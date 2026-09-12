@@ -134,6 +134,7 @@ for (const [prefix, permission] of [
   ['/uebersicht', 'uebersicht'],
   ['/produkte', 'produkte'],
   ['/auswertung', 'produkt.analyse'],
+  ['/nachrichten', 'nachrichten'],
   ['/lager', 'lager.lesen'],
   ['/kategorien', 'kategorien'],
   ['/medien', 'medien'],
@@ -144,6 +145,8 @@ for (const [prefix, permission] of [
   ['/einstellungen', 'einstellungen'],
   ['/protokoll', 'protokoll']
 ]) router.use(prefix, access.requirePermission(permission));
+
+router.use('/nachrichten', require('./admin-messages'));
 
 /* ------------------------------ Lager --------------------------------- */
 router.get('/lager', (req, res) => {

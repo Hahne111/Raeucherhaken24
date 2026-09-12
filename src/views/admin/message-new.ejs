@@ -1,0 +1,21 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<p><a class="btn btn--ghost btn--sm" href="/verwaltung/nachrichten">Zurück zur Übersicht</a></p>
+<div class="card"><div class="card__head"><h2>Unterhaltung beginnen</h2></div><div class="card__body">
+  <% if (error) { %><p class="field__err"><%= error %></p><% } %>
+  <% if (!recipients.length) { %><p>Es gibt noch keine weiteren aktiven Mitarbeiterkonten.</p><% } else { %>
+    <form method="post" action="/verwaltung/nachrichten/neu">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <label class="field"><span>Betreff</span><input name="subject" maxlength="160" value="<%= input.subject || '' %>" required></label>
+      <fieldset class="field"><legend>Empfänger</legend>
+        <% var selected = [].concat(input.recipient_ids || []).map(String); %>
+        <% recipients.forEach(function (user) { %>
+          <label class="check"><input type="checkbox" name="recipient_ids" value="<%= user.id %>" <%= selected.includes(String(user.id)) ? 'checked' : '' %>><span><%= user.name || user.email %> (<%= user.email %>)</span></label>
+        <% }); %>
+      </fieldset>
+      <label class="field"><span>Nachricht</span><textarea name="body" rows="8" maxlength="4000" required><%= input.body || '' %></textarea></label>
+      <button class="btn btn--primary" type="submit">Unterhaltung anlegen</button>
+    </form>
+  <% } %>
+</div></div>
+<%- include('../partials/admin-foot') %>

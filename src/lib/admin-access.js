@@ -13,13 +13,13 @@ const ROLES = {
 
 const GRANTS = {
   admin: ['*'],
-  kundenservice: ['bestellungen.lesen', 'kunden.lesen', 'kunden.bearbeiten'],
-  redaktion: ['produkte', 'kategorien', 'medien'],
-  finanzen: ['uebersicht', 'produkt.analyse'],
-  vertrieb: [],
-  produktion: [],
-  lager: ['lager.lesen', 'lager.buchen'],
-  kasse: []
+  kundenservice: ['bestellungen.lesen', 'kunden.lesen', 'kunden.bearbeiten', 'nachrichten'],
+  redaktion: ['produkte', 'kategorien', 'medien', 'nachrichten'],
+  finanzen: ['uebersicht', 'produkt.analyse', 'nachrichten'],
+  vertrieb: ['nachrichten'],
+  produktion: ['nachrichten'],
+  lager: ['lager.lesen', 'lager.buchen', 'nachrichten'],
+  kasse: ['nachrichten']
 };
 
 function can(user, permission) {
@@ -32,6 +32,7 @@ function startPath(user) {
   if (can(user, 'produkte')) return '/verwaltung/produkte';
   if (can(user, 'bestellungen.lesen')) return '/verwaltung/bestellungen';
   if (can(user, 'lager.lesen')) return '/verwaltung/lager';
+  if (can(user, 'nachrichten')) return '/verwaltung/nachrichten';
   return '/verwaltung/team';
 }
 

@@ -1,0 +1,28 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<p><a class="btn btn--ghost btn--sm" href="/verwaltung/nachrichten">Zurück zur Übersicht</a></p>
+<div class="card"><div class="card__head"><h2>Teilnehmende</h2></div><div class="card__body">
+  <p><%= members.map(function (m) { return m.name || m.email; }).join(', ') %></p>
+  <% if (unread) { %>
+    <form method="post" action="/verwaltung/nachrichten/<%= thread.id %>/gelesen">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <button class="btn btn--ghost btn--sm" type="submit">Als gelesen markieren</button>
+    </form>
+  <% } %>
+</div></div>
+<div class="card"><div class="card__head"><h2>Verlauf</h2></div><div class="card__body">
+  <% messages.forEach(function (message) { %>
+    <div style="border-bottom:1px solid var(--a-line);padding:12px 0">
+      <strong><%= message.sender_name || message.sender_email %></strong> · <%= formatDate(message.created_at) %>
+      <p style="white-space:pre-wrap;margin:8px 0 0"><%= message.body %></p>
+    </div>
+  <% }); %>
+</div></div>
+<div class="card"><div class="card__head"><h2>Antworten</h2></div><div class="card__body">
+  <form method="post" action="/verwaltung/nachrichten/<%= thread.id %>/antworten">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <label class="field"><span>Nachricht</span><textarea name="body" rows="6" maxlength="4000" required></textarea></label>
+    <button class="btn btn--primary" type="submit">Antwort speichern</button>
+  </form>
+</div></div>
+<%- include('../partials/admin-foot') %>

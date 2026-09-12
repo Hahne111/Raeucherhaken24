@@ -258,6 +258,28 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
 
+CREATE TABLE IF NOT EXISTS message_threads (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  subject    TEXT NOT NULL,
+  created_by INTEGER NOT NULL REFERENCES admin_users(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS message_participants (
+  thread_id    INTEGER NOT NULL REFERENCES message_threads(id) ON DELETE CASCADE,
+  user_id      INTEGER NOT NULL REFERENCES admin_users(id),
+  last_read_id INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (thread_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_message_participants_user ON message_participants(user_id);
+CREATE TABLE IF NOT EXISTS messages (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  thread_id  INTEGER NOT NULL REFERENCES message_threads(id) ON DELETE CASCADE,
+  sender_id  INTEGER NOT NULL REFERENCES admin_users(id),
+  body       TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_messages_thread ON messages(thread_id, id);
+
 CREATE TABLE IF NOT EXISTS audit_log (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   actor      TEXT NOT NULL DEFAULT 'system',

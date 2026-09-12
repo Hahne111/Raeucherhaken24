@@ -1,0 +1,33 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/nachrichten/neu">Neue Unterhaltung</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+
+<div class="toolbar">
+  <form method="get" action="/verwaltung/nachrichten">
+    <label class="visually-hidden" for="q">Betreff suchen</label>
+    <input id="q" type="search" name="q" value="<%= q %>" placeholder="Betreff suchen">
+    <button class="btn btn--dark btn--sm" type="submit">Suchen</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/nachrichten">Zurücksetzen</a>
+  </form>
+</div>
+<div class="card">
+  <div class="card__head"><h2><%= total %> Unterhaltungen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %><p style="padding:20px;margin:0">Keine Unterhaltungen gefunden.</p><% } else { %>
+      <table class="tbl"><thead><tr><th>Betreff</th><th>Mit</th><th>Letzte Nachricht</th><th>Ungelesen</th><th></th></tr></thead><tbody>
+        <% rows.forEach(function (row) { %>
+          <tr><td><a class="link" href="/verwaltung/nachrichten/<%= row.id %>"><%= row.subject %></a></td>
+            <td><%= row.others || '–' %></td><td><%= formatDate(row.last_at) %><br><small><%= row.preview.length > 100 ? row.preview.slice(0, 100) + '…' : row.preview %></small></td>
+            <td><%= row.unread ? row.unread + ' neu' : '–' %></td>
+            <td><a class="btn btn--ghost btn--sm" href="/verwaltung/nachrichten/<%= row.id %>">Verlauf</a></td></tr>
+        <% }); %>
+      </tbody></table>
+    <% } %>
+  </div>
+</div>
+<% if (pages > 1) { %><nav class="pager" aria-label="Seiten">
+  <% for (var i = 1; i <= pages; i++) { %>
+    <% if (i === page) { %><span class="is-current"><%= i %></span><% } else { %><a href="/verwaltung/nachrichten?seite=<%= i %>&q=<%= encodeURIComponent(q) %>"><%= i %></a><% } %>
+  <% } %>
+</nav><% } %>
+<%- include('../partials/admin-foot') %>

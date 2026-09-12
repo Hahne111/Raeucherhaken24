@@ -48,13 +48,17 @@ require('../server');
 class Client {
   constructor() { this.cookies = new Map(); }
   async request(method, url, fields = {}) {
+    const form = new URLSearchParams();
+    for (const [key, value] of Object.entries(fields)) {
+      for (const item of [].concat(value)) form.append(key, item);
+    }
     const response = await fetch(`http://127.0.0.1:${process.env.PORT}${url}`, {
       method, redirect: 'manual',
       headers: {
         cookie: [...this.cookies].map(([key, value]) => `${key}=${value}`).join('; '),
         ...(method === 'POST' ? { 'content-type': 'application/x-www-form-urlencoded' } : {})
       },
-      ...(method === 'POST' ? { body: new URLSearchParams(fields).toString() } : {})
+      ...(method === 'POST' ? { body: form.toString() } : {})
     });
     for (const cookie of response.headers.getSetCookie()) {
       const [key, value] = cookie.split(';', 1)[0].split('=');
@@ -135,6 +139,33 @@ function csrf(html) {
   const warehouse = clients.lager;
   assert.equal((await warehouse.get('/verwaltung/lager')).status, 200);
   assert.equal((await warehouse.get('/verwaltung/produkte/naturgewuerze')).status, 403);
+  const messageStart = await warehouse.get('/verwaltung/nachrichten/neu');
+  assert.equal(messageStart.status, 200);
+  const messageToken = csrf(messageStart.body);
+  assert.equal((await warehouse.post('/verwaltung/nachrichten/neu', {
+    _csrf: messageToken, subject: 'Test-Unterhaltung', body: 'Erster Stand', recipient_ids: '999999'
+  })).status, 400);
+  const createdThread = await warehouse.post('/verwaltung/nachrichten/neu', {
+    _csrf: messageToken, subject: 'Test-Unterhaltung', body: 'Erster Stand',
+    recipient_ids: [String(db.get('SELECT id FROM admin_users WHERE email=?', ['admin@example.test']).id),
+      String(db.get('SELECT id FROM admin_users WHERE email=?', ['kundenservice@example.test']).id)]
+  });
+  assert.equal(createdThread.status, 302);
+  const threadPath = createdThread.location;
+  assert.ok((await admin.get('/verwaltung/nachrichten')).body.includes('1 neu'));
+  assert.equal((await editor.get(threadPath)).status, 404, 'nicht adressierte Rolle sieht keinen Thread');
+  assert.equal((await editor.post(threadPath + '/antworten', {
+    _csrf: csrf((await editor.get('/verwaltung/team')).body), body: 'Fremdantwort'
+  })).status, 404);
+  assert.equal((await service.get(threadPath)).status, 200);
+  const adminThread = await admin.get(threadPath);
+  assert.ok(adminThread.body.includes('Erster Stand'));
+  assert.equal((await admin.post(threadPath + '/gelesen', { _csrf: csrf(adminThread.body) })).status, 302);
+  assert.equal((await admin.get('/verwaltung/nachrichten')).body.includes('1 neu'), false);
+  assert.equal((await admin.post(threadPath + '/antworten', { _csrf: csrf(adminThread.body), body: 'Antwort vom Admin' })).status, 302);
+  assert.ok((await warehouse.get('/verwaltung/nachrichten')).body.includes('1 neu'));
+  assert.ok((await warehouse.get(threadPath)).body.includes('Antwort vom Admin'));
+  assert.equal((await new Client().get(threadPath)).status, 403);
   const warehouseCsv = await warehouse.get('/verwaltung/lager/export.csv');
   assert.equal(warehouseCsv.status, 200);
   assert.ok(warehouseCsv.body.includes('Produkt;Variante;Artikelnummer;Bestand'));
@@ -299,6 +330,6 @@ function csrf(html) {
   })).status, 302);
   assert.equal(db.get('SELECT active FROM products WHERE id=?', [draft.id]).active, 0);
   assert.ok(db.get('SELECT id FROM product_calculations WHERE id=?', [proposalId]), 'Kalkulation bleibt erhalten');
-  console.log('Rollen, Produktfreigabe, Lagerjournal, Naturgewürze, Analyse und Kalkulation geprüft.');
+  console.log('Rollen, Nachrichten, Produktfreigabe, Lagerjournal, Naturgewürze, Analyse und Kalkulation geprüft.');
   process.exit(0);
 })().catch((error) => { console.error(error); process.exit(1); });
