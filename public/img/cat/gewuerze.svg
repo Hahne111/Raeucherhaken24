@@ -36,6 +36,8 @@
     <path d="M18 86a44 20 0 0 0 88 0z" fill="url(#gw-bowl)"/>
     <ellipse cx="62" cy="86" rx="44" ry="19" fill="#2a1f12"/>
     <ellipse cx="62" cy="85" rx="37" ry="15" fill="url(#gw-dark)"/>
+    <ellipse cx="62" cy="85" rx="37" ry="15" fill="none" stroke="#0f0b07" stroke-width="2" opacity=".55"/>
+    <path d="M28 82a34 13 0 0 1 68 0a34 13 0 0 1-68 0" fill="#0a0705" opacity=".22"/>
     <g fill="#191512"><circle cx="48" cy="82" r="2.6"/><circle cx="60" cy="88" r="2.8"/><circle cx="72" cy="80" r="2.4"/><circle cx="66" cy="92" r="2.2"/><circle cx="54" cy="92" r="2.4"/></g>
     <g fill="#7a6c60" opacity=".7"><circle cx="50" cy="80" r="1"/><circle cx="70" cy="86" r="1"/></g>
   </g>
@@ -45,6 +47,8 @@
     <path d="M110 96a42 19 0 0 0 84 0z" fill="url(#gw-bowl)"/>
     <ellipse cx="152" cy="96" rx="42" ry="18" fill="#2a1f12"/>
     <ellipse cx="152" cy="95" rx="35" ry="14" fill="url(#gw-salt)"/>
+    <ellipse cx="152" cy="95" rx="35" ry="14" fill="none" stroke="#0f0b07" stroke-width="2" opacity=".45"/>
+    <path d="M122 91a30 11 0 0 1 60 0" fill="none" stroke="#b9b2a0" stroke-width="1.4" opacity=".6"/>
     <g fill="#ffffff" opacity=".85"><circle cx="140" cy="92" r="1.8"/><circle cx="156" cy="98" r="2"/><circle cx="164" cy="90" r="1.6"/><circle cx="148" cy="99" r="1.5"/></g>
   </g>
   <!-- Schale rechts (Paprika) -->
@@ -53,15 +57,20 @@
     <path d="M200 84a40 18 0 0 0 80 0z" fill="url(#gw-bowl)"/>
     <ellipse cx="240" cy="84" rx="40" ry="17" fill="#2a1f12"/>
     <ellipse cx="240" cy="83" rx="33" ry="13" fill="url(#gw-red)"/>
+    <ellipse cx="240" cy="83" rx="33" ry="13" fill="none" stroke="#0f0b07" stroke-width="2" opacity=".5"/>
+    <g fill="#7f280f" opacity=".5"><circle cx="228" cy="82" r="2.4"/><circle cx="244" cy="86" r="2.2"/><circle cx="252" cy="80" r="2"/></g>
+    <g fill="#f08a5c" opacity=".45"><circle cx="234" cy="78" r="2"/><circle cx="248" cy="84" r="1.8"/></g>
   </g>
   <!-- kleine Schale hinten -->
   <g opacity=".95">
     <ellipse cx="196" cy="58" rx="30" ry="12" fill="#241a0f"/>
     <ellipse cx="196" cy="57" rx="24" ry="9" fill="url(#gw-yellow)"/>
+    <ellipse cx="196" cy="57" rx="24" ry="9" fill="none" stroke="#14100a" stroke-width="1.6" opacity=".5"/>
   </g>
   <g opacity=".9">
     <ellipse cx="92" cy="54" rx="28" ry="11" fill="#241a0f"/>
-    <ellipse cx="92" cy="53" rx="22" ry="8" fill="#7f8f4e"/>
+    <ellipse cx="92" cy="53" rx="22" ry="8" fill="#6f7f45"/>
+    <ellipse cx="92" cy="53" rx="22" ry="8" fill="none" stroke="#14100a" stroke-width="1.6" opacity=".5"/>
     <g fill="#9fae63"><ellipse cx="86" cy="51" rx="4" ry="2"/><ellipse cx="97" cy="55" rx="4.5" ry="2"/></g>
   </g>
   <!-- verstreute Körner -->

@@ -263,6 +263,17 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
 }
 .stage__scene { position: absolute; inset: 0; z-index: 0; }
 .stage__scene svg { width: 100%; height: 100%; display: block; }
+
+/* Die Szene besteht aus gestapelten Ebenen. Jede Ebene wird vom Browser
+   getrennt zusammengesetzt: die statischen Ebenen zeichnet er einmal,
+   nur die bewegten Ebenen werden neu gezeichnet. */
+.scene-stack { position: absolute; inset: 0; }
+.scene-layer {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(0, calc(var(--sy, 0) * var(--par, 0px)), 0);
+  will-change: transform;
+}
 .stage__inner { position: relative; z-index: 3; min-height: var(--stage-h); }
 
 .hero {
@@ -767,7 +778,13 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
    ========================================================================== */
 .scene { display: block; }
 .stage__scene.is-paused *, .stage__scene.is-paused { animation-play-state: paused !important; }
-.scene g, .scene use, .scene path, .scene ellipse, .scene rect { will-change: auto; }
+
+/* Bewegte Gruppen bekommen eine eigene Kompositionsebene. Ohne diesen Hinweis
+   zeichnet der Browser bei jeder Bildwiederholung die komplette Szene neu. */
+#lh-beam-rotor, #lh-halo, #lh-lamp-core,
+.wave, .swell, .mist, .smoke-puff, .spray, .gull, .boat, .rope-sway, .fish-sway, #ember-glow {
+  will-change: transform, opacity;
+}
 
 /* Leuchtfeuer: kontinuierliche Drehung, Sichtbarkeit über Opazität moduliert. */
 #lh-beam-rotor {
@@ -785,15 +802,15 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
    (Drehwinkel 0 Grad = Blick nach links), und verblasst, wenn er aus dem Bild zeigt. */
 @keyframes lhFace {
   0%   { opacity: 1; }
-  7%   { opacity: .92; }
-  15%  { opacity: .6; }
-  26%  { opacity: .3; }
-  38%  { opacity: .12; }
-  50%  { opacity: .06; }
-  62%  { opacity: .12; }
-  74%  { opacity: .3; }
-  86%  { opacity: .62; }
-  94%  { opacity: .92; }
+  9%   { opacity: .95; }
+  18%  { opacity: .74; }
+  28%  { opacity: .5; }
+  40%  { opacity: .28; }
+  50%  { opacity: .2; }
+  60%  { opacity: .28; }
+  72%  { opacity: .5; }
+  84%  { opacity: .76; }
+  93%  { opacity: .95; }
   100% { opacity: 1; }
 }
 @keyframes lhHalo {
@@ -915,9 +932,6 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
 .fish-sway:nth-of-type(3n) { animation-duration: 9.1s; animation-delay: -4.5s; }
 @keyframes fishSway { 0%,100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
 
-/* Parallax-Ebenen (per JS über --sy gesteuert) */
-.stage__scene .par { transform: translate3d(0, calc(var(--sy, 0) * var(--par, 0px)), 0); }
-
 /* Einblenden der Bühneninhalte – nur bei aktivem JavaScript, sonst ist
    alles von Anfang an sichtbar. */
 .js .reveal { opacity: 0; transform: translateY(14px); }
@@ -947,7 +961,7 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
   .smoke-puff--f { opacity: .34; transform: translate3d(-8px,-44px,0) scale(.72); }
   .spray { opacity: .5; transform: none; }
   .js .reveal { opacity: 1; transform: none; }
-  .stage__scene .par { transform: none; }
+  .scene-layer { transform: none; }
 }
 
 /* ==========================================================================
