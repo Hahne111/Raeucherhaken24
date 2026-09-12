@@ -90,8 +90,11 @@ const categories = [
 ];
 const catIds = {};
 categories.forEach((c, i) => {
-  const existing = db.get('SELECT id FROM categories WHERE slug = ?', [c.slug]);
+  const existing = db.get('SELECT id, image FROM categories WHERE slug = ?', [c.slug]);
   if (existing) {
+    if (existing.image === `/img/cat/${c.slug}.svg`) {
+      db.run("UPDATE categories SET image = ?, updated_at = datetime('now') WHERE id = ?", [c.image, existing.id]);
+    }
     catIds[c.slug] = existing.id;
     return;
   }
