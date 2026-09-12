@@ -1,0 +1,43 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/marktplatz/mitglieder">Mitglieder</a> <a class="btn btn--ghost btn--sm" href="/verwaltung/marktplatz/meldungen">Meldungen' + (openReports ? ' (' + openReports + ')' : '') + '</a> <a class="btn btn--ghost btn--sm" href="/markt">Im Shop ansehen</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="ad-alert ad-alert--info">
+  Eine Anzeige erscheint erst nach der Freigabe und läuft dann <%= runtime %> Tage, längstens bis zum Ende der
+  Mitgliedschaft. Für die Mitgliedschaft ist <strong>keine Online-Zahlung angebunden</strong>; sie wird nach
+  Zahlungseingang von Hand freigeschaltet.
+</div>
+<form method="get" class="filterbar">
+  <input type="search" name="q" value="<%= q %>" placeholder="Titel suchen">
+  <label>Status
+    <select name="status"><option value="">alle</option>
+      <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+    </select>
+  </label>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+<div class="card">
+  <div class="card__head"><h2>Anzeigen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Anzeigen in dieser Auswahl.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Anzeige</th><th>Mitglied</th><th>Bereich</th><th class="num">Preis</th><th>Läuft bis</th><th>Status</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td><a href="/verwaltung/marktplatz/<%= r.id %>"><%= r.title %></a>
+            <% if (r.open_reports) { %> <span class="pill pill--err"><%= r.open_reports %> Meldung(en)</span><% } %></td>
+          <td><%= r.customer_name || r.customer_email %><br><small><%= r.customer_email %></small></td>
+          <td><%= categories[r.category] || r.category %><br><small><%= kinds[r.kind] %></small></td>
+          <td class="num"><%= r.price_cents ? fmt(r.price_cents) : '–' %></td>
+          <td><%= r.expires_on || '–' %></td>
+          <td><span class="pill <%= r.status === 'aktiv' ? 'pill--ok' : (r.status === 'abgelehnt' ? 'pill--err' : '') %>"><%= states[r.status] || r.status %></span></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

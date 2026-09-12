@@ -1,0 +1,63 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/marktplatz">Zur Übersicht</a>' + (row.status === 'aktiv' ? ' <a class="btn btn--ghost btn--sm" href="/markt/anzeige/' + row.id + '">Im Shop ansehen</a>' : ''); %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2><%= row.title %></h2>
+      <span class="pill <%= row.status === 'aktiv' ? 'pill--ok' : (row.status === 'abgelehnt' ? 'pill--err' : '') %>"><%= states[row.status] || row.status %></span></div>
+    <div class="card__body">
+      <table class="tbl tbl--plain">
+        <tr><th>Art</th><td><%= kinds[row.kind] %> · <%= categories[row.category] || row.category %> · <%= conditions[row.condition] || row.condition %></td></tr>
+        <tr><th>Preis</th><td><%= row.price_cents ? fmt(row.price_cents) : 'auf Anfrage' %><%= row.negotiable ? ' (VB)' : '' %></td></tr>
+        <tr><th>Ort</th><td><%= row.zip %> <%= row.city %></td></tr>
+        <tr><th>Kontakt</th><td><%= row.contact %></td></tr>
+        <tr><th>Eingereicht</th><td><%= row.created_at %><% if (row.created_ip) { %> · <%= row.created_ip %><% } %></td></tr>
+        <tr><th>Mitgliedschaft</th><td>
+          <% if (memberActive) { %>läuft bis <%= membership.ends_on || 'ohne Ende' %><% } else { %><span class="pill pill--err">keine laufende Mitgliedschaft</span><% } %>
+        </td></tr>
+        <% if (row.expires_on) { %><tr><th>Läuft bis</th><td><%= row.expires_on %></td></tr><% } %>
+        <% if (row.reject_reason) { %><tr><th>Begründung</th><td><%= row.reject_reason %></td></tr><% } %>
+        <% if (row.moderated_by) { %><tr><th>Geprüft von</th><td><%= row.moderated_by %></td></tr><% } %>
+      </table>
+      <p style="white-space:pre-line;border-top:1px solid var(--a-line);padding-top:12px"><%= row.body %></p>
+      <% if (row.image_url) { %><p><img src="<%= row.image_url %>" alt="" style="max-width:100%;border-radius:8px"></p><% } %>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Prüfen</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/marktplatz/<%= row.id %>/status" style="margin-bottom:18px">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <input type="hidden" name="status" value="aktiv">
+        <label>Laufzeit in Tagen <input type="number" name="days" value="<%= runtime %>" min="1" max="180"></label>
+        <button class="btn btn--dark" type="submit">Freigeben</button>
+      </form>
+      <form method="post" action="/verwaltung/marktplatz/<%= row.id %>/status" style="margin-bottom:18px">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <input type="hidden" name="status" value="abgelehnt">
+        <label>Begründung der Ablehnung <input type="text" name="reason" maxlength="500" value="<%= row.reject_reason %>"></label>
+        <button class="btn btn--ghost" type="submit">Ablehnen</button>
+      </form>
+      <% if (row.status === 'aktiv') { %>
+      <form method="post" action="/verwaltung/marktplatz/<%= row.id %>/status">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <input type="hidden" name="status" value="abgelaufen">
+        <button class="btn btn--ghost btn--sm" type="submit">Sofort beenden</button>
+      </form>
+      <% } %>
+      <% if (reports.length) { %>
+      <h3 style="margin-top:20px">Meldungen</h3>
+      <table class="tbl">
+        <thead><tr><th>Grund</th><th>Hinweis</th><th>Status</th></tr></thead>
+        <tbody>
+          <% reports.forEach(function (r) { %>
+            <tr><td><%= reasons[r.reason] || r.reason %></td><td><%= r.note %></td>
+              <td><span class="pill <%= r.status === 'offen' ? 'pill--err' : '' %>"><%= r.status %></span></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

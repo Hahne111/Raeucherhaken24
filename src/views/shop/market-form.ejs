@@ -1,0 +1,50 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap wrap--narrow">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><a href="/markt">An- und Verkaufen</a><span>/</span><span>Anzeige aufgeben</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1>Anzeige aufgeben</h1></div>
+      <div class="panel"><div class="panel__body">
+        <% if (!active) { %>
+          <p>Für eine Anzeige brauchst du eine laufende Mitgliedschaft.</p>
+          <p><a class="btn btn--dark" href="/markt/mitgliedschaft">Mitglied werden</a></p>
+        <% } else { %>
+        <form method="post" action="/markt/neu">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label>Ich möchte
+            <select name="kind">
+              <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>"><%= kinds[k] %></option><% }); %>
+            </select>
+          </label>
+          <label>Titel <input type="text" name="title" required minlength="5" maxlength="120" placeholder="z. B. Räucherofen 120 cm, Edelstahl"></label>
+          <label>Beschreibung <textarea name="body" rows="6" required minlength="20" maxlength="4000"></textarea></label>
+          <label>Bereich
+            <select name="category">
+              <% Object.keys(categories).forEach(function (k) { %><option value="<%= k %>"><%= categories[k] %></option><% }); %>
+            </select>
+          </label>
+          <label>Zustand
+            <select name="condition">
+              <% Object.keys(conditions).forEach(function (k) { %><option value="<%= k %>"><%= conditions[k] %></option><% }); %>
+            </select>
+          </label>
+          <label>Preis in € <input type="text" name="price" inputmode="decimal" placeholder="120,00"></label>
+          <label style="display:flex;gap:8px;align-items:center;font-weight:400">
+            <input type="checkbox" name="negotiable" value="1"> Preis verhandelbar oder auf Anfrage
+          </label>
+          <div style="display:flex;gap:10px">
+            <label style="flex:0 0 120px">PLZ <input type="text" name="zip" maxlength="10"></label>
+            <label style="flex:1">Ort <input type="text" name="city" maxlength="80"></label>
+          </div>
+          <label>Kontakt für Interessenten <input type="text" name="contact" value="<%= values.contact %>" maxlength="160"></label>
+          <label>Bild aus der Medienablage (optional) <input type="text" name="image_url" placeholder="/uploads/…"></label>
+          <button class="btn btn--dark" type="submit">Anzeige einreichen</button>
+        </form>
+        <p style="margin-top:12px;color:var(--ink-soft)"><small>Jede Anzeige wird vor der Veröffentlichung geprüft. Sie läuft danach 30 Tage, längstens bis zum Ende deiner Mitgliedschaft.</small></p>
+        <% } %>
+      </div></div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

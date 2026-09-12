@@ -52,6 +52,7 @@ app.use('/', require('./src/routes/shop'));
 app.use('/warenkorb', require('./src/routes/cart'));
 app.use('/kasse', require('./src/routes/checkout'));
 app.use('/konto', require('./src/routes/account'));
+app.use('/markt', require('./src/routes/market'));
 app.use('/verwaltung', require('./src/routes/admin'));
 
 app.use((req, res) => {

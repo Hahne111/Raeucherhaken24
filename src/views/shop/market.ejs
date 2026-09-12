@@ -1,0 +1,95 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><span>An- und Verkaufen</span></nav>
+    <div class="section">
+      <div class="pagehead">
+        <span class="pagehead__eyebrow">Von Mitglied zu Mitglied</span>
+        <h1>An- und Verkaufen</h1>
+        <p>Gebrauchte Öfen, Haken, Holz und Zubehör – privat angeboten, von uns geprüft, bevor eine Anzeige erscheint.</p>
+      </div>
+
+      <div class="panel" style="margin-bottom:22px"><div class="panel__body">
+        <% if (!customer) { %>
+          <p>Anzeigen ansehen kann jeder. Zum Aufgeben einer Anzeige brauchst du ein Konto und eine Mitgliedschaft.
+            <a href="/konto/anmelden?weiter=%2Fmarkt">Anmelden</a> oder <a href="/konto/registrieren">Konto anlegen</a>.</p>
+        <% } else if (memberActive) { %>
+          <p>Deine Mitgliedschaft läuft<% if (membership.ends_on) { %> bis <%= membership.ends_on %><% } %>.
+            <a class="btn btn--dark btn--sm" href="/markt/neu" style="margin-left:8px">Anzeige aufgeben</a></p>
+        <% } else if (membership && membership.status === 'offen') { %>
+          <p>Deine Anfrage zur Mitgliedschaft liegt vor. Wir melden uns mit den Zahlungsdaten und schalten dich nach Zahlungseingang frei.</p>
+        <% } else { %>
+          <p>Zum Aufgeben einer Anzeige brauchst du eine Mitgliedschaft.
+            <a class="btn btn--dark btn--sm" href="/markt/mitgliedschaft" style="margin-left:8px">Mitglied werden</a></p>
+        <% } %>
+      </div></div>
+
+      <form method="get" class="recipe-filter">
+        <a class="recipe-filter__chip <%= category ? '' : 'is-active' %>" href="/markt">Alle</a>
+        <% Object.keys(categories).forEach(function (k) { %>
+          <a class="recipe-filter__chip <%= category === k ? 'is-active' : '' %>" href="/markt?kategorie=<%= k %>"><%= categories[k] %></a>
+        <% }); %>
+        <input type="search" name="q" value="<%= q %>" placeholder="Anzeigen durchsuchen" aria-label="Anzeigen durchsuchen">
+        <button class="btn btn--ghost btn--sm" type="submit">Suchen</button>
+      </form>
+
+      <% if (!rows.length) { %>
+        <div class="empty">
+          <h2>Keine Anzeigen</h2>
+          <p>Hier erscheinen freigegebene Anzeigen unserer Mitglieder.</p>
+        </div>
+      <% } else { %>
+        <div class="grid-products">
+          <% rows.forEach(function (r) { %>
+            <article class="pcard">
+              <a class="pcard__media" href="/markt/anzeige/<%= r.id %>">
+                <% if (r.image_url) { %><img src="<%= r.image_url %>" alt="" width="400" height="300" loading="lazy"><% } %>
+                <span class="pcard__flags"><span class="flag"><%= kinds[r.kind] %></span></span>
+              </a>
+              <div class="pcard__body">
+                <span class="pcard__cat"><%= categories[r.category] || r.category %></span>
+                <h2 class="pcard__title"><a href="/markt/anzeige/<%= r.id %>"><%= r.title %></a></h2>
+                <p class="pcard__sub"><%= r.body.slice(0, 110) %><%= r.body.length > 110 ? '…' : '' %></p>
+                <div class="pcard__foot">
+                  <span class="price"><%= r.price_cents ? fmt(r.price_cents) : 'auf Anfrage' %><% if (r.negotiable && r.price_cents) { %> <small>VB</small><% } %></span>
+                  <span class="pcard__cat"><%= r.zip %> <%= r.city %></span>
+                </div>
+              </div>
+            </article>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <% if (customer && mine.length) { %>
+      <div class="section section--tight">
+        <h2 style="margin-bottom:14px">Meine Anzeigen</h2>
+        <div class="panel"><div class="panel__body">
+          <table class="tbl">
+            <thead><tr><th>Anzeige</th><th>Status</th><th>Läuft bis</th><th></th></tr></thead>
+            <tbody>
+              <% mine.forEach(function (m) { %>
+              <tr>
+                <td><% if (m.status === 'aktiv') { %><a href="/markt/anzeige/<%= m.id %>"><%= m.title %></a><% } else { %><%= m.title %><% } %>
+                  <% if (m.reject_reason) { %><br><small><%= m.reject_reason %></small><% } %></td>
+                <td><%= states[m.status] || m.status %></td>
+                <td><%= m.expires_on || '–' %></td>
+                <td>
+                  <% if (m.status === 'aktiv') { %>
+                  <form method="post" action="/markt/anzeige/<%= m.id %>/abschliessen">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <button class="btn btn--ghost btn--sm" type="submit">Abschließen</button>
+                  </form>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div></div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

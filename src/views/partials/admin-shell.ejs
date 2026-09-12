@@ -53,10 +53,11 @@
       <% if (adminCan('provision.eigene')) { %><a href="/verwaltung/verdienst" class="<%= currentPath.indexOf('/verdienst') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Verdienstrechner</a><% } %>
       <% if (adminCan('provision.eigene')) { %><a href="/verwaltung/rangliste" class="<%= currentPath.indexOf('/rangliste') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Rangliste</a><% } %>
       <% if (adminCan('fahrtenbuch')) { %><a href="/verwaltung/fahrten" class="<%= currentPath.indexOf('/fahrten') === 0 || currentPath.indexOf('/fahrzeuge') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-truck"/></svg>Fahrtenbuch</a><% } %>
-      <% if (adminCan('rezepte') || adminCan('bewertungen') || adminCan('newsletter')) { %><span class="ad-nav__sep">Inhalte &amp; Marketing</span><% } %>
+      <% if (adminCan('rezepte') || adminCan('bewertungen') || adminCan('newsletter') || adminCan('marktplatz')) { %><span class="ad-nav__sep">Inhalte &amp; Marketing</span><% } %>
       <% if (adminCan('rezepte')) { %><a href="/verwaltung/rezepte" class="<%= currentPath.indexOf('/rezepte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-leaf"/></svg>Rezepte &amp; Ratgeber</a><% } %>
       <% if (adminCan('bewertungen')) { %><a href="/verwaltung/bewertungen" class="<%= currentPath.indexOf('/bewertungen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Bewertungen</a><% } %>
       <% if (adminCan('newsletter')) { %><a href="/verwaltung/newsletter" class="<%= currentPath.indexOf('/newsletter') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-user"/></svg>Newsletter</a><% } %>
+      <% if (adminCan('marktplatz')) { %><a href="/verwaltung/marktplatz" class="<%= currentPath.indexOf('/marktplatz') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-cart"/></svg>Marktplatz</a><% } %>
       <% if (adminCan('termine') || adminCan('nachrichten')) { %><span class="ad-nav__sep">Zusammenarbeit</span><% } %>
       <% if (adminCan('termine')) { %><a href="/verwaltung/termine" class="<%= currentPath.indexOf('/termine') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Termine</a><% } %>
       <% if (adminCan('nachrichten')) { %><a href="/verwaltung/nachrichten" class="<%= currentPath.indexOf('/nachrichten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-user"/></svg>Nachrichten</a><% } %>

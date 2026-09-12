@@ -1404,3 +1404,64 @@ CREATE TABLE IF NOT EXISTS label_runs (
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_label_runs ON label_runs(template_id, id);
+
+/* ===================== Marktplatz "An- und Verkaufen" ===================== */
+
+/*
+ * Mitgliedschaft mit Laufzeit. Eine Online-Zahlung ist nicht angebunden;
+ * die Verwaltung schaltet die Mitgliedschaft nach Zahlungseingang frei.
+ */
+CREATE TABLE IF NOT EXISTS market_memberships (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  status      TEXT NOT NULL DEFAULT 'offen',
+  starts_on   TEXT,
+  ends_on     TEXT,
+  price_cents INTEGER NOT NULL DEFAULT 0,
+  paid_on     TEXT,
+  note        TEXT NOT NULL DEFAULT '',
+  created_by  TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_market_memberships ON market_memberships(customer_id, status);
+
+/* Anzeige eines Mitglieds; oeffentlich erst nach Freigabe und vor Ablauf. */
+CREATE TABLE IF NOT EXISTS market_listings (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id  INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  title        TEXT NOT NULL,
+  body         TEXT NOT NULL DEFAULT '',
+  category     TEXT NOT NULL DEFAULT 'zubehoer',
+  kind         TEXT NOT NULL DEFAULT 'verkauf',
+  condition    TEXT NOT NULL DEFAULT 'gebraucht',
+  price_cents  INTEGER NOT NULL DEFAULT 0,
+  negotiable   INTEGER NOT NULL DEFAULT 0,
+  zip          TEXT NOT NULL DEFAULT '',
+  city         TEXT NOT NULL DEFAULT '',
+  contact      TEXT NOT NULL DEFAULT '',
+  image_url    TEXT NOT NULL DEFAULT '',
+  status       TEXT NOT NULL DEFAULT 'offen',
+  published_at TEXT,
+  expires_on   TEXT,
+  reject_reason TEXT NOT NULL DEFAULT '',
+  moderated_by TEXT NOT NULL DEFAULT '',
+  created_ip   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_market_listings ON market_listings(status, expires_on);
+
+/* Meldung zu einer Anzeige. */
+CREATE TABLE IF NOT EXISTS market_reports (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  listing_id  INTEGER NOT NULL REFERENCES market_listings(id) ON DELETE CASCADE,
+  customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  reason      TEXT NOT NULL DEFAULT 'sonstiges',
+  note        TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'offen',
+  handled_by  TEXT NOT NULL DEFAULT '',
+  handled_at  TEXT,
+  created_ip  TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_market_reports ON market_reports(listing_id, status);

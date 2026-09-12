@@ -39,6 +39,12 @@
         <li class="mainnav__item">
           <a class="mainnav__link" href="/angebote" <%= currentPath === '/angebote' ? 'aria-current="page"' : '' %>>Angebote</a>
         </li>
+        <li class="mainnav__item">
+          <a class="mainnav__link" href="/ratgeber" <%= currentPath.indexOf('/ratgeber') === 0 || currentPath.indexOf('/rezept/') === 0 ? 'aria-current="page"' : '' %>>Rauchwissen</a>
+        </li>
+        <li class="mainnav__item">
+          <a class="mainnav__link" href="/markt" <%= currentPath.indexOf('/markt') === 0 ? 'aria-current="page"' : '' %>>An- &amp; Verkaufen</a>
+        </li>
       </ul>
     </nav>
 
@@ -77,6 +83,8 @@
     <% }); %>
     <a href="/angebote">Angebote</a>
     <a class="is-sub" href="/produkte">Alle Produkte</a>
+    <a href="/ratgeber">Rauchwissen</a>
+    <a href="/markt">An- &amp; Verkaufen</a>
     <a class="is-sub" href="<%= customer ? '/konto' : '/konto/anmelden' %>">Mein Konto</a>
     <a class="is-sub" href="/warenkorb">Warenkorb (<%= cartCount %>)</a>
   </nav>

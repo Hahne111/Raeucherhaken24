@@ -1,0 +1,56 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/marktplatz">Zu den Anzeigen</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="ad-alert ad-alert--info">
+  Eine Mitgliedschaft wird nach Zahlungseingang freigeschaltet. Eine Online-Zahlung ist nicht angebunden.
+</div>
+<form method="get" class="filterbar">
+  <label>Status
+    <select name="status"><option value="">alle</option>
+      <option value="offen" <%= status === 'offen' ? 'selected' : '' %>>Anfrage offen</option>
+      <option value="aktiv" <%= status === 'aktiv' ? 'selected' : '' %>>aktiv</option>
+      <option value="beendet" <%= status === 'beendet' ? 'selected' : '' %>>beendet</option>
+    </select>
+  </label>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+<div class="card">
+  <div class="card__head"><h2>Mitgliedschaften</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Einträge.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Mitglied</th><th>Status</th><th>Laufzeit</th><th class="num">Beitrag</th><th>Notiz</th><th style="width:260px">Aktion</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (m) { %>
+        <tr>
+          <td><%= m.name || m.email %><br><small><%= m.email %></small></td>
+          <td><span class="pill <%= isActive(m) ? 'pill--ok' : '' %>"><%= m.status %></span></td>
+          <td><%= m.starts_on || '–' %> bis <%= m.ends_on || '–' %></td>
+          <td class="num"><%= fmt(m.price_cents) %></td>
+          <td><small><%= m.note %></small></td>
+          <td>
+            <% if (m.status !== 'aktiv') { %>
+            <form method="post" action="/verwaltung/marktplatz/mitglieder/<%= m.id %>/freischalten" style="display:flex;gap:6px">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <select name="months" aria-label="Laufzeit">
+                <option value="1">1 Monat</option><option value="3">3 Monate</option><option value="12" selected>12 Monate</option>
+              </select>
+              <button class="btn btn--dark btn--sm" type="submit">Freischalten</button>
+            </form>
+            <% } else { %>
+            <form method="post" action="/verwaltung/marktplatz/mitglieder/<%= m.id %>/beenden">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <button class="btn btn--ghost btn--sm" type="submit">Beenden</button>
+            </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

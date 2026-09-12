@@ -1,0 +1,46 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap wrap--narrow">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><a href="/markt">An- und Verkaufen</a><span>/</span><span><%= row.title %></span></nav>
+    <div class="section">
+      <div class="pagehead">
+        <span class="pagehead__eyebrow"><%= kinds[row.kind] %> · <%= categories[row.category] || row.category %></span>
+        <h1><%= row.title %></h1>
+        <p><%= row.price_cents ? fmt(row.price_cents) : 'Preis auf Anfrage' %><% if (row.negotiable && row.price_cents) { %> (VB)<% } %>
+          · <%= conditions[row.condition] || row.condition %>
+          <% if (row.city) { %> · <%= row.zip %> <%= row.city %><% } %>
+        </p>
+      </div>
+      <% if (row.image_url) { %><p><img src="<%= row.image_url %>" alt="" style="width:100%;border-radius:12px"></p><% } %>
+      <div class="panel"><div class="panel__body" style="font-size:15.5px;line-height:1.75">
+        <p style="white-space:pre-line"><%= row.body %></p>
+        <p style="margin-top:16px"><strong>Kontakt:</strong> <%= row.contact %></p>
+        <p style="color:var(--ink-soft)"><small>Diese Anzeige stammt von einem Mitglied. Räucherhaken24 ist nicht Vertragspartner und wickelt weder Zahlung noch Versand ab.
+          <% if (row.expires_on) { %> Sie läuft bis <%= row.expires_on %>.<% } %></small></p>
+      </div></div>
+
+      <% if (isOwner) { %>
+      <form method="post" action="/markt/anzeige/<%= row.id %>/abschliessen" style="margin-top:16px">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn btn--ghost btn--sm" type="submit">Anzeige abschließen</button>
+      </form>
+      <% } else { %>
+      <div class="panel" style="margin-top:16px"><div class="panel__body">
+        <h2 style="font-size:18px;margin-bottom:10px">Anzeige melden</h2>
+        <form method="post" action="/markt/anzeige/<%= row.id %>/melden">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label>Grund
+            <select name="reason">
+              <% Object.keys(reasons).forEach(function (k) { %><option value="<%= k %>"><%= reasons[k] %></option><% }); %>
+            </select>
+          </label>
+          <label>Was stimmt nicht? <textarea name="note" rows="3" maxlength="1000"></textarea></label>
+          <button class="btn btn--ghost btn--sm" type="submit">Melden</button>
+        </form>
+      </div></div>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

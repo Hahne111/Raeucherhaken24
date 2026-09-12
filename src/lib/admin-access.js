@@ -16,9 +16,9 @@ const GRANTS = {
   kundenservice: [
     'bestellungen.lesen', 'kunden.lesen', 'kunden.bearbeiten', 'kunden.anlegen',
     'termine', 'termine.alle', 'beratung', 'belege', 'versand', 'produktion', 'prototypen',
-    'bewertungen', 'newsletter', 'nachrichten'
+    'bewertungen', 'newsletter', 'marktplatz', 'nachrichten'
   ],
-  redaktion: ['produkte', 'kategorien', 'medien', 'rezepte', 'bewertungen', 'newsletter', 'nachrichten'],
+  redaktion: ['produkte', 'kategorien', 'medien', 'rezepte', 'bewertungen', 'newsletter', 'marktplatz', 'nachrichten'],
   finanzen: [
     'uebersicht', 'produkt.analyse', 'bestellungen.lesen', 'belege', 'belege.ausstellen',
     'kassenbuch', 'kassenbuch.buchen', 'finanzen', 'finanzen.buchen', 'einkauf',

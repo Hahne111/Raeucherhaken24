@@ -1,0 +1,44 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/marktplatz">Zu den Anzeigen</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="get" class="filterbar">
+  <label>Status
+    <select name="status">
+      <option value="offen" <%= status === 'offen' ? 'selected' : '' %>>offen</option>
+      <option value="erledigt" <%= status === 'erledigt' ? 'selected' : '' %>>erledigt</option>
+    </select>
+  </label>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+<div class="card">
+  <div class="card__head"><h2>Meldungen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Meldungen in dieser Auswahl.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Anzeige</th><th>Grund</th><th>Hinweis</th><th>Gemeldet von</th><th>Eingegangen</th><th style="width:140px"></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td><a href="/verwaltung/marktplatz/<%= r.listing_id %>"><%= r.title %></a><br><small><%= r.listing_status %></small></td>
+          <td><%= reasons[r.reason] || r.reason %></td>
+          <td><%= r.note %></td>
+          <td><small><%= r.reporter_email || 'ohne Konto' %><% if (r.created_ip) { %><br><%= r.created_ip %><% } %></small></td>
+          <td><small><%= r.created_at %></small></td>
+          <td>
+            <% if (r.status === 'offen') { %>
+            <form method="post" action="/verwaltung/marktplatz/meldungen/<%= r.id %>/erledigt">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <button class="btn btn--ghost btn--sm" type="submit">Erledigt</button>
+            </form>
+            <% } else { %><small><%= r.handled_by %></small><% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>
