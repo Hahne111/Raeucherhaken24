@@ -1,0 +1,2219 @@
+[
+  {
+    "source_id": "prototype-project",
+    "sku": "PROTO-149",
+    "article_no": "90001",
+    "name": "Prototypenentwicklung Räucherhaken",
+    "category": "Sonderanfertigung",
+    "price_cents": 14900,
+    "unit": "Projekt",
+    "description": "Individuelle Prototypenentwicklung und Projektstart.",
+    "shop_visible": false,
+    "images": []
+  },
+  {
+    "source_id": "std",
+    "sku": "RH-STD",
+    "article_no": "10001",
+    "name": "Räucherhaken Standard – 10er-Set",
+    "category": "Räucherhaken",
+    "price_cents": 1290,
+    "unit": "10er-Set",
+    "description": "Standard-Räucherhaken mit Varianten.",
+    "shop_visible": true,
+    "images": [
+      "/img/products/legacy/std-1.webp",
+      "/img/products/legacy/std-2.webp",
+      "/img/products/legacy/std-3.webp"
+    ]
+  },
+  {
+    "source_id": "aal",
+    "sku": "RH-AAL",
+    "article_no": "10002",
+    "name": "Räucherhaken Standard Aal – 10er-Set",
+    "category": "Räucherhaken",
+    "price_cents": 1290,
+    "unit": "10er-Set",
+    "description": "Räucherhaken mit kleinem Hakenbogen für Aal, Hornhecht und schlanke Fische.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "ultra",
+    "sku": "RH-ULT",
+    "article_no": "10003",
+    "name": "Räucherhaken Ultra – 10er-Set",
+    "category": "Räucherhaken",
+    "price_cents": 1990,
+    "unit": "10er-Set",
+    "description": "Extra stabil für große und schwere Fische.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "kralle",
+    "sku": "RH-KRA",
+    "article_no": "10004",
+    "name": "Räucherhaken Kralle – 10er-Set",
+    "category": "Räucherhaken",
+    "price_cents": 1890,
+    "unit": "10er-Set",
+    "description": "Mehrpunkt-Halt für große und schwere Fische.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "filet",
+    "sku": "RH-FIL",
+    "article_no": "10005",
+    "name": "Räucherhaken Filet – 10er-Set",
+    "category": "Räucherhaken",
+    "price_cents": 1590,
+    "unit": "10er-Set",
+    "description": "Für Filets und flache Räucherstücke.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "doppel",
+    "sku": "RH-DOP",
+    "article_no": "10006",
+    "name": "Räucherhaken Doppeldorn – 10er-Set",
+    "category": "Räucherhaken",
+    "price_cents": 1590,
+    "unit": "10er-Set",
+    "description": "Doppeldorn-Ausführung für mehr Stabilität.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "fleisch",
+    "sku": "FH-S5",
+    "article_no": "10007",
+    "name": "Fleischerhaken S-Form 5 mm",
+    "category": "Fleischerhaken",
+    "price_cents": 790,
+    "unit": "Stück",
+    "description": "Massiver Fleischerhaken in S-Form für Schinken und schwere Fleischstücke.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "mehl-buche",
+    "sku": "RM-BUC",
+    "article_no": "11001",
+    "name": "Räuchermehl Buche – 500 g",
+    "category": "Räuchermehl",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Klassisches Räuchermehl Buche – ausgewogener Allrounder.",
+    "shop_visible": true,
+    "images": [
+      "/img/products/legacy/mehl-buche-1.webp",
+      "/img/products/legacy/mehl-buche-2.webp"
+    ]
+  },
+  {
+    "source_id": "mehl-erle",
+    "sku": "RM-ERL",
+    "article_no": "11002",
+    "name": "Räuchermehl Erle – 500 g",
+    "category": "Räuchermehl",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Mildes Räuchermehl Erle – besonders passend zu Fisch.",
+    "shop_visible": true,
+    "images": [
+      "/img/products/legacy/mehl-erle.webp"
+    ]
+  },
+  {
+    "source_id": "mehl-birke",
+    "sku": "RM-BIR",
+    "article_no": "11003",
+    "name": "Räuchermehl Birke – 500 g",
+    "category": "Räuchermehl",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Mildes Räuchermehl aus Birke.",
+    "shop_visible": true,
+    "images": [
+      "/img/products/legacy/mehl-birke.webp"
+    ]
+  },
+  {
+    "source_id": "mehl-eiche",
+    "sku": "RM-EIC",
+    "article_no": "11004",
+    "name": "Räuchermehl Eiche – 500 g",
+    "category": "Räuchermehl",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Kräftiges Räuchermehl aus Eiche.",
+    "shop_visible": true,
+    "images": [
+      "/img/products/legacy/mehl-eiche.webp"
+    ]
+  },
+  {
+    "source_id": "mehl-kirsche",
+    "sku": "RM-KIR",
+    "article_no": "11005",
+    "name": "Räuchermehl Kirsche – 500 g",
+    "category": "Räuchermehl",
+    "price_cents": 695,
+    "unit": "500 g",
+    "description": "Mild-fruchtiges Räuchermehl aus Kirschholz.",
+    "shop_visible": true,
+    "images": [
+      "/img/products/legacy/mehl-kirsche.webp"
+    ]
+  },
+  {
+    "source_id": "lauge-forelle-0",
+    "sku": "RL-FOR-STD",
+    "article_no": "12001",
+    "name": "Räucherlauge Forelle – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Salz-Gewürz-Mischung mit Dill und Wacholder für Forellen.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-forelle-1",
+    "sku": "RL-FOR-CLA",
+    "article_no": "12002",
+    "name": "Räucherlauge Forelle Classic – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Klassische fein-würzige Forellen-Räucherlauge mit Wacholderaroma.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-forelle-2",
+    "sku": "RL-FOR-CHI",
+    "article_no": "12003",
+    "name": "Räucherlauge Forelle Chili – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Forellen-Räucherlauge mit fein-feuriger Chili-Note.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-forelle-3",
+    "sku": "RL-FOR-RED",
+    "article_no": "12004",
+    "name": "Räucherlauge Forelle RED – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 695,
+    "unit": "500 g",
+    "description": "Gewürzmischung mit ganzen Wacholderbeeren für Forellen und Lachsforellen.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-forelle-4",
+    "sku": "RL-FOR-KRA",
+    "article_no": "12005",
+    "name": "Räucherlauge Forelle Kräuter – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Milde Forellen-Räucherlauge mit feiner Kräuternote.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-forelle-5",
+    "sku": "RL-FOR-KNO",
+    "article_no": "12006",
+    "name": "Räucherlauge Forelle Knoblauch – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Herzhafte Forellen-Räucherlauge mit feiner Knoblauchnote.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-forelle-6",
+    "sku": "RL-FOR-ZPF",
+    "article_no": "12007",
+    "name": "Räucherlauge Forelle Zitronenpfeffer – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Forellen-Räucherlauge mit Zitronennote und mildem Pfeffer.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-forelle-7",
+    "sku": "RL-FOR-DEL",
+    "article_no": "12008",
+    "name": "Räucherlauge Forelle Delikat – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Fein abgestimmte Forellen-Räucherlauge mit leicht feurigem Geschmack.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-forelle-8",
+    "sku": "RL-FOR-ELP",
+    "article_no": "12009",
+    "name": "Räucherlauge Forelle EL PASO – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Kräftig-würzige Forellen-Räucherlauge mit leicht pikant-rauchiger Note.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-forelle-9",
+    "sku": "RL-FOR-KAN",
+    "article_no": "12010",
+    "name": "Räucherlauge Forelle Kansas – 500 g",
+    "category": "Räucherlaugen Forelle",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Abgestimmte Räucherlauge für Lachsforellen und Forellen.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-aal-0",
+    "sku": "RL-AAL-STD",
+    "article_no": "12101",
+    "name": "Räucherlauge Aal – 500 g",
+    "category": "Räucherlaugen Aal",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Kräftige klassische Salz-Gewürz-Mischung für Räucheraal.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-aal-1",
+    "sku": "RL-AAL-PFE",
+    "article_no": "12102",
+    "name": "Räucherlauge Aal Pfeffer – 500 g",
+    "category": "Räucherlaugen Aal",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Aal-Räucherlauge mit fein-würziger Pfeffernote.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "lauge-aal-2",
+    "sku": "RL-AAL-DEL",
+    "article_no": "12103",
+    "name": "Räucherlauge Aal Delikat – 500 g",
+    "category": "Räucherlaugen Aal",
+    "price_cents": 495,
+    "unit": "500 g",
+    "description": "Milde, fein ausgewogene Aal-Räucherlauge.",
+    "shop_visible": true,
+    "images": []
+  },
+  {
+    "source_id": "natur-13001",
+    "sku": "NG-13001",
+    "article_no": "13001",
+    "name": "\"WAIDMANN\" Kräuter Zwiebel Mischung",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13001.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13002",
+    "sku": "NG-13002",
+    "article_no": "13002",
+    "name": "Apfelgranulat 3–5 mm geschnitten, geschwefelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13002.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13003",
+    "sku": "NG-13003",
+    "article_no": "13003",
+    "name": "Bärlauch geschnitten, 2 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13003.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13004",
+    "sku": "NG-13004",
+    "article_no": "13004",
+    "name": "Basilikum gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13004.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13005",
+    "sku": "NG-13005",
+    "article_no": "13005",
+    "name": "BIO Chilipulver",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13005.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13006",
+    "sku": "NG-13006",
+    "article_no": "13006",
+    "name": "BIO Curry",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13006.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13007",
+    "sku": "NG-13007",
+    "article_no": "13007",
+    "name": "BIO Gelbsenfmehl",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13007.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13008",
+    "sku": "NG-13008",
+    "article_no": "13008",
+    "name": "BIO Ingwer, gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13008.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13009",
+    "sku": "NG-13009",
+    "article_no": "13009",
+    "name": "BIO Knoblauchpulver",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13009.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13010",
+    "sku": "NG-13010",
+    "article_no": "13010",
+    "name": "BIO Koriander, gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13010.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13011",
+    "sku": "NG-13011",
+    "article_no": "13011",
+    "name": "BIO Kümmel, gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13011.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13012",
+    "sku": "NG-13012",
+    "article_no": "13012",
+    "name": "BIO Majoran, gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13012.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13013",
+    "sku": "NG-13013",
+    "article_no": "13013",
+    "name": "BIO Muskatnuss, gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13013.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13014",
+    "sku": "NG-13014",
+    "article_no": "13014",
+    "name": "BIO Paprika, rot, gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13014.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13015",
+    "sku": "NG-13015",
+    "article_no": "13015",
+    "name": "BIO Pfeffer schwarz, gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13015.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13016",
+    "sku": "NG-13016",
+    "article_no": "13016",
+    "name": "BIO Pfeffer weiß, gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13016.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13017",
+    "sku": "NG-13017",
+    "article_no": "13017",
+    "name": "BIO Röstzwiebel",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13017.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13018",
+    "sku": "NG-13018",
+    "article_no": "13018",
+    "name": "BIO Zwiebelpulver",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13018.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13019",
+    "sku": "NG-13019",
+    "article_no": "13019",
+    "name": "Bohnenkraut gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13019.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13020",
+    "sku": "NG-13020",
+    "article_no": "13020",
+    "name": "Bratapfel – Fruchtmix",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13020.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13021",
+    "sku": "NG-13021",
+    "article_no": "13021",
+    "name": "Cardamom in der Schale gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13021.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13022",
+    "sku": "NG-13022",
+    "article_no": "13022",
+    "name": "Chilis gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13022.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13023",
+    "sku": "NG-13023",
+    "article_no": "13023",
+    "name": "Cranberry – Apfel – Mix",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13023.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13024",
+    "sku": "NG-13024",
+    "article_no": "13024",
+    "name": "CUMIN gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13024.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13025",
+    "sku": "NG-13025",
+    "article_no": "13025",
+    "name": "Curcuma fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13025.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13026",
+    "sku": "NG-13026",
+    "article_no": "13026",
+    "name": "Curry",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13026.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13027",
+    "sku": "NG-13027",
+    "article_no": "13027",
+    "name": "Dillspitzen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13027.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13028",
+    "sku": "NG-13028",
+    "article_no": "13028",
+    "name": "Edamer Käsegranulat 6 mm gefriergetrocknet",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13028.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13029",
+    "sku": "NG-13029",
+    "article_no": "13029",
+    "name": "Estragonblätter gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13029.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13030",
+    "sku": "NG-13030",
+    "article_no": "13030",
+    "name": "Feine Kräutermischung für Rohwurst / für Brühwurst",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13030.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13031",
+    "sku": "NG-13031",
+    "article_no": "13031",
+    "name": "Fermentierter Pfeffer schwarz ganz",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13031.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13032",
+    "sku": "NG-13032",
+    "article_no": "13032",
+    "name": "Gelbsenfkörner",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13032.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13033",
+    "sku": "NG-13033",
+    "article_no": "13033",
+    "name": "Gelbsenfmehl teilentölt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13033.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13034",
+    "sku": "NG-13034",
+    "article_no": "13034",
+    "name": "GV – Chillies geschrotet ohne Kerne",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13034.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13035",
+    "sku": "NG-13035",
+    "article_no": "13035",
+    "name": "GV – Curry Madras",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13035.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13036",
+    "sku": "NG-13036",
+    "article_no": "13036",
+    "name": "GV – Knoblauchgranulat chinesisch",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13036.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13037",
+    "sku": "NG-13037",
+    "article_no": "13037",
+    "name": "GV – Paprika edelsüß „C“ spanisch",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13037.jpg"
+    ]
+  },
+  {
+    "source_id": "natur-13038",
+    "sku": "NG-13038",
+    "article_no": "13038",
+    "name": "GV – Pfeffer weiß, feinst vermahlen „K“",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13038.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13039",
+    "sku": "NG-13039",
+    "article_no": "13039",
+    "name": "Ingwer gemahlen keimreduziert",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13039.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13040",
+    "sku": "NG-13040",
+    "article_no": "13040",
+    "name": "Italienischer Hartkäse fein gerieben",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13040.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13041",
+    "sku": "NG-13041",
+    "article_no": "13041",
+    "name": "Karottengranulat 3 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13041.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13042",
+    "sku": "NG-13042",
+    "article_no": "13042",
+    "name": "Karottenwürfel getrocknet, 10 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13042.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13043",
+    "sku": "NG-13043",
+    "article_no": "13043",
+    "name": "Kerbel gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13043.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13044",
+    "sku": "NG-13044",
+    "article_no": "13044",
+    "name": "Knoblauch granuliert 81604201",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13044.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13045",
+    "sku": "NG-13045",
+    "article_no": "13045",
+    "name": "Knoblauchgranulat 2–3 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13045.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13046",
+    "sku": "NG-13046",
+    "article_no": "13046",
+    "name": "Knoblauchpaste",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13046.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13047",
+    "sku": "NG-13047",
+    "article_no": "13047",
+    "name": "Knoblauchpulver",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13047.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13048",
+    "sku": "NG-13048",
+    "article_no": "13048",
+    "name": "Knoblauchpulver californisch 812892",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13048.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13049",
+    "sku": "NG-13049",
+    "article_no": "13049",
+    "name": "Koriander ganz",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13049.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13050",
+    "sku": "NG-13050",
+    "article_no": "13050",
+    "name": "Koriander gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13050.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13051",
+    "sku": "NG-13051",
+    "article_no": "13051",
+    "name": "Kräuter der Provence",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13051.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13052",
+    "sku": "NG-13052",
+    "article_no": "13052",
+    "name": "Kümmel ganz",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13052.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13053",
+    "sku": "NG-13053",
+    "article_no": "13053",
+    "name": "Kümmel gebrochen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13053.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13054",
+    "sku": "NG-13054",
+    "article_no": "13054",
+    "name": "Kümmel gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13054.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13055",
+    "sku": "NG-13055",
+    "article_no": "13055",
+    "name": "Liebstocklaub gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13055.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13056",
+    "sku": "NG-13056",
+    "article_no": "13056",
+    "name": "Liebstockwurzel fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13056.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13057",
+    "sku": "NG-13057",
+    "article_no": "13057",
+    "name": "Lorbeerlaub (ganz) gereinigt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13057.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13058",
+    "sku": "NG-13058",
+    "article_no": "13058",
+    "name": "Majoran extra gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13058.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13059",
+    "sku": "NG-13059",
+    "article_no": "13059",
+    "name": "Majoran extra gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13059.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13060",
+    "sku": "NG-13060",
+    "article_no": "13060",
+    "name": "Majoran, ägyptisch gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13060.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13061",
+    "sku": "NG-13061",
+    "article_no": "13061",
+    "name": "Majoran, thüringisch gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13061.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13062",
+    "sku": "NG-13062",
+    "article_no": "13062",
+    "name": "Minze geschnitten, 2–3 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13062.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13063",
+    "sku": "NG-13063",
+    "article_no": "13063",
+    "name": "Muskatblüte (Macis) – hell gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13063.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13064",
+    "sku": "NG-13064",
+    "article_no": "13064",
+    "name": "Muskatblüte (Macis) gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13064.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13065",
+    "sku": "NG-13065",
+    "article_no": "13065",
+    "name": "Muskatnuss gemahlen 810847",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13065.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13066",
+    "sku": "NG-13066",
+    "article_no": "13066",
+    "name": "Nelken fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13066.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13067",
+    "sku": "NG-13067",
+    "article_no": "13067",
+    "name": "Nelken ganz",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13067.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13068",
+    "sku": "NG-13068",
+    "article_no": "13068",
+    "name": "Oliven geschwärzt granuliert",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13068.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13069",
+    "sku": "NG-13069",
+    "article_no": "13069",
+    "name": "Oregano gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13069.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13070",
+    "sku": "NG-13070",
+    "article_no": "13070",
+    "name": "Paprika delikatess",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13070.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13071",
+    "sku": "NG-13071",
+    "article_no": "13071",
+    "name": "Paprika edelsüß",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13071.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13072",
+    "sku": "NG-13072",
+    "article_no": "13072",
+    "name": "Paprika flakes rot, 9 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13072.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13073",
+    "sku": "NG-13073",
+    "article_no": "13073",
+    "name": "Paprika scharf",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13073.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13074",
+    "sku": "NG-13074",
+    "article_no": "13074",
+    "name": "Paprikaflocken grün, 9 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13074.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13075",
+    "sku": "NG-13075",
+    "article_no": "13075",
+    "name": "Paprikaflocken grün, fein",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13075.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13076",
+    "sku": "NG-13076",
+    "article_no": "13076",
+    "name": "Paprikaflocken rot/grün granuliert, 1–3 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13076.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13077",
+    "sku": "NG-13077",
+    "article_no": "13077",
+    "name": "Peppadew Streifen ATG 1,5 kg",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13077.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13078",
+    "sku": "NG-13078",
+    "article_no": "13078",
+    "name": "Peppadew™ Whole sweet piquante peppers",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13078.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13079",
+    "sku": "NG-13079",
+    "article_no": "13079",
+    "name": "Petersilie gerebelt (2 mm)",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13079.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13080",
+    "sku": "NG-13080",
+    "article_no": "13080",
+    "name": "Pfeffer grün, (100 g) in Lake",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13080.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13081",
+    "sku": "NG-13081",
+    "article_no": "13081",
+    "name": "Pfeffer weiß gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13081.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13082",
+    "sku": "NG-13082",
+    "article_no": "13082",
+    "name": "Pfeffer, grün luftgetr., geschroten – ganzes Korn",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13082.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13083",
+    "sku": "NG-13083",
+    "article_no": "13083",
+    "name": "Pfeffer, grün luftgetrocknet",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13083.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13084",
+    "sku": "NG-13084",
+    "article_no": "13084",
+    "name": "Pfeffer, grün, in Lake",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13084.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13085",
+    "sku": "NG-13085",
+    "article_no": "13085",
+    "name": "Pfeffer, schwarz – weiß (70/30) mittelf., gebrochen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13085.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13086",
+    "sku": "NG-13086",
+    "article_no": "13086",
+    "name": "Pfeffer, schwarz fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13086.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13087",
+    "sku": "NG-13087",
+    "article_no": "13087",
+    "name": "Pfeffer, schwarz ganz",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13087.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13088",
+    "sku": "NG-13088",
+    "article_no": "13088",
+    "name": "Pfeffer, schwarz ganz doppelt gereinigt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13088.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13089",
+    "sku": "NG-13089",
+    "article_no": "13089",
+    "name": "Pfeffer, schwarz grob gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13089.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13090",
+    "sku": "NG-13090",
+    "article_no": "13090",
+    "name": "Pfeffer, schwarz mittelfein geschroten",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13090.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13091",
+    "sku": "NG-13091",
+    "article_no": "13091",
+    "name": "Pfeffer, SW / WS (70/30), mittelfein, Spezial",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13091.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13092",
+    "sku": "NG-13092",
+    "article_no": "13092",
+    "name": "Pfeffer, weiß fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13092.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13093",
+    "sku": "NG-13093",
+    "article_no": "13093",
+    "name": "Pfeffer, weiß ganz",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13093.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13094",
+    "sku": "NG-13094",
+    "article_no": "13094",
+    "name": "Pfeffer, weiß ganz, Handverlesen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13094.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13095",
+    "sku": "NG-13095",
+    "article_no": "13095",
+    "name": "Pfeffer, weiß grob gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13095.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13096",
+    "sku": "NG-13096",
+    "article_no": "13096",
+    "name": "Pfeffer, weiß mittelfein geschroten",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13096.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13097",
+    "sku": "NG-13097",
+    "article_no": "13097",
+    "name": "Pfeffer, weiß, geschroten",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13097.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13098",
+    "sku": "NG-13098",
+    "article_no": "13098",
+    "name": "Piment fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13098.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13099",
+    "sku": "NG-13099",
+    "article_no": "13099",
+    "name": "Piment ganz",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13099.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13100",
+    "sku": "NG-13100",
+    "article_no": "13100",
+    "name": "Piment grob gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13100.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13101",
+    "sku": "NG-13101",
+    "article_no": "13101",
+    "name": "Pistazien enthäutet",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13101.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13102",
+    "sku": "NG-13102",
+    "article_no": "13102",
+    "name": "Porreeflocken geschnitten, 6 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13102.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13103",
+    "sku": "NG-13103",
+    "article_no": "13103",
+    "name": "Rosenpaprika",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13103.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13104",
+    "sku": "NG-13104",
+    "article_no": "13104",
+    "name": "Rosmarin fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13104.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13105",
+    "sku": "NG-13105",
+    "article_no": "13105",
+    "name": "Rosmarin geschnitten",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13105.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13106",
+    "sku": "NG-13106",
+    "article_no": "13106",
+    "name": "Salatgemüse-Mix geschnitten",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13106.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13107",
+    "sku": "NG-13107",
+    "article_no": "13107",
+    "name": "Schnittlauch Klasse 1A, 4–5 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13107.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13108",
+    "sku": "NG-13108",
+    "article_no": "13108",
+    "name": "Schwarzer Trüffel (Tuber indicum)",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13108.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13109",
+    "sku": "NG-13109",
+    "article_no": "13109",
+    "name": "Sellerieblätter fein gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13109.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13110",
+    "sku": "NG-13110",
+    "article_no": "13110",
+    "name": "Sellerieknollenpulver",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13110.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13111",
+    "sku": "NG-13111",
+    "article_no": "13111",
+    "name": "Suppengrün 1a Suppengewürz grob",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13111.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13112",
+    "sku": "NG-13112",
+    "article_no": "13112",
+    "name": "Thymian fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13112.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13113",
+    "sku": "NG-13113",
+    "article_no": "13113",
+    "name": "Thymian gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Lieferanten-Referenz aus Vorlage: 81602801. Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13113.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13114",
+    "sku": "NG-13114",
+    "article_no": "13114",
+    "name": "Tomatenflocken geschnitten, 10 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13114.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13115",
+    "sku": "NG-13115",
+    "article_no": "13115",
+    "name": "Top-Pfeffer weiß",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13115.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13116",
+    "sku": "NG-13116",
+    "article_no": "13116",
+    "name": "Vanillinzucker",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13116.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13117",
+    "sku": "NG-13117",
+    "article_no": "13117",
+    "name": "Wacholderbeeren fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13117.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13118",
+    "sku": "NG-13118",
+    "article_no": "13118",
+    "name": "Wacholderbeeren ganz",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13118.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13119",
+    "sku": "NG-13119",
+    "article_no": "13119",
+    "name": "Wacholderbeeren gequetscht, gebrochen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13119.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13120",
+    "sku": "NG-13120",
+    "article_no": "13120",
+    "name": "Wacholderbeeren Industrie gebrochen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13120.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13121",
+    "sku": "NG-13121",
+    "article_no": "13121",
+    "name": "Walnusskerne gebrochen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13121.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13122",
+    "sku": "NG-13122",
+    "article_no": "13122",
+    "name": "Zimt fein gemahlen",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13122.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13123",
+    "sku": "NG-13123",
+    "article_no": "13123",
+    "name": "Zimtstangen ganz",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13123.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13124",
+    "sku": "NG-13124",
+    "article_no": "13124",
+    "name": "Zwiebelgranulat 0,3–0,8 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13124.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13125",
+    "sku": "NG-13125",
+    "article_no": "13125",
+    "name": "Zwiebelgrieß 1–2 mm",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13125.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13126",
+    "sku": "NG-13126",
+    "article_no": "13126",
+    "name": "Zwiebellauch gerebelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13126.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13127",
+    "sku": "NG-13127",
+    "article_no": "13127",
+    "name": "Zwiebeln fein gehackt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13127.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13128",
+    "sku": "NG-13128",
+    "article_no": "13128",
+    "name": "Zwiebeln gekibbelt",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13128.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13129",
+    "sku": "NG-13129",
+    "article_no": "13129",
+    "name": "Zwiebeln gekibbelt (4–5 mm)",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13129.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13130",
+    "sku": "NG-13130",
+    "article_no": "13130",
+    "name": "Zwiebeln geröstet SG",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13130.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13131",
+    "sku": "NG-13131",
+    "article_no": "13131",
+    "name": "Zwiebeln getoastet",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13131.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13132",
+    "sku": "NG-13132",
+    "article_no": "13132",
+    "name": "Zwiebeln in Scheiben getrocknet",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13132.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13133",
+    "sku": "NG-13133",
+    "article_no": "13133",
+    "name": "Zwiebeln in Scheiben getrocknet I A",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13133.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13134",
+    "sku": "NG-13134",
+    "article_no": "13134",
+    "name": "Zwiebelpulver",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13134.webp"
+    ]
+  },
+  {
+    "source_id": "natur-13135",
+    "sku": "NG-13135",
+    "article_no": "13135",
+    "name": "Zwiebelpulver californisch, fein",
+    "category": "Naturgewürze",
+    "price_cents": 0,
+    "unit": "Gebinde folgt",
+    "description": "Sortimentsartikel Naturgewürze. Produktbild, Gebindegröße und Verkaufspreis werden im Orgaboard ergänzt.",
+    "shop_visible": 1,
+    "images": [
+      "/img/products/legacy/natur-13135.webp"
+    ]
+  }
+]

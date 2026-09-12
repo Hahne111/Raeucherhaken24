@@ -268,6 +268,7 @@ for (const p of products) {
   }
   created++;
 }
+const legacyCreated = require('./import-legacy-products')(db, catIds);
 
 /* ------------------------------------------------------------------ */
 /* Versandarten und Gutscheine                                          */
@@ -295,7 +296,7 @@ for (const [code, kind, value, min, limit] of coupons) {
     [code, kind, value, min, limit]);
 }
 
-audit.log('system', 'seed.ausgefuehrt', 'system', '', `${created} Produkte neu angelegt`);
+audit.log('system', 'seed.ausgefuehrt', 'system', '', `${created + legacyCreated} Produkte neu angelegt`);
 const counts = {
   Kategorien: db.get('SELECT COUNT(*) c FROM categories').c,
   Produkte: db.get('SELECT COUNT(*) c FROM products').c,
