@@ -32,7 +32,7 @@ Stand: 12.09.2026, Branch `codex/shop-system-20260912`. `Teilweise` bezeichnet v
 | Lieferanten/Einkauf | Keine Lieferanten- oder Einkaufsbestellungen | Lieferant, Einkaufsartikel, Position, Beleg, Wareneingang | (Lieferanten), (Bestellung neu/:id), (Wareneingang) | Einkauf/Admin, Lager/Finanzen je Recht | Lager, Kreditoren | CRUD, Summen, Beleg, Wareneingang, Mailbestätigung | Offen; E-Mail extern |
 | Produktionsteam | Adminkonten ohne echte Produktionsrechte | Mitarbeiter, Zuständigkeit, Arbeitsschritt | `/verwaltung/team`, (Produktion/Team) | Admin, Produktion eigene Daten | Leitstand, Audit | Zuordnung, Rechte, Verlauf | Teilweise |
 | Produktzentrale | CRUD, Suche/Kategorie/Aktiv-/Lagerfilter, keine Batchvorschau | Produkt, Variante, Bild, Kategorie | `/verwaltung/produkte`, `/neu`, `/:id`, (Batch) | Admin, Redaktion; Lager separat | Shop, Lager, Kalkulation | Filter, Entwurf, Batch-Vorschau/Rollback | Teilweise |
-| Produkt-Baukasten | Eine Produktmaske mit Preis/Variante/Bild/Status; kein mehrstufiger Ablauf | Stammdaten, Varianten, Preis, Bestand | `/verwaltung/produkte/neu`, `/:id` | Admin, Redaktion nach Recht | Shop, Kasse | Entwurf unsichtbar, Veröffentlichung sofort, Fehlerfälle | Teilweise |
+| Produkt-Baukasten | Produktmaske mit Preis/Variante/Bild/Status; Ein-Varianten-Entwurf kann mit Preis freigegeben werden, Veröffentlichung ohne kaufbare Variante wird abgewiesen; kein mehrstufiger Ablauf | Stammdaten, Varianten, Preis, Bestand | `/verwaltung/produkte/neu`, `/:id` | Admin, Redaktion nach Recht | Shop, Kasse | `role-test.js`: Entwurf 404 → Preis/Freigabe → Shop 200, Variante synchron, unvollständiger Entwurf 400; Mehrvarianten noch offen | Teilweise |
 | Naturgewürze | 135 importierte preislose Entwürfe mit Bildern in demselben Produktmodell; keine eigene Sicht | Gewicht, Preis, Angebot, Beliebtheit, Bild, Status | (Produkte/Naturgewürze), `/produkte/:id` | Admin, Redaktion | Shop, Produktzentrale | nur Naturgewürze, Preis/Status, kein Duplikat | Teilweise |
 | Etikettenstudio | Keine Vorlagen/Druckprofile | Vorlage, Barcode, Serienlauf, Historie | (Etiketten), (Vorlage neu/:id), (Druck) | Admin, Lager/Produktion nach Recht | Produkt, Kunde, Auftrag | Skalierung, Vorschau, Serienlauf, Nachdruck | Offen; Drucker extern |
 | Gutscheine | Prozent/Fest/Versand, Gültigkeit, Limits und transaktionale Einlösung | Coupon, Nutzung, ggf. Restwert/Serie/Journal | `/verwaltung/gutscheine`, `/warenkorb/gutschein`, (Journal/Export) | Admin, Kunde Einlösung | Warenkorb, Bestellung | Parallel-Limit, Rückbuchung, Wertgutschein-Rest | Teilweise |
@@ -55,7 +55,7 @@ Stand: 12.09.2026, Branch `codex/shop-system-20260912`. `Teilweise` bezeichnet v
 
 | Ablauf | Derzeitige Evidenz | Noch erforderlich |
 | --- | --- | --- |
-| Produkt → Shop → Auftrag → Bestand | Bestehender `scripts/smoke-test.js` prüft einen Shopauftrag mit Bestandsbuchung | Anlage/Publikation im Admin, Fehler und konkurrierende Bestellung |
+| Produkt → Shop → Auftrag → Bestand | `scripts/role-test.js` prüft Entwurf/Freigabe und `scripts/smoke-test.js` getrennt Shopauftrag/Bestand | gesamter Ablauf in einer Prüfung, konkurrierende Bestellung |
 | B2B → Beratung → Provision → Beleg → Zahlung | Keine Ende-zu-Ende-Verbindung | vollständige Implementierung und Prüfbelege |
 | Einkauf → Wareneingang → Shopbestand | Keine Lieferantenbestellung | vollständige Implementierung und Journalabgleich |
 | Produktion/Prototyp → Versand | Keine Fertigungsdaten | vollständige Implementierung und Statusabgleich |

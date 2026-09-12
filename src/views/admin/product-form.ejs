@@ -110,6 +110,7 @@
         <div class="card__head"><h2>Sichtbarkeit</h2></div>
         <div class="card__body">
           <label class="check"><input type="checkbox" name="active" value="1" <%= product.active ? 'checked' : '' %>><span>Im Shop sichtbar</span></label>
+          <% if (errors.active) { %><p class="field__err"><%= errors.active %></p><% } %>
           <label class="check"><input type="checkbox" name="featured" value="1" <%= product.featured ? 'checked' : '' %>><span>Auf der Startseite unter „Unsere Favoriten“</span></label>
           <label class="field"><span>Reihenfolge Startseite</span><input type="number" name="home_sort" value="<%= product.home_sort || 0 %>"></label>
           <label class="field"><span>Reihenfolge Kategorie</span><input type="number" name="sort" value="<%= product.sort || 0 %>"></label>

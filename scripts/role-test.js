@@ -117,6 +117,35 @@ function csrf(html) {
     _csrf: csrf(ownAdmin.body), email: 'ungueltig@example.test', password, role: 'superuser'
   })).status, 302);
   assert.equal(db.get('SELECT id FROM admin_users WHERE email = ?', ['ungueltig@example.test']), undefined);
-  console.log('Rollenintegration: Anmeldung, acht Rollen, Rechte je Seite/Aktion und Fremdzugriff geprüft.');
+  const draft = db.get("SELECT * FROM products WHERE sku = 'NG-13001'");
+  assert.equal((await admin.get('/produkt/' + draft.slug)).status, 404);
+  const draftForm = await admin.get('/verwaltung/produkte/' + draft.id);
+  const fields = {
+    _csrf: csrf(draftForm.body), name: draft.name, slug: draft.slug,
+    category_id: String(draft.category_id), subtitle: draft.subtitle,
+    description: draft.description, details: draft.details, sku: draft.sku,
+    brand: draft.brand, tax_rate: '19', price: '5,90', active: '1'
+  };
+  assert.equal((await admin.post('/verwaltung/produkte/' + draft.id, fields)).status, 302);
+  assert.equal(db.get('SELECT active FROM products WHERE id = ?', [draft.id]).active, 1);
+  let variant = db.get('SELECT price_cents, stock, active FROM variants WHERE product_id = ?', [draft.id]);
+  assert.equal(variant.price_cents, 590);
+  assert.equal(variant.stock, 0);
+  assert.equal(variant.active, 1);
+  assert.equal((await admin.get('/produkt/' + draft.slug)).status, 200);
+  fields.price = '6,40';
+  assert.equal((await admin.post('/verwaltung/produkte/' + draft.id, fields)).status, 302);
+  variant = db.get('SELECT price_cents FROM variants WHERE product_id = ?', [draft.id]);
+  assert.equal(variant.price_cents, 640, 'Grundpreis und alleinige Standardvariante bleiben gleich');
+
+  const incomplete = db.get("SELECT * FROM products WHERE sku = 'NG-13002'");
+  db.run('DELETE FROM variants WHERE product_id = ?', [incomplete.id]);
+  const invalid = await admin.post('/verwaltung/produkte/' + incomplete.id, {
+    ...fields, name: incomplete.name, slug: incomplete.slug, sku: incomplete.sku,
+    price: '4,50', category_id: String(incomplete.category_id)
+  });
+  assert.equal(invalid.status, 400);
+  assert.equal(db.get('SELECT active FROM products WHERE id = ?', [incomplete.id]).active, 0);
+  console.log('Rollen und Produktfreigabe: acht Logins, Berechtigungen und Entwurf → Shop geprüft.');
   process.exit(0);
 })().catch((error) => { console.error(error); process.exit(1); });

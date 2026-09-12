@@ -296,31 +296,46 @@ router.post('/produkte/:id', (req, res, next) => {
   const clash = db.get('SELECT id FROM products WHERE slug = ? AND id != ?', [values.slug, id]);
   if (clash) errors.slug = 'Diese URL-Kennung wird bereits verwendet.';
   if (values.price_cents <= 0) errors.price = 'Bitte einen Preis größer als 0 angeben.';
+  const variants = catalog.variantsFor(id, { activeOnly: false });
+  const single = variants.length === 1 ? variants[0] : null;
+  const syncPrice = single && single.price_cents === product.price_cents && values.price_cents !== product.price_cents;
+  const activateSingle = single && product.active === 0 && values.active === 1 && single.active === 0 &&
+    (syncPrice || single.price_cents === values.price_cents);
+  if (values.active && !variants.some((v) => (v.active || (single && v.id === single.id && activateSingle)) &&
+      (single && v.id === single.id && syncPrice ? values.price_cents : v.price_cents) > 0)) {
+    errors.active = 'Vor der Veröffentlichung ist eine aktive Variante mit einem Preis erforderlich.';
+  }
   if (Object.keys(errors).length) {
     return res.status(400).render('admin/product-form', {
       title: product.name, product: Object.assign({}, product, values),
-      images: catalog.imagesFor(id), variants: catalog.variantsFor(id, { activeOnly: false }),
+      images: catalog.imagesFor(id), variants,
       facets: catalog.facetsFor(id), errors,
       categories: catalog.categories({ activeOnly: false }), media: db.all('SELECT * FROM media ORDER BY id DESC LIMIT 40')
     });
   }
-  db.run(
+  db.transaction(() => {
+    db.run(
     `UPDATE products SET slug=?, name=?, category_id=?, subtitle=?, description=?, details=?, price_cents=?,
       compare_cents=?, sku=?, brand=?, material=?, weight_g=?, tax_rate=?, active=?, featured=?, home_sort=?, sort=?,
       updated_at=datetime('now') WHERE id = ?`,
     [values.slug, values.name, values.category_id, values.subtitle, values.description, values.details,
       values.price_cents, values.compare_cents, values.sku, values.brand, values.material, values.weight_g,
       values.tax_rate, values.active, values.featured, values.home_sort, values.sort, id]
-  );
+    );
+    if (single && (syncPrice || activateSingle)) {
+      db.run('UPDATE variants SET price_cents=?, active=? WHERE id=? AND product_id=?',
+        [syncPrice ? values.price_cents : single.price_cents, activateSingle ? 1 : single.active, single.id, id]);
+    }
 
-  // Merkmale (je Zeile "Schlüssel: Wert")
-  db.run('DELETE FROM product_facets WHERE product_id = ?', [id]);
-  for (const line of String(req.body.facets || '').split('\n')) {
-    const [key, value] = line.split(':');
-    if (!key || !value) continue;
-    db.run('INSERT OR IGNORE INTO product_facets (product_id, key, value) VALUES (?,?,?)',
-      [id, key.trim().slice(0, 40), value.trim().slice(0, 60)]);
-  }
+    // Merkmale (je Zeile "Schlüssel: Wert")
+    db.run('DELETE FROM product_facets WHERE product_id = ?', [id]);
+    for (const line of String(req.body.facets || '').split('\n')) {
+      const [key, value] = line.split(':');
+      if (!key || !value) continue;
+      db.run('INSERT OR IGNORE INTO product_facets (product_id, key, value) VALUES (?,?,?)',
+        [id, key.trim().slice(0, 40), value.trim().slice(0, 60)]);
+    }
+  });
 
   audit.log(req.admin.email, 'produkt.geaendert', 'product', String(id), values.name, req.ip);
   req.flash('success', 'Änderungen gespeichert – sie sind sofort im Shop sichtbar.');
