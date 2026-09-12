@@ -309,6 +309,45 @@ function csrf(html) {
   assert.equal((await finance.get(reportUrl + '&von=2026-13-99')).status, 400);
   assert.equal((await finance.get('/verwaltung/auswertung/produkte/druck?q=' + encodeURIComponent(fields.sku))).status, 200);
   assert.equal((await service.get('/verwaltung/auswertung/produkte')).status, 403);
+  const shopper = new Client();
+  const shopProduct = await shopper.get('/produkt/' + draft.slug);
+  assert.equal(shopProduct.status, 200);
+  const saleBefore = db.get('SELECT stock FROM variants WHERE id=?', [draftVariant.id]).stock;
+  assert.equal((await shopper.post('/warenkorb/hinzufuegen', {
+    _csrf: csrf(shopProduct.body), variant_id: String(draftVariant.id), qty: '2', redirect: '/warenkorb'
+  })).status, 302);
+  const addressPage = await shopper.get('/kasse/adresse');
+  assert.equal((await shopper.post('/kasse/adresse', {
+    _csrf: csrf(addressPage.body), email: 'durchlauf@example.test',
+    s_first_name: 'Test', s_last_name: 'Ablauf', s_street: 'Hafen 1',
+    s_zip: '27472', s_city: 'Cuxhaven', s_country: 'DE'
+  })).location, '/kasse/versand');
+  const shippingPage = await shopper.get('/kasse/versand');
+  const shipping = db.get('SELECT code FROM shipping_methods WHERE active=1 ORDER BY sort LIMIT 1');
+  assert.equal((await shopper.post('/kasse/versand', {
+    _csrf: csrf(shippingPage.body), shipping_code: shipping.code
+  })).location, '/kasse/zahlung');
+  const paymentPage = await shopper.get('/kasse/zahlung');
+  assert.equal((await shopper.post('/kasse/zahlung', {
+    _csrf: csrf(paymentPage.body), payment_method: 'vorkasse'
+  })).location, '/kasse/pruefen');
+  const reviewPage = await shopper.get('/kasse/pruefen');
+  const placed = await shopper.post('/kasse/bestellen', { _csrf: csrf(reviewPage.body), agb: '1' });
+  assert.ok(placed.location.startsWith('/kasse/danke/'));
+  const realOrder = db.get('SELECT id,number FROM orders WHERE email=? ORDER BY id DESC LIMIT 1', ['durchlauf@example.test']);
+  assert.equal((await admin.get('/verwaltung/bestellungen/' + realOrder.id)).status, 200);
+  assert.equal(db.get('SELECT qty FROM order_items WHERE order_id=?', [realOrder.id]).qty, 2);
+  assert.equal(db.get('SELECT stock FROM variants WHERE id=?', [draftVariant.id]).stock, saleBefore - 2);
+  assert.equal(db.get('SELECT delta FROM stock_movements WHERE source=? AND reference=?',
+    ['shop.bestellung', String(realOrder.id)]).delta, -2);
+  assert.equal((await shopper.post('/kasse/bestellen', { _csrf: csrf(reviewPage.body), agb: '1' })).status, 302);
+  assert.equal(db.get('SELECT COUNT(*) AS c FROM orders WHERE email=?', ['durchlauf@example.test']).c, 1);
+  const placedOrderPage = await admin.get('/verwaltung/bestellungen/' + realOrder.id);
+  assert.equal((await admin.post('/verwaltung/bestellungen/' + realOrder.id + '/stornieren', {
+    _csrf: csrf(placedOrderPage.body)
+  })).status, 302);
+  assert.equal(db.get('SELECT stock FROM variants WHERE id=?', [draftVariant.id]).stock, saleBefore);
+  assert.equal(db.get('SELECT status FROM orders WHERE id=?', [realOrder.id]).status, 'storniert');
   const created = await admin.post('/verwaltung/produkte/neu', {
     _csrf: csrf(createForm.body), name: 'Testartikel Lagerjournal', slug: 'testartikel-lagerjournal',
     category_id: String(draft.category_id), price: '10,00', sku: 'TEST-LAGER', start_stock: '3'
@@ -330,6 +369,6 @@ function csrf(html) {
   })).status, 302);
   assert.equal(db.get('SELECT active FROM products WHERE id=?', [draft.id]).active, 0);
   assert.ok(db.get('SELECT id FROM product_calculations WHERE id=?', [proposalId]), 'Kalkulation bleibt erhalten');
-  console.log('Rollen, Nachrichten, Produktfreigabe, Lagerjournal, Naturgewürze, Analyse und Kalkulation geprüft.');
+  console.log('Rollen, Nachrichten, Naturgewürz → Shopauftrag → Lagerjournal/Storno, Analyse und Kalkulation geprüft.');
   process.exit(0);
 })().catch((error) => { console.error(error); process.exit(1); });

@@ -55,7 +55,7 @@ Stand: 12.09.2026, Branch `codex/shop-system-20260912`. `Teilweise` bezeichnet v
 
 | Ablauf | Derzeitige Evidenz | Noch erforderlich |
 | --- | --- | --- |
-| Produkt → Shop → Auftrag → Bestand | `scripts/role-test.js` prüft Entwurf/Freigabe und `scripts/smoke-test.js` getrennt Shopauftrag/Bestand | gesamter Ablauf in einer Prüfung, konkurrierende Bestellung |
+| Produkt → Shop → Auftrag → Bestand | `scripts/role-test.js`: Entwurf → Preis/Freigabe → Shopkauf → Auftrag und Journal → Storno/Bestandsrückbuchung in einer isolierten Datenbank; doppelte Absendung erzeugt keinen zweiten Auftrag | konkurrierende Käufe/Überverkauf zusätzlich prüfen |
 | B2B → Beratung → Provision → Beleg → Zahlung | Keine Ende-zu-Ende-Verbindung | vollständige Implementierung und Prüfbelege |
 | Einkauf → Wareneingang → Shopbestand | Manuelle begründete Bestandsbuchung möglich, keine Lieferantenbestellung | Einkauf/Wareneingang mit Beleg und Journalabgleich |
 | Produktion/Prototyp → Versand | Keine Fertigungsdaten | vollständige Implementierung und Statusabgleich |
