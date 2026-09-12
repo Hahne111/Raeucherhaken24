@@ -4,6 +4,9 @@ const path = require('path');
 const express = require('express');
 const db = require('../db');
 const catalog = require('../lib/catalog');
+const newsletter = require('../lib/newsletter');
+const reviews = require('../lib/reviews');
+const recipes = require('../lib/recipes');
 const settings = require('../lib/settings');
 const util = require('../lib/util');
 
@@ -126,7 +129,52 @@ router.get('/produkt/:slug', (req, res, next) => {
     images,
     facets: catalog.facetsFor(product.id),
     related: withDefaultVariant(catalog.related(product, 4)),
+    reviews: reviews.published(product.id),
+    reviewSummary: reviews.summary(product.id),
+    ownReview: req.customer ? reviews.forCustomer(req.customer.id, product.id) : null,
+    boughtIt: req.customer ? Boolean(reviews.purchasedVariantOrder(req.customer.id, product.id)) : false,
     pageScript: '/js/product.js'
+  });
+});
+
+/* Bewertung abgeben: nur angemeldet, nur einmal je Produkt, immer mit Prüfung. */
+router.post('/produkt/:slug/bewertung', (req, res, next) => {
+  const product = catalog.productBySlug(req.params.slug);
+  if (!product) return next();
+  if (!req.customer) {
+    req.flash('error', 'Zum Bewerten musst du angemeldet sein.');
+    return res.redirect('/konto/anmelden?weiter=' + encodeURIComponent('/produkt/' + product.slug));
+  }
+  const result = reviews.create({
+    productId: product.id, customer: req.customer,
+    rating: req.body.rating, title: req.body.title, body: req.body.body, ip: req.ip
+  });
+  req.flash(result.ok ? 'success' : 'error', result.message);
+  res.redirect('/produkt/' + product.slug + '#bewertungen');
+});
+
+/* ------------------------- Rezepte und Ratgeber ------------------------ */
+router.get('/ratgeber', (req, res) => {
+  const category = String(req.query.kategorie || '');
+  const q = String(req.query.q || '').trim().slice(0, 80);
+  res.render('shop/recipes', {
+    title: 'Rauchwissen',
+    metaDescription: 'Rezepte, Ratgeber und Technikwissen rund ums Räuchern.',
+    rows: recipes.published({ category, q }),
+    category, q, categories: recipes.CATEGORIES
+  });
+});
+
+router.get('/rezept/:slug', (req, res, next) => {
+  const row = recipes.bySlug(req.params.slug);
+  if (!row || row.status !== 'veroeffentlicht') return next();
+  res.render('shop/recipe', {
+    title: row.title,
+    metaDescription: row.teaser.slice(0, 160),
+    row,
+    products: withDefaultVariant(recipes.productsFor(row.id)),
+    categories: recipes.CATEGORIES,
+    difficulties: recipes.DIFFICULTIES
   });
 });
 
@@ -151,17 +199,32 @@ router.get('/seite/:slug', (req, res, next) => {
 });
 
 /* ------------------------------ Newsletter ---------------------------- */
+/*
+ * Anmeldung mit Doppelbestaetigung: die Adresse wird vorgemerkt und erst
+ * nach dem Klick auf den Link in der Bestaetigungsmail aufgenommen.
+ */
 router.post('/newsletter', (req, res) => {
-  const email = String(req.body.email || '').trim();
-  if (!util.isEmail(email)) {
-    req.flash('error', 'Bitte eine gültige E-Mail-Adresse angeben.');
-    return res.redirect('/#inhalt');
-  }
-  const existing = db.get('SELECT id FROM customers WHERE email = ?', [email.toLowerCase()]);
-  if (existing) db.run('UPDATE customers SET newsletter = 1 WHERE id = ?', [existing.id]);
-  require('../lib/audit').log(email, 'newsletter.anmeldung', 'newsletter', '', email, req.ip);
-  req.flash('success', 'Danke! Wir haben dich für die Rauchzeichen vorgemerkt.');
+  const result = newsletter.subscribe({
+    email: req.body.email, name: req.body.name, source: 'startseite', ip: req.ip
+  });
+  req.flash(result.ok ? 'success' : 'error', result.message);
   res.redirect('/#inhalt');
+});
+
+router.get('/newsletter/bestaetigen', (req, res) => {
+  const result = newsletter.confirm(req.query.token, req.ip);
+  res.render('shop/newsletter', {
+    title: result.ok ? 'Anmeldung bestätigt' : 'Bestätigung nicht möglich',
+    ok: result.ok, message: result.message, showSignup: !result.ok
+  });
+});
+
+router.get('/newsletter/abmelden', (req, res) => {
+  const result = newsletter.unsubscribe(req.query.token, req.ip);
+  res.render('shop/newsletter', {
+    title: result.ok ? 'Abgemeldet' : 'Abmeldung nicht möglich',
+    ok: result.ok, message: result.message, showSignup: false
+  });
 });
 
 module.exports = router;

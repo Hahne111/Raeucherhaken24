@@ -1,0 +1,47 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap wrap--narrow">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><a href="/ratgeber">Rauchwissen</a><span>/</span><span><%= row.title %></span></nav>
+    <div class="section">
+      <div class="pagehead">
+        <span class="pagehead__eyebrow"><%= categories[row.category] || row.category %></span>
+        <h1><%= row.title %></h1>
+        <p>
+          <% if (row.minutes) { %><%= row.minutes %> Minuten · <% } %><%= difficulties[row.difficulty] || row.difficulty %><% if (row.author) { %> · <%= row.author %><% } %>
+        </p>
+      </div>
+      <% if (row.image_url) { %>
+        <p><img src="<%= row.image_url %>" alt="" style="width:100%;border-radius:12px"></p>
+      <% } %>
+      <div class="panel"><div class="panel__body" style="font-size:15.5px;line-height:1.75">
+        <% if (row.teaser) { %><p><strong><%= row.teaser %></strong></p><% } %>
+        <% if (row.ingredients) { %>
+          <h2 style="margin-top:18px">Zutaten</h2>
+          <%- textToHtml(row.ingredients) %>
+        <% } %>
+        <h2 style="margin-top:18px">Zubereitung</h2>
+        <%- textToHtml(row.body) %>
+      </div></div>
+      <% if (products.length) { %>
+      <div class="section section--tight">
+        <h2 style="margin-bottom:14px">Passendes Zubehör</h2>
+        <div class="grid-products">
+          <% products.forEach(function (p) { %>
+            <article class="pcard">
+              <a class="pcard__media" href="/produkt/<%= p.slug %>">
+                <% if (p.thumb) { %><img src="<%= p.thumb %>" alt="" width="400" height="300" loading="lazy"><% } %>
+              </a>
+              <div class="pcard__body">
+                <h3 class="pcard__title"><a href="/produkt/<%= p.slug %>"><%= p.name %></a></h3>
+                <p class="pcard__sub"><%= p.subtitle %></p>
+              </div>
+            </article>
+          <% }); %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

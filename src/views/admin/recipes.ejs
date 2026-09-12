@@ -1,0 +1,48 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/rezepte/neu">Beitrag anlegen</a> <a class="btn btn--ghost btn--sm" href="/ratgeber">Im Shop ansehen</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="get" class="filterbar">
+  <input type="search" name="q" value="<%= q %>" placeholder="Titel suchen">
+  <label>Status
+    <select name="status"><option value="">alle</option>
+      <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+    </select>
+  </label>
+  <label>Bereich
+    <select name="kategorie"><option value="">alle</option>
+      <% Object.keys(categories).forEach(function (k) { %><option value="<%= k %>" <%= category === k ? 'selected' : '' %>><%= categories[k] %></option><% }); %>
+    </select>
+  </label>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+<div class="card">
+  <div class="card__head"><h2>Beiträge</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Noch kein Beitrag angelegt.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Titel</th><th>Bereich</th><th>Status</th><th>Veröffentlicht</th><th style="width:220px">Aktion</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td><a href="/verwaltung/rezepte/<%= r.id %>/bearbeiten"><%= r.title %></a><br><small>/rezept/<%= r.slug %></small></td>
+          <td><%= categories[r.category] || r.category %></td>
+          <td><span class="pill <%= r.status === 'veroeffentlicht' ? 'pill--ok' : '' %>"><%= states[r.status] || r.status %></span></td>
+          <td><small><%= r.published_at || '–' %></small></td>
+          <td style="display:flex;gap:6px">
+            <form method="post" action="/verwaltung/rezepte/<%= r.id %>/status">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <input type="hidden" name="status" value="<%= r.status === 'veroeffentlicht' ? 'entwurf' : 'veroeffentlicht' %>">
+              <button class="btn btn--ghost btn--sm" type="submit"><%= r.status === 'veroeffentlicht' ? 'Zurückziehen' : 'Veröffentlichen' %></button>
+            </form>
+            <% if (r.status === 'veroeffentlicht') { %><a class="btn btn--ghost btn--sm" href="/rezept/<%= r.slug %>">Ansehen</a><% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

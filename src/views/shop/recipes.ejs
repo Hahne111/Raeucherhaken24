@@ -1,0 +1,45 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><span>Rauchwissen</span></nav>
+    <div class="section">
+      <div class="pagehead">
+        <span class="pagehead__eyebrow">Rauchwissen</span>
+        <h1>Rezepte &amp; Ratgeber</h1>
+        <p>Aus der Praxis für die Praxis: Rezepte zum Nachmachen, Ratgeber zu Holz und Salz sowie Technik rund um Ofen und Haken.</p>
+      </div>
+      <form method="get" class="recipe-filter">
+        <a class="recipe-filter__chip <%= category ? '' : 'is-active' %>" href="/ratgeber">Alle</a>
+        <% Object.keys(categories).forEach(function (k) { %>
+          <a class="recipe-filter__chip <%= category === k ? 'is-active' : '' %>" href="/ratgeber?kategorie=<%= k %>"><%= categories[k] %></a>
+        <% }); %>
+        <input type="search" name="q" value="<%= q %>" placeholder="Beiträge durchsuchen" aria-label="Beiträge durchsuchen">
+        <button class="btn btn--ghost btn--sm" type="submit">Suchen</button>
+      </form>
+      <% if (!rows.length) { %>
+        <div class="empty">
+          <h2>Noch nichts veröffentlicht</h2>
+          <p>Hier erscheinen unsere Rezepte und Ratgeber, sobald die Redaktion sie freigegeben hat.</p>
+        </div>
+      <% } else { %>
+        <div class="grid-products">
+          <% rows.forEach(function (r) { %>
+            <article class="pcard">
+              <a class="pcard__media" href="/rezept/<%= r.slug %>">
+                <% if (r.image_url) { %><img src="<%= r.image_url %>" alt="" width="400" height="300" loading="lazy"><% } %>
+                <span class="pcard__flags"><span class="flag flag--new"><%= categories[r.category] || r.category %></span></span>
+              </a>
+              <div class="pcard__body">
+                <h2 class="pcard__title"><a href="/rezept/<%= r.slug %>"><%= r.title %></a></h2>
+                <p class="pcard__sub"><%= r.teaser %></p>
+                <% if (r.minutes) { %><span class="pcard__cat"><%= r.minutes %> Minuten</span><% } %>
+              </div>
+            </article>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

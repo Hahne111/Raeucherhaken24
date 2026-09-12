@@ -43,6 +43,7 @@ const defaults = [
   ['shop.register', '', 'shop', 'Registergericht und -nummer', 'text', 13],
   ['shop.bank', '', 'shop', 'Bankverbindung für Rechnungen', 'text', 14],
   ['shop.invoice_due_days', '14', 'shop', 'Zahlungsziel für Rechnungen (Tage)', 'number', 15],
+  ['shop.url', '', 'shop', 'Adresse des Shops im Netz, z. B. https://raeucherhaken24.de (für Links in Systemmails)', 'text', 16],
 
   ['home.topbar_1', 'Für echten Rauchgenuss', 'startseite', 'Servicezeile 1', 'text', 1],
   ['home.topbar_2', 'Räuchern verbindet', 'startseite', 'Servicezeile 2', 'text', 2],

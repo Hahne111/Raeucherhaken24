@@ -1107,3 +1107,26 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 400; margin: 0; line-he
   .topbar, .site-header, .site-footer, .stage__scene, .btn { display: none !important; }
   body { background: #fff; color: #000; }
 }
+
+/* Rauchwissen: Filterzeile über den Beiträgen. */
+.recipe-filter { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 22px; }
+.recipe-filter__chip {
+  display: inline-flex; align-items: center; padding: 7px 14px; border-radius: 999px;
+  border: 1px solid var(--line); background: #fff; font-size: 13px; color: var(--ink-soft);
+}
+.recipe-filter__chip:hover { border-color: var(--copper-400); color: var(--copper-700); }
+.recipe-filter__chip.is-active { background: var(--navy-800); border-color: var(--navy-800); color: #fff; }
+.recipe-filter input[type="search"] { margin-left: auto; min-width: 200px; }
+
+/* Bewertungen auf der Produktseite. */
+.reviews { display: grid; gap: 16px; }
+.review { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; padding: 16px 18px; }
+.review__head { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; justify-content: space-between; }
+.review__stars { color: var(--copper-700); letter-spacing: .08em; }
+.review__meta { font-size: 12.5px; color: var(--ink-soft); }
+.review__verified { font-size: 11.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--navy-600); }
+.review__reply { margin-top: 12px; padding: 12px 14px; background: #f4f2ed; border-radius: 10px; font-size: 14px; }
+.review-form label { display: block; margin-bottom: 10px; }
+@media (max-width: 760px) {
+  .recipe-filter input[type="search"] { margin-left: 0; width: 100%; }
+}

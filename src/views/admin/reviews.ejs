@@ -1,0 +1,38 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = ''; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="kpis">
+  <div class="kpi"><span>Zur Prüfung</span><strong><%= openCount %></strong><small>noch nicht öffentlich</small></div>
+</div>
+<form method="get" class="filterbar">
+  <label>Status
+    <select name="status"><option value="">alle</option>
+      <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+    </select>
+  </label>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+<div class="card">
+  <div class="card__head"><h2>Bewertungen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Bewertungen in dieser Auswahl.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Produkt</th><th>Sterne</th><th>Text</th><th>Verfasst von</th><th>Status</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td><a href="/verwaltung/bewertungen/<%= r.id %>"><%= r.product_name %></a></td>
+          <td><%= '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) %></td>
+          <td><%= r.title ? r.title + ' – ' : '' %><%= r.body.slice(0, 90) %><%= r.body.length > 90 ? '…' : '' %></td>
+          <td><%= r.author %><% if (r.verified) { %> <span class="pill pill--ok">Gekauft</span><% } %><br><small><%= r.customer_email || '' %></small></td>
+          <td><span class="pill <%= r.status === 'freigegeben' ? 'pill--ok' : (r.status === 'abgelehnt' ? 'pill--err' : '') %>"><%= states[r.status] || r.status %></span></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

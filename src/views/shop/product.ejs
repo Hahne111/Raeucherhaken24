@@ -119,6 +119,65 @@
         </div>
       </div>
 
+      <div id="bewertungen" style="margin-top:52px">
+        <h2 style="font-size:26px;color:var(--navy-800);margin-bottom:6px">Bewertungen</h2>
+        <% if (reviewSummary.count) { %>
+          <p class="review__meta" style="margin-bottom:18px">
+            <span class="review__stars"><%= '★'.repeat(Math.round(reviewSummary.average)) + '☆'.repeat(5 - Math.round(reviewSummary.average)) %></span>
+            <%= String(reviewSummary.average).replace('.', ',') %> von 5 aus <%= reviewSummary.count %> Bewertung<%= reviewSummary.count === 1 ? '' : 'en' %>
+          </p>
+        <% } else { %>
+          <p class="review__meta" style="margin-bottom:18px">Für dieses Produkt gibt es noch keine freigegebene Bewertung.</p>
+        <% } %>
+
+        <% if (reviews.length) { %>
+        <div class="reviews">
+          <% reviews.forEach(function (r) { %>
+            <article class="review">
+              <div class="review__head">
+                <div>
+                  <span class="review__stars"><%= '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) %></span>
+                  <% if (r.title) { %><strong style="margin-left:8px"><%= r.title %></strong><% } %>
+                </div>
+                <span class="review__meta"><%= r.author %> · <%= formatDay(r.created_at) %><% if (r.verified) { %> · <span class="review__verified">Gekauft</span><% } %></span>
+              </div>
+              <p style="margin-top:10px;white-space:pre-line"><%= r.body %></p>
+              <% if (r.reply) { %>
+                <div class="review__reply"><strong>Antwort von Räucherhaken24:</strong><br><span style="white-space:pre-line"><%= r.reply %></span></div>
+              <% } %>
+            </article>
+          <% }); %>
+        </div>
+        <% } %>
+
+        <div class="panel" style="margin-top:20px"><div class="panel__body">
+          <% if (!customer) { %>
+            <p>Bewerten können angemeldete Kundinnen und Kunden.
+              <a href="/konto/anmelden?weiter=<%= encodeURIComponent('/produkt/' + product.slug) %>">Jetzt anmelden</a>.</p>
+          <% } else if (ownReview) { %>
+            <p>Du hast dieses Produkt bereits bewertet.
+              <% if (ownReview.status === 'offen') { %>Deine Bewertung wird geprüft und erscheint nach der Freigabe.<% } %>
+              <% if (ownReview.status === 'abgelehnt') { %>Deine Bewertung wurde nicht veröffentlicht.<% } %>
+            </p>
+          <% } else { %>
+            <h3 style="margin-bottom:12px">Deine Bewertung</h3>
+            <% if (boughtIt) { %><p class="review__meta">Wir haben eine Bestellung mit diesem Produkt gefunden – deine Bewertung wird als „Gekauft“ gekennzeichnet.</p><% } %>
+            <form method="post" action="/produkt/<%= product.slug %>/bewertung" class="review-form">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <label>Sterne
+                <select name="rating" required>
+                  <% [5, 4, 3, 2, 1].forEach(function (n) { %><option value="<%= n %>"><%= n %> von 5</option><% }); %>
+                </select>
+              </label>
+              <label>Überschrift <input type="text" name="title" maxlength="120"></label>
+              <label>Dein Text <textarea name="body" rows="4" required minlength="10" maxlength="4000"></textarea></label>
+              <button class="btn btn--dark" type="submit">Bewertung abschicken</button>
+            </form>
+            <p class="review__meta" style="margin-top:10px">Jede Bewertung wird vor der Veröffentlichung geprüft.</p>
+          <% } %>
+        </div></div>
+      </div>
+
       <% if (related.length) { %>
         <div style="margin-top:52px">
           <h2 style="font-size:26px;color:var(--navy-800);margin-bottom:18px">Passt dazu</h2>

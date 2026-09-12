@@ -1,0 +1,51 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/rezepte">Zur Übersicht</a>' + (row.id && row.status === 'veroeffentlicht' ? ' <a class="btn btn--ghost btn--sm" href="/rezept/' + row.slug + '">Im Shop ansehen</a>' : ''); %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="post" action="/verwaltung/rezepte">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <input type="hidden" name="id" value="<%= row.id %>">
+  <div class="cols">
+    <div class="card">
+      <div class="card__head"><h2>Inhalt</h2></div>
+      <div class="card__body">
+        <label>Titel <input type="text" name="title" value="<%= row.title %>" required maxlength="160"></label>
+        <label>Anreißer <textarea name="teaser" rows="2" maxlength="400"><%= row.teaser %></textarea></label>
+        <label>Zutaten <textarea name="ingredients" rows="6" maxlength="4000" placeholder="Eine Zutat je Zeile"><%= row.ingredients %></textarea></label>
+        <label>Text <textarea name="body" rows="14" required><%= row.body %></textarea></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Angaben</h2></div>
+      <div class="card__body">
+        <label>Bereich
+          <select name="category">
+            <% Object.keys(categories).forEach(function (k) { %><option value="<%= k %>" <%= row.category === k ? 'selected' : '' %>><%= categories[k] %></option><% }); %>
+          </select>
+        </label>
+        <label>Aufwand
+          <select name="difficulty">
+            <% Object.keys(difficulties).forEach(function (k) { %><option value="<%= k %>" <%= row.difficulty === k ? 'selected' : '' %>><%= difficulties[k] %></option><% }); %>
+          </select>
+        </label>
+        <label>Dauer in Minuten <input type="number" name="minutes" value="<%= row.minutes %>" min="0"></label>
+        <label>Bild aus der Medienablage <input type="text" name="image_url" value="<%= row.image_url %>" placeholder="/uploads/…"></label>
+        <label>Status
+          <select name="status">
+            <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= row.status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+          </select>
+        </label>
+        <fieldset style="border:1px solid var(--a-line);border-radius:8px;padding:12px;max-height:280px;overflow:auto">
+          <legend>Passendes Zubehör</legend>
+          <% products.forEach(function (p) { %>
+            <label style="display:flex;gap:8px;align-items:center;font-weight:400">
+              <input type="checkbox" name="product_id" value="<%= p.id %>" <%= linked.indexOf(p.id) >= 0 ? 'checked' : '' %>>
+              <%= p.name %>
+            </label>
+          <% }); %>
+        </fieldset>
+        <button class="btn btn--dark" type="submit">Speichern</button>
+      </div>
+    </div>
+  </div>
+</form>
+<%- include('../partials/admin-foot') %>

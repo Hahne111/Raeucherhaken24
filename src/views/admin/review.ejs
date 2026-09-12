@@ -1,0 +1,45 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/bewertungen">Zur Übersicht</a> <a class="btn btn--ghost btn--sm" href="/produkt/' + row.product_slug + '#bewertungen">Produktseite</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2><%= row.product_name %></h2>
+      <span class="pill <%= row.status === 'freigegeben' ? 'pill--ok' : (row.status === 'abgelehnt' ? 'pill--err' : '') %>"><%= states[row.status] || row.status %></span></div>
+    <div class="card__body">
+      <table class="tbl tbl--plain">
+        <tr><th>Sterne</th><td><%= '★'.repeat(row.rating) + '☆'.repeat(5 - row.rating) %></td></tr>
+        <tr><th>Überschrift</th><td><%= row.title || '–' %></td></tr>
+        <tr><th>Verfasst von</th><td><%= row.author %> (<%= row.customer_email || 'Konto gelöscht' %>)</td></tr>
+        <tr><th>Gekauft</th><td><%= row.verified ? 'Ja, zu Bestellung ' + (row.order_id || '–') : 'Kein Kauf zu diesem Konto gefunden' %></td></tr>
+        <tr><th>Eingereicht</th><td><%= row.created_at %><% if (row.created_ip) { %> · <%= row.created_ip %><% } %></td></tr>
+        <% if (row.moderated_at) { %><tr><th>Geprüft</th><td><%= row.moderated_at %> durch <%= row.moderated_by %></td></tr><% } %>
+        <% if (row.reject_reason) { %><tr><th>Begründung</th><td><%= row.reject_reason %></td></tr><% } %>
+      </table>
+      <p style="white-space:pre-line;border-top:1px solid var(--a-line);padding-top:12px"><%= row.body %></p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Prüfen</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/bewertungen/<%= row.id %>/status" style="margin-bottom:20px">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <input type="hidden" name="status" value="freigegeben">
+        <button class="btn btn--dark" type="submit">Freigeben</button>
+      </form>
+      <form method="post" action="/verwaltung/bewertungen/<%= row.id %>/status">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <input type="hidden" name="status" value="abgelehnt">
+        <label>Begründung der Ablehnung <input type="text" name="reason" maxlength="500" value="<%= row.reject_reason %>"></label>
+        <button class="btn btn--ghost" type="submit">Ablehnen</button>
+      </form>
+      <hr style="margin:20px 0;border:0;border-top:1px solid var(--a-line)">
+      <form method="post" action="/verwaltung/bewertungen/<%= row.id %>/antwort">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label>Öffentliche Antwort <textarea name="reply" rows="4" maxlength="2000"><%= row.reply %></textarea></label>
+        <button class="btn btn--dark btn--sm" type="submit">Antwort speichern</button>
+      </form>
+      <p style="color:var(--a-soft)"><small>Die Antwort erscheint unter der Bewertung, sobald diese freigegeben ist.</small></p>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

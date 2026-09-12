@@ -1,0 +1,63 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/newsletter">Zur Übersicht</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2><%= row.id ? 'Kampagne bearbeiten' : 'Kampagne anlegen' %></h2>
+      <span class="pill <%= row.status === 'versendet' ? 'pill--ok' : '' %>"><%= states[row.status] || row.status %></span></div>
+    <div class="card__body">
+      <% if (row.status === 'versendet') { %>
+        <p style="color:var(--a-soft)">Diese Kampagne ist versendet und wird nicht mehr geändert.</p>
+        <table class="tbl tbl--plain">
+          <tr><th>Betreff</th><td><%= row.subject %></td></tr>
+          <tr><th>Empfänger</th><td><%= row.recipients %></td></tr>
+          <tr><th>Versendet</th><td><%= row.sent_at %> durch <%= row.sent_by %></td></tr>
+        </table>
+        <p style="white-space:pre-line;border-top:1px solid var(--a-line);padding-top:12px"><%= row.body %></p>
+      <% } else { %>
+      <form method="post" action="/verwaltung/newsletter/kampagne">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <input type="hidden" name="id" value="<%= row.id %>">
+        <label>Betreff <input type="text" name="subject" value="<%= row.subject %>" required maxlength="300"></label>
+        <label>Text <textarea name="body" rows="12" required><%= row.body %></textarea></label>
+        <p style="color:var(--a-soft)"><small>Der Abmeldelink wird beim Versand automatisch angehängt.</small></p>
+        <button class="btn btn--dark" type="submit">Speichern</button>
+      </form>
+      <% } %>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Versand</h2></div>
+    <div class="card__body">
+      <% if (!mailStatus.configured) { %>
+        <div class="ad-alert ad-alert--warn">Der Mailversand ist nicht eingerichtet (<%= mailStatus.missing.join(', ') %>). Nachrichten bleiben im Ausgangskorb gesperrt.</div>
+      <% } %>
+      <p><strong><%= confirmed %></strong> bestätigte Empfänger.</p>
+      <% if (row.id && row.status !== 'versendet') { %>
+      <form method="post" action="/verwaltung/newsletter/kampagne/<%= row.id %>/test" style="display:flex;gap:8px;align-items:flex-end;margin-bottom:16px">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label style="flex:1">Testadresse <input type="email" name="email" required></label>
+        <button class="btn btn--ghost btn--sm" type="submit">Test senden</button>
+      </form>
+      <form method="post" action="/verwaltung/newsletter/kampagne/<%= row.id %>/senden">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn btn--dark" type="submit">An alle bestätigten Empfänger senden</button>
+      </form>
+      <p style="color:var(--a-soft)"><small>Jeder Empfänger erhält die Kampagne genau einmal; das Journal unten hält fest, wer sie bekommen hat.</small></p>
+      <% } else if (!row.id) { %>
+        <p style="color:var(--a-soft)">Speichere die Kampagne, dann kannst du sie testen und versenden.</p>
+      <% } %>
+      <% if (sends.length) { %>
+      <table class="tbl" style="margin-top:16px">
+        <thead><tr><th>E-Mail</th><th>Status</th></tr></thead>
+        <tbody>
+          <% sends.forEach(function (s) { %>
+            <tr><td><%= s.email %></td><td><span class="pill"><%= s.mail_status || 'unbekannt' %></span><% if (s.last_error) { %><br><small><%= s.last_error %></small><% } %></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

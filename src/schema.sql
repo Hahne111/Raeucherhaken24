@@ -1225,3 +1225,101 @@ CREATE TABLE IF NOT EXISTS trip_expenses (
   created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_trip_expenses ON trip_expenses(advisor_id, spent_on);
+
+/* ===================== Newsletter, Bewertungen, Inhalte ===================== */
+
+/*
+ * Newsletter mit Doppelbestaetigung: eine Anmeldung ist erst nach dem
+ * Klick auf den Bestaetigungslink gueltig. Zeitpunkt, Adresse und Quelle
+ * werden mitgeschrieben, damit die Einwilligung belegbar bleibt.
+ */
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  email           TEXT NOT NULL UNIQUE,
+  name            TEXT NOT NULL DEFAULT '',
+  status          TEXT NOT NULL DEFAULT 'ausstehend',
+  token           TEXT NOT NULL,
+  source          TEXT NOT NULL DEFAULT 'shop',
+  signup_ip       TEXT NOT NULL DEFAULT '',
+  signup_at       TEXT NOT NULL DEFAULT (datetime('now')),
+  confirm_ip      TEXT NOT NULL DEFAULT '',
+  confirmed_at    TEXT,
+  unsubscribed_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_newsletter_status ON newsletter_subscribers(status);
+
+/* Kampagne mit Versandjournal je Empfaenger. */
+CREATE TABLE IF NOT EXISTS newsletter_campaigns (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  subject      TEXT NOT NULL,
+  body         TEXT NOT NULL DEFAULT '',
+  status       TEXT NOT NULL DEFAULT 'entwurf',
+  recipients   INTEGER NOT NULL DEFAULT 0,
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  sent_by      TEXT NOT NULL DEFAULT '',
+  sent_at      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS newsletter_sends (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  campaign_id   INTEGER NOT NULL REFERENCES newsletter_campaigns(id) ON DELETE CASCADE,
+  subscriber_id INTEGER NOT NULL REFERENCES newsletter_subscribers(id) ON DELETE CASCADE,
+  mail_id       INTEGER,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (campaign_id, subscriber_id)
+);
+
+/*
+ * Produktbewertungen. Jede Bewertung wird serverseitig geprueft und ist erst
+ * nach Freigabe oeffentlich sichtbar. `verified` steht fuer eine Bewertung zu
+ * einer nachweislich gelieferten Bestellung.
+ */
+CREATE TABLE IF NOT EXISTS reviews (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id  INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  order_id    INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  author      TEXT NOT NULL DEFAULT '',
+  rating      INTEGER NOT NULL DEFAULT 5,
+  title       TEXT NOT NULL DEFAULT '',
+  body        TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'offen',
+  verified    INTEGER NOT NULL DEFAULT 0,
+  reply       TEXT NOT NULL DEFAULT '',
+  replied_by  TEXT NOT NULL DEFAULT '',
+  moderated_by TEXT NOT NULL DEFAULT '',
+  moderated_at TEXT,
+  reject_reason TEXT NOT NULL DEFAULT '',
+  created_ip  TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (product_id, customer_id)
+);
+CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id, status);
+
+/* Rezepte und Ratgeberbeitraege der Redaktion. */
+CREATE TABLE IF NOT EXISTS recipes (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug         TEXT NOT NULL UNIQUE,
+  title        TEXT NOT NULL,
+  teaser       TEXT NOT NULL DEFAULT '',
+  body         TEXT NOT NULL DEFAULT '',
+  ingredients  TEXT NOT NULL DEFAULT '',
+  category     TEXT NOT NULL DEFAULT 'rezept',
+  difficulty   TEXT NOT NULL DEFAULT 'mittel',
+  minutes      INTEGER NOT NULL DEFAULT 0,
+  image_url    TEXT NOT NULL DEFAULT '',
+  status       TEXT NOT NULL DEFAULT 'entwurf',
+  author       TEXT NOT NULL DEFAULT '',
+  published_at TEXT,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_recipes_status ON recipes(status, category);
+
+/* Empfohlene Produkte zu einem Rezept. */
+CREATE TABLE IF NOT EXISTS recipe_products (
+  recipe_id  INTEGER NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  PRIMARY KEY (recipe_id, product_id)
+);

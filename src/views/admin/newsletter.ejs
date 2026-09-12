@@ -1,0 +1,82 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/newsletter/kampagne/neu">Kampagne anlegen</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<% if (!mailStatus.configured) { %>
+<div class="ad-alert ad-alert--warn">
+  <strong>Der Mailversand ist nicht eingerichtet.</strong>
+  Bestätigungs- und Kampagnenmails bleiben im Ausgangskorb gesperrt liegen, bis diese Angaben gesetzt sind:
+  <%= mailStatus.missing.join(', ') %>. Eine Anmeldung gilt ohne Bestätigung nicht als erteilt.
+</div>
+<% } %>
+<div class="kpis">
+  <div class="kpi"><span>Bestätigt</span><strong><%= counts.bestaetigt %></strong><small>erhalten den Newsletter</small></div>
+  <div class="kpi"><span>Bestätigung offen</span><strong><%= counts.ausstehend %></strong><small>ohne Klick auf den Link</small></div>
+  <div class="kpi"><span>Abgemeldet</span><strong><%= counts.abgemeldet %></strong></div>
+  <div class="kpi"><span>Gesamt</span><strong><%= counts.gesamt %></strong></div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Kampagnen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!campaigns.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Noch keine Kampagne angelegt.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Betreff</th><th>Status</th><th class="num">Empfänger</th><th>Versendet</th></tr></thead>
+      <tbody>
+        <% campaigns.forEach(function (c) { %>
+        <tr>
+          <td><a href="/verwaltung/newsletter/kampagne/<%= c.id %>"><%= c.subject %></a></td>
+          <td><span class="pill <%= c.status === 'versendet' ? 'pill--ok' : '' %>"><%= campaignStates[c.status] || c.status %></span></td>
+          <td class="num"><%= c.recipients %></td>
+          <td><%= c.sent_at || '–' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+
+<form method="get" class="filterbar">
+  <input type="search" name="q" value="<%= q %>" placeholder="E-Mail suchen">
+  <label>Status
+    <select name="status"><option value="">alle</option>
+      <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+    </select>
+  </label>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+
+<div class="card">
+  <div class="card__head"><h2>Empfänger</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Einträge.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>E-Mail</th><th>Status</th><th>Angemeldet</th><th>Bestätigt</th><th>Quelle</th><th style="width:130px"></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td><%= r.email %></td>
+          <td><span class="pill <%= r.status === 'bestaetigt' ? 'pill--ok' : '' %>"><%= states[r.status] || r.status %></span></td>
+          <td><small><%= r.signup_at %><% if (r.signup_ip) { %><br><%= r.signup_ip %><% } %></small></td>
+          <td><small><%= r.confirmed_at || '–' %></small></td>
+          <td><small><%= r.source %></small></td>
+          <td>
+            <% if (r.status !== 'abgemeldet') { %>
+            <form method="post" action="/verwaltung/newsletter/<%= r.id %>/abmelden">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <button class="btn btn--ghost btn--sm" type="submit">Abmelden</button>
+            </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

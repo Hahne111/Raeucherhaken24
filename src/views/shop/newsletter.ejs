@@ -1,0 +1,23 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap wrap--narrow">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><span>Rauchzeichen</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1><%= title %></h1></div>
+      <div class="panel"><div class="panel__body" style="font-size:15.5px;line-height:1.75">
+        <p><%= message %></p>
+        <% if (showSignup) { %>
+        <form method="post" action="/newsletter" class="nl-form" style="margin-top:18px">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label for="nl-mail">E-Mail-Adresse</label>
+          <input id="nl-mail" type="email" name="email" required placeholder="du@beispiel.de">
+          <button class="btn btn--dark" type="submit">Anmelden</button>
+        </form>
+        <% } %>
+        <p style="margin-top:18px"><a href="/">Zurück zur Startseite</a></p>
+      </div></div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>
