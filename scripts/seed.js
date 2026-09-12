@@ -14,7 +14,7 @@ const reset = process.argv.includes('--reset');
 
 if (reset) {
   db.transaction(() => {
-    for (const t of ['order_items', 'orders', 'cart_items', 'carts', 'product_facets', 'variants', 'product_images', 'products', 'categories', 'coupons', 'shipping_methods', 'media']) {
+    for (const t of ['order_items', 'orders', 'cart_items', 'carts', 'stock_movements', 'product_facets', 'variants', 'product_images', 'products', 'categories', 'coupons', 'shipping_methods', 'media']) {
       db.run(`DELETE FROM ${t}`);
     }
     db.run("DELETE FROM sqlite_sequence WHERE name IN ('order_items','orders','cart_items','carts','variants','product_images','products','categories','coupons','shipping_methods','media')");

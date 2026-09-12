@@ -1,0 +1,29 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/lager/export.csv">Bestand als CSV</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="toolbar"><form method="get" action="/verwaltung/lager">
+  <label class="visually-hidden" for="lager-q">Produkt oder Artikelnummer</label>
+  <input id="lager-q" type="search" name="q" value="<%= q %>" placeholder="Produkt oder Artikelnummer">
+  <button class="btn btn--dark btn--sm" type="submit">Suchen</button>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/lager">Zurücksetzen</a>
+</form></div>
+<div class="card"><div class="card__head"><h2>Bestände (<%= total %>)</h2></div>
+  <div class="card__body card__body--flush">
+  <% if (!rows.length) { %><p style="padding:20px">Keine Varianten gefunden.</p><% } else { %>
+  <table class="tbl"><thead><tr><th>Produkt</th><th>Variante</th><th>Art.-Nr.</th><th class="num">Bestand</th><th></th></tr></thead>
+  <tbody><% rows.forEach(function (v) { %><tr>
+    <td><%= v.product_name %></td><td><%= v.variant_name %></td><td><%= v.sku %></td>
+    <td class="num"><span class="pill <%= v.stock === 0 ? 'pill--err' : v.stock <= 10 ? 'pill--warn' : 'pill--ok' %>"><%= v.stock %></span></td>
+    <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/lager/variante/<%= v.id %>">Buchen / Verlauf</a></td>
+  </tr><% }); %></tbody></table><% } %>
+  <% if (total > rows.length) { %><p style="padding:16px">Es werden die ersten 200 Varianten angezeigt. Suche eingrenzen oder CSV exportieren.</p><% } %>
+  </div></div>
+<div class="card"><div class="card__head"><h2>Letzte Lagerbewegungen</h2></div><div class="card__body card__body--flush">
+  <% if (!movements.length) { %><p style="padding:20px">Noch keine Bewegungen protokolliert. Der vorhandene Anfangsbestand wird nicht als erfundene Buchung dargestellt.</p><% } else { %>
+  <table class="tbl"><thead><tr><th>Zeit</th><th>Artikel</th><th>Grund / Herkunft</th><th>Person</th><th class="num">Änderung</th><th class="num">Danach</th></tr></thead>
+  <tbody><% movements.forEach(function (m) { %><tr>
+    <td><%= formatDate(m.created_at) %></td><td><%= m.sku %></td><td><%= m.reason %> · <%= m.source %></td>
+    <td><%= m.actor %></td><td class="num"><%= m.delta > 0 ? '+' : '' %><%= m.delta %></td><td class="num"><%= m.stock_after %></td>
+  </tr><% }); %></tbody></table><% } %>
+</div></div>
+<%- include('../partials/admin-foot') %>

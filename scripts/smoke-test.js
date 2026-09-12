@@ -10,6 +10,7 @@ process.env.PORT = process.env.PORT || '3999';
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || require('crypto').randomBytes(32).toString('hex');
 
 const db = require('../src/db');
+const orders = require('../src/lib/orders');
 const app = require('../server');
 
 const BASE = 'http://127.0.0.1:' + process.env.PORT;
@@ -132,10 +133,23 @@ function csrfFrom(html) {
   check('Bestellung gespeichert', order && order.email === mail, order ? order.number : 'keine');
   const itemCount = db.get('SELECT COUNT(*) AS c FROM order_items WHERE order_id = ?', [order.id]).c;
   check('Bestellpositionen gespeichert', itemCount > 0, itemCount + ' Position(en)');
+  const outbound = db.get("SELECT delta, stock_before, stock_after FROM stock_movements WHERE source = 'shop.bestellung' AND reference = ?", [String(order.id)]);
+  check('Lagerbewegung für Bestellung', outbound && outbound.delta === -2 && outbound.stock_after === stockBefore - 2);
+  db.run("UPDATE orders SET payment_status = 'bezahlt' WHERE id = ?", [order.id]);
+  check('Bezahlte Bestellung nicht blind stornierbar', !orders.cancel(order.id, 'smoke-test', '127.0.0.1').ok &&
+    db.get('SELECT stock FROM variants WHERE id = ?', [variant.id]).stock === stockAfter);
+  db.run("UPDATE orders SET payment_status = 'offen', shipping_status = 'versandt' WHERE id = ?", [order.id]);
+  check('Versandte Bestellung nicht blind rückbuchbar', !orders.cancel(order.id, 'smoke-test', '127.0.0.1').ok &&
+    db.get('SELECT stock FROM variants WHERE id = ?', [variant.id]).stock === stockAfter);
+  db.run("UPDATE orders SET shipping_status = 'nicht versandt' WHERE id = ?", [order.id]);
+  const canceled = orders.cancel(order.id, 'smoke-test', '127.0.0.1');
+  check('Storno bucht Bestand zurück', canceled.ok && db.get('SELECT stock FROM variants WHERE id = ?', [variant.id]).stock === stockBefore);
+  const inbound = db.get("SELECT delta, stock_before, stock_after FROM stock_movements WHERE source = 'shop.storno' AND reference = ?", [String(order.id)]);
+  check('Lagerbewegung für Storno', inbound && inbound.delta === 2 && inbound.stock_after === stockBefore);
 
   console.log('\nAufräumen');
   db.transaction(() => {
-    db.run('UPDATE variants SET stock = ? WHERE id = ?', [stockBefore, variant.id]);
+    db.run("DELETE FROM stock_movements WHERE reference = ? AND source IN ('shop.bestellung','shop.storno')", [String(order.id)]);
     db.run('DELETE FROM order_items WHERE order_id = ?', [order.id]);
     db.run('DELETE FROM orders WHERE id = ?', [order.id]);
   });

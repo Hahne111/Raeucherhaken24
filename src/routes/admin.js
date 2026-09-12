@@ -11,6 +11,7 @@ const access = require('../lib/admin-access');
 const auth = require('../lib/auth');
 const catalog = require('../lib/catalog');
 const orders = require('../lib/orders');
+const stock = require('../lib/stock');
 const settings = require('../lib/settings');
 const audit = require('../lib/audit');
 const util = require('../lib/util');
@@ -131,6 +132,7 @@ router.use(requireAdmin);
 for (const [prefix, permission] of [
   ['/uebersicht', 'uebersicht'],
   ['/produkte', 'produkte'],
+  ['/lager', 'lager.lesen'],
   ['/kategorien', 'kategorien'],
   ['/medien', 'medien'],
   ['/bestellungen', 'bestellungen.lesen'],
@@ -140,6 +142,62 @@ for (const [prefix, permission] of [
   ['/einstellungen', 'einstellungen'],
   ['/protokoll', 'protokoll']
 ]) router.use(prefix, access.requirePermission(permission));
+
+/* ------------------------------ Lager --------------------------------- */
+router.get('/lager', (req, res) => {
+  const q = String(req.query.q || '').trim().slice(0, 80);
+  const params = q ? [`%${q}%`, `%${q}%`] : [];
+  const where = q ? ' WHERE p.name LIKE ? OR v.sku LIKE ?' : '';
+  res.render('admin/inventory', {
+    title: 'Lager', q,
+    rows: db.all(`SELECT v.id, v.name AS variant_name, v.sku, v.stock, p.name AS product_name
+       FROM variants v JOIN products p ON p.id = v.product_id${where}
+       ORDER BY p.name, v.sort, v.id LIMIT 200`, params),
+    total: db.get(`SELECT COUNT(*) AS c FROM variants v JOIN products p ON p.id = v.product_id${where}`, params).c,
+    movements: db.all('SELECT * FROM stock_movements ORDER BY id DESC LIMIT 30')
+  });
+});
+
+router.get('/lager/export.csv', (req, res) => {
+  const q = String(req.query.q || '').trim().slice(0, 80);
+  const params = q ? [`%${q}%`, `%${q}%`] : [];
+  const where = q ? ' WHERE p.name LIKE ? OR v.sku LIKE ?' : '';
+  const rows = db.all(`SELECT p.name AS product, v.name AS variant, v.sku, v.stock
+    FROM variants v JOIN products p ON p.id = v.product_id${where}
+    ORDER BY p.name, v.sort, v.id`, params);
+  const cell = (value) => `"${String(value == null ? '' : value).replace(/^[\s]*[=+@-]/, "'$&").replace(/"/g, '""')}"`;
+  res.type('text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="lagerbestand.csv"');
+  res.send('\uFEFFProdukt;Variante;Artikelnummer;Bestand\r\n' +
+    rows.map((row) => [row.product, row.variant, row.sku, row.stock].map(cell).join(';')).join('\r\n') + '\r\n');
+});
+
+router.get('/lager/variante/:id', (req, res, next) => {
+  const row = db.get(`SELECT v.*, p.name AS product_name, p.slug AS product_slug
+    FROM variants v JOIN products p ON p.id = v.product_id WHERE v.id = ?`,
+  [util.toInt(req.params.id, 0)]);
+  if (!row) return next();
+  res.render('admin/inventory-variant', {
+    title: 'Lager · ' + row.product_name, row,
+    movements: db.all('SELECT * FROM stock_movements WHERE variant_id = ? ORDER BY id DESC LIMIT 100', [row.id])
+  });
+});
+
+router.post('/lager/variante/:id/buchen', access.requirePermission('lager.buchen'), (req, res, next) => {
+  const id = util.toInt(req.params.id, 0);
+  if (!db.get('SELECT id FROM variants WHERE id = ?', [id])) return next();
+  const raw = String(req.body.delta || '').trim();
+  const reason = String(req.body.reason || '').trim().slice(0, 250);
+  if (!/^[+-]?\d+$/.test(raw) || !Number.isSafeInteger(Number(raw)) || Number(raw) === 0 || reason.length < 3) {
+    req.flash('error', 'Bitte eine gültige Menge und einen Grund mit mindestens drei Zeichen angeben.');
+    return res.redirect('/verwaltung/lager/variante/' + id);
+  }
+  const result = db.transaction(() => stock.book(id, Number(raw), {
+    source: 'verwaltung.lager', reason, actor: req.admin.email
+  }));
+  req.flash(result.ok ? 'success' : 'error', result.ok ? 'Bestand gebucht und protokolliert.' : result.message);
+  res.redirect('/verwaltung/lager/variante/' + id);
+});
 
 /* ------------------------------ Übersicht ------------------------------ */
 router.get('/uebersicht', (req, res) => {
@@ -257,17 +315,24 @@ router.post('/produkte/neu', (req, res) => {
       errors, categories: catalog.categories({ activeOnly: false }), media: []
     });
   }
-  const result = db.run(
+  const id = db.transaction(() => {
+    const result = db.run(
     `INSERT INTO products (slug, name, category_id, subtitle, description, details, price_cents, compare_cents,
       sku, brand, material, weight_g, tax_rate, active, featured, home_sort, sort)
      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [values.slug, values.name, values.category_id, values.subtitle, values.description, values.details,
       values.price_cents, values.compare_cents, values.sku, values.brand, values.material, values.weight_g,
       values.tax_rate, values.active, values.featured, values.home_sort, values.sort]
-  );
-  const id = Number(result.lastInsertRowid);
-  db.run('INSERT INTO variants (product_id, name, sku, price_cents, stock, sort, active) VALUES (?,?,?,?,?,0,1)',
-    [id, 'Standard', values.sku, values.price_cents, util.toInt(req.body.start_stock, 0)]);
+    );
+    const productId = Number(result.lastInsertRowid);
+    const variant = db.run('INSERT INTO variants (product_id, name, sku, price_cents, stock, sort, active) VALUES (?,?,?,?,0,0,1)',
+      [productId, 'Standard', values.sku, values.price_cents]);
+    const startStock = Math.max(0, util.toInt(req.body.start_stock, 0));
+    if (startStock > 0) stock.book(Number(variant.lastInsertRowid), startStock, {
+      source: 'verwaltung.produktanlage', reference: String(productId), reason: 'Anfangsbestand bei Produktanlage', actor: req.admin.email
+    });
+    return productId;
+  });
   audit.log(req.admin.email, 'produkt.angelegt', 'product', String(id), values.name, req.ip);
   req.flash('success', `Produkt „${values.name}“ wurde angelegt.`);
   res.redirect('/verwaltung/produkte/' + id);
@@ -353,7 +418,14 @@ router.post('/produkte/:id/loeschen', (req, res, next) => {
     req.flash('warn', 'Das Produkt kommt in Bestellungen vor und wurde deshalb nur deaktiviert.');
     return res.redirect('/verwaltung/produkte/' + id);
   }
-  db.run('DELETE FROM products WHERE id = ?', [id]);
+  db.transaction(() => {
+    for (const variant of db.all('SELECT id, stock FROM variants WHERE product_id = ?', [id])) {
+      if (variant.stock > 0) stock.book(variant.id, -variant.stock, {
+        source: 'verwaltung.loeschung', reference: String(id), reason: 'Produkt entfernt', actor: req.admin.email
+      });
+    }
+    db.run('DELETE FROM products WHERE id = ?', [id]);
+  });
   audit.log(req.admin.email, 'produkt.geloescht', 'product', String(id), product.name, req.ip);
   req.flash('success', `Produkt „${product.name}“ wurde gelöscht.`);
   res.redirect('/verwaltung/produkte');
@@ -369,29 +441,69 @@ router.post('/produkte/:id/varianten', (req, res, next) => {
   const prices = [].concat(req.body.variant_price || []);
   const stocks = [].concat(req.body.variant_stock || []);
   const actives = [].concat(req.body.variant_active || []);
-
-  ids.forEach((rawId, i) => {
-    const variantId = util.toInt(rawId, 0);
-    const name = String(names[i] || '').trim().slice(0, 80);
-    if (!name) return;
-    const active = String(actives[i]) === '1' ? 1 : 0;
-    const price = util.parsePrice(prices[i]);
-    const stock = Math.max(0, util.toInt(stocks[i], 0));
-    const sku = String(skus[i] || '').trim().slice(0, 40);
-    if (variantId) {
-      db.run('UPDATE variants SET name=?, sku=?, price_cents=?, stock=?, active=?, sort=? WHERE id = ? AND product_id = ?',
-        [name, sku, price, stock, active, i, variantId, id]);
-    } else {
-      db.run('INSERT INTO variants (product_id, name, sku, price_cents, stock, sort, active) VALUES (?,?,?,?,?,?,?)',
-        [id, name, sku, price, stock, i, active]);
-    }
-  });
-
+  const reason = String(req.body.stock_reason || '').trim().slice(0, 250);
+  const current = new Map(db.all('SELECT id, stock FROM variants WHERE product_id = ?', [id]).map((v) => [v.id, v]));
   const newName = String(req.body.new_variant_name || '').trim();
-  if (newName) {
-    db.run('INSERT INTO variants (product_id, name, sku, price_cents, stock, sort, active) VALUES (?,?,?,?,?,?,1)',
-      [id, newName.slice(0, 80), String(req.body.new_variant_sku || '').slice(0, 40),
-        util.parsePrice(req.body.new_variant_price), Math.max(0, util.toInt(req.body.new_variant_stock, 0)), 999]);
+  const newStock = Math.max(0, util.toInt(req.body.new_variant_stock, 0));
+  const submittedIds = ids.map((raw) => util.toInt(raw, 0)).filter(Boolean);
+  if (new Set(submittedIds).size !== submittedIds.length || submittedIds.some((variantId) => !current.has(variantId)) ||
+      stocks.some((value) => !/^\d+$/.test(String(value))) ||
+      ids.some((_, i) => String(actives[i]) === '1' && util.parsePrice(prices[i]) <= 0) ||
+      (newName && util.parsePrice(req.body.new_variant_price) <= 0)) {
+    req.flash('error', 'Ungültige Variante, Menge oder Preis. Bitte Eingaben prüfen.');
+    return res.redirect('/verwaltung/produkte/' + id);
+  }
+  const changesStock = ids.some((rawId, i) => {
+    const old = current.get(util.toInt(rawId, 0));
+    return old && old.stock !== Math.max(0, util.toInt(stocks[i], 0));
+  }) || (newName && newStock > 0);
+  if (changesStock && !reason) {
+    req.flash('error', 'Bitte einen Grund für die Bestandsänderung angeben.');
+    return res.redirect('/verwaltung/produkte/' + id);
+  }
+
+  try {
+    db.transaction(() => {
+      function stockBook(variantId, delta) {
+        const result = stock.book(variantId, delta, {
+          source: 'verwaltung.variante', reference: String(id), reason, actor: req.admin.email
+        });
+        if (!result.ok) throw new Error(result.message);
+      }
+      ids.forEach((rawId, i) => {
+        const variantId = util.toInt(rawId, 0);
+        const name = String(names[i] || '').trim().slice(0, 80);
+        if (!name) return;
+        const active = String(actives[i]) === '1' ? 1 : 0;
+        const price = util.parsePrice(prices[i]);
+        const amount = Math.max(0, util.toInt(stocks[i], 0));
+        const sku = String(skus[i] || '').trim().slice(0, 40);
+        if (variantId) {
+          db.run('UPDATE variants SET name=?, sku=?, price_cents=?, active=?, sort=? WHERE id = ? AND product_id = ?',
+            [name, sku, price, active, i, variantId, id]);
+          const old = current.get(variantId);
+          if (old && old.stock !== amount) stockBook(variantId, amount - old.stock);
+        } else {
+          const result = db.run('INSERT INTO variants (product_id, name, sku, price_cents, stock, sort, active) VALUES (?,?,?,?,0,?,?)',
+            [id, name, sku, price, i, active]);
+          if (amount > 0) stockBook(Number(result.lastInsertRowid), amount);
+        }
+      });
+
+      if (newName) {
+        const result = db.run('INSERT INTO variants (product_id, name, sku, price_cents, stock, sort, active) VALUES (?,?,?,?,0,?,1)',
+          [id, newName.slice(0, 80), String(req.body.new_variant_sku || '').slice(0, 40),
+            util.parsePrice(req.body.new_variant_price), 999]);
+        if (newStock > 0) stockBook(Number(result.lastInsertRowid), newStock);
+      }
+      if (db.get('SELECT active FROM products WHERE id = ?', [id]).active &&
+          !db.get('SELECT id FROM variants WHERE product_id = ? AND active = 1 AND price_cents > 0 LIMIT 1', [id])) {
+        throw new Error('Ein sichtbares Produkt braucht mindestens eine aktive bepreiste Variante.');
+      }
+    });
+  } catch (error) {
+    req.flash('error', error.message);
+    return res.redirect('/verwaltung/produkte/' + id);
   }
   audit.log(req.admin.email, 'varianten.geaendert', 'product', String(id), '', req.ip);
   req.flash('success', 'Varianten und Bestand aktualisiert.');
@@ -401,12 +513,25 @@ router.post('/produkte/:id/varianten', (req, res, next) => {
 router.post('/produkte/:id/varianten/:variantId/loeschen', (req, res) => {
   const id = util.toInt(req.params.id, 0);
   const variantId = util.toInt(req.params.variantId, 0);
+  const product = db.get('SELECT active FROM products WHERE id = ?', [id]);
+  const variantToDelete = db.get('SELECT active FROM variants WHERE id = ? AND product_id = ?', [variantId, id]);
+  if (product && product.active && variantToDelete && variantToDelete.active &&
+      db.get('SELECT COUNT(*) AS c FROM variants WHERE product_id = ? AND active = 1 AND price_cents > 0', [id]).c <= 1) {
+    req.flash('error', 'Das Produkt zuerst deaktivieren oder eine andere bepreiste Variante aktivieren.');
+    return res.redirect('/verwaltung/produkte/' + id);
+  }
   const used = db.get('SELECT COUNT(*) AS c FROM order_items WHERE variant_id = ?', [variantId]).c;
   if (used > 0) {
     db.run('UPDATE variants SET active = 0 WHERE id = ? AND product_id = ?', [variantId, id]);
     req.flash('warn', 'Die Variante kommt in Bestellungen vor und wurde nur deaktiviert.');
   } else {
-    db.run('DELETE FROM variants WHERE id = ? AND product_id = ?', [variantId, id]);
+    db.transaction(() => {
+      const variant = db.get('SELECT stock FROM variants WHERE id = ? AND product_id = ?', [variantId, id]);
+      if (variant && variant.stock > 0) stock.book(variantId, -variant.stock, {
+        source: 'verwaltung.loeschung', reference: String(id), reason: 'Variante entfernt', actor: req.admin.email
+      });
+      db.run('DELETE FROM variants WHERE id = ? AND product_id = ?', [variantId, id]);
+    });
     req.flash('success', 'Variante gelöscht.');
   }
   audit.log(req.admin.email, 'variante.entfernt', 'product', String(id), String(variantId), req.ip);
@@ -596,6 +721,14 @@ router.post('/bestellungen/:id', access.requirePermission('bestellungen.bearbeit
   const order = orders.byId(id);
   if (!order) return next();
   const status = orders.STATUS.includes(req.body.status) ? req.body.status : order.status;
+  if (status === 'storniert' && order.status !== 'storniert') {
+    req.flash('error', 'Für eine Stornierung bitte die gesonderte Aktion mit Bestandsrückbuchung verwenden.');
+    return res.redirect('/verwaltung/bestellungen/' + id);
+  }
+  if (order.status === 'storniert' && status !== 'storniert') {
+    req.flash('error', 'Eine stornierte Bestellung kann hier nicht reaktiviert werden.');
+    return res.redirect('/verwaltung/bestellungen/' + id);
+  }
   const paymentStatus = orders.PAYMENT_STATUS.includes(req.body.payment_status) ? req.body.payment_status : order.payment_status;
   const shippingStatus = orders.SHIPPING_STATUS.includes(req.body.shipping_status) ? req.body.shipping_status : order.shipping_status;
   const tracking = String(req.body.tracking_code || '').trim().slice(0, 60);

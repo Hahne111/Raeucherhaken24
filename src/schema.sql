@@ -71,6 +71,22 @@ CREATE TABLE IF NOT EXISTS variants (
 );
 CREATE INDEX IF NOT EXISTS idx_variants_product ON variants(product_id);
 
+CREATE TABLE IF NOT EXISTS stock_movements (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  variant_id  INTEGER REFERENCES variants(id) ON DELETE SET NULL,
+  product_id  INTEGER REFERENCES products(id) ON DELETE SET NULL,
+  sku         TEXT NOT NULL DEFAULT '',
+  delta       INTEGER NOT NULL CHECK (delta != 0),
+  stock_before INTEGER NOT NULL CHECK (stock_before >= 0),
+  stock_after  INTEGER NOT NULL CHECK (stock_after >= 0),
+  source      TEXT NOT NULL,
+  reference   TEXT NOT NULL DEFAULT '',
+  reason      TEXT NOT NULL,
+  actor       TEXT NOT NULL,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_stock_movements_variant ON stock_movements(variant_id, id DESC);
+
 CREATE TABLE IF NOT EXISTS product_facets (
   product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   key        TEXT NOT NULL,

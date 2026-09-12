@@ -1,0 +1,22 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/lager">Zur Lagerübersicht</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols"><div class="card"><div class="card__head"><h2>Buchungsverlauf</h2></div><div class="card__body card__body--flush">
+  <% if (!movements.length) { %><p style="padding:20px">Für diese Variante wurden noch keine neuen Bewegungen protokolliert.</p><% } else { %>
+  <table class="tbl"><thead><tr><th>Zeit</th><th>Grund</th><th>Person</th><th class="num">Vorher</th><th class="num">Änderung</th><th class="num">Danach</th></tr></thead>
+  <tbody><% movements.forEach(function (m) { %><tr>
+    <td><%= formatDate(m.created_at) %></td><td><%= m.reason %> · <%= m.source %><% if (m.reference) { %> · <%= m.reference %><% } %></td>
+    <td><%= m.actor %></td><td class="num"><%= m.stock_before %></td>
+    <td class="num"><%= m.delta > 0 ? '+' : '' %><%= m.delta %></td><td class="num"><%= m.stock_after %></td>
+  </tr><% }); %></tbody></table><% } %>
+</div></div><div class="card"><div class="card__head"><h2><%= row.product_name %> · <%= row.name %></h2></div><div class="card__body">
+  <p>Artikelnummer: <strong><%= row.sku || '–' %></strong><br>Aktueller Bestand: <strong><%= row.stock %></strong></p>
+  <form method="post" action="/verwaltung/lager/variante/<%= row.id %>/buchen">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <label class="field"><span>Bestandsänderung (+ oder −)</span><input type="number" name="delta" required step="1" placeholder="z. B. +12 oder -2"></label>
+    <label class="field"><span>Grund</span><input type="text" name="reason" required minlength="3" maxlength="250" placeholder="z. B. Wareneingang oder Inventurkorrektur"></label>
+    <button class="btn btn--primary" type="submit">Bestand buchen</button>
+  </form>
+  <% if (adminCan('produkte')) { %><p><a class="link" href="/verwaltung/produkte/<%= row.product_id %>">Produkt bearbeiten</a></p><% } %>
+</div></div></div>
+<%- include('../partials/admin-foot') %>

@@ -18,7 +18,7 @@ const GRANTS = {
   finanzen: ['uebersicht'],
   vertrieb: [],
   produktion: [],
-  lager: [],
+  lager: ['lager.lesen', 'lager.buchen'],
   kasse: []
 };
 
@@ -31,6 +31,7 @@ function startPath(user) {
   if (can(user, 'uebersicht')) return '/verwaltung/uebersicht';
   if (can(user, 'produkte')) return '/verwaltung/produkte';
   if (can(user, 'bestellungen.lesen')) return '/verwaltung/bestellungen';
+  if (can(user, 'lager.lesen')) return '/verwaltung/lager';
   return '/verwaltung/team';
 }
 

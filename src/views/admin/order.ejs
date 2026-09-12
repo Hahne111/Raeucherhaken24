@@ -78,7 +78,7 @@
           <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
           <label class="field"><span>Bestellstatus</span>
             <select name="status">
-              <% statuses.forEach(function (s) { %><option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option><% }); %>
+              <% statuses.filter(function (s) { return s !== 'storniert' || order.status === 'storniert'; }).forEach(function (s) { %><option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option><% }); %>
             </select>
           </label>
           <label class="field"><span>Zahlungsstatus</span>
@@ -119,12 +119,14 @@
         <p style="color:var(--a-soft);font-size:13px;margin:0 0 12px">
           Beim Stornieren wird der Bestand aller Positionen automatisch zurückgebucht und eine Gutscheinnutzung zurückgesetzt.
         </p>
+        <% if (order.status === 'storniert' || ['bezahlt', 'erstattet'].includes(order.payment_status) || ['versandt', 'zugestellt', 'retoure'].includes(order.shipping_status)) { %>
+          <p style="color:var(--a-soft);font-size:13px">Eine bereits stornierte, bezahlte oder versandte Bestellung wird hier nicht automatisch zurückgebucht. Dafür ist eine gesonderte Erstattungs- bzw. Retourenprüfung nötig.</p>
+        <% } else { %>
         <form method="post" action="/verwaltung/bestellungen/<%= order.id %>/stornieren" data-confirm="Bestellung wirklich stornieren und Bestand zurückbuchen?">
           <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
-          <button class="btn btn--danger btn--block" type="submit" <%= order.status === 'storniert' ? 'disabled' : '' %>>
-            <%= order.status === 'storniert' ? 'Bereits storniert' : 'Bestellung stornieren' %>
-          </button>
+          <button class="btn btn--danger btn--block" type="submit">Bestellung stornieren</button>
         </form>
+        <% } %>
       </div>
     </div>
     <% } %>

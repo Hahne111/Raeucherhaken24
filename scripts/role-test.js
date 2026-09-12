@@ -75,6 +75,11 @@ function csrf(html) {
   assert.equal((await admin.get('/verwaltung/produkte')).status, 200);
   assert.equal((await admin.get('/verwaltung/kunden')).status, 200);
   assert.equal((await admin.get('/verwaltung/protokoll')).status, 200);
+  const orderPage = await admin.get(`/verwaltung/bestellungen/${orderId}`);
+  assert.equal((await admin.post(`/verwaltung/bestellungen/${orderId}`, {
+    _csrf: csrf(orderPage.body), status: 'storniert'
+  })).status, 302);
+  assert.equal(db.get('SELECT status FROM orders WHERE id = ?', [orderId]).status, 'offen', 'kein Storno ohne Bestandsweg');
 
   const service = clients.kundenservice;
   assert.equal((await service.get('/verwaltung/bestellungen')).status, 200);
@@ -106,6 +111,27 @@ function csrf(html) {
   assert.equal(dashboard.status, 200);
   assert.equal(dashboard.body.includes('admin@example.test'), false, 'kein Audit fremder Konten');
   assert.equal((await finance.get('/verwaltung/bestellungen')).status, 403);
+  const warehouse = clients.lager;
+  assert.equal((await warehouse.get('/verwaltung/lager')).status, 200);
+  const warehouseCsv = await warehouse.get('/verwaltung/lager/export.csv');
+  assert.equal(warehouseCsv.status, 200);
+  assert.ok(warehouseCsv.body.includes('Produkt;Variante;Artikelnummer;Bestand'));
+  const stocked = db.get("SELECT id, stock FROM variants WHERE sku = 'RH-1001-10'");
+  const stockPage = await warehouse.get('/verwaltung/lager/variante/' + stocked.id);
+  assert.equal(stockPage.status, 200);
+  const stockToken = csrf(stockPage.body);
+  assert.equal((await warehouse.post(`/verwaltung/lager/variante/${stocked.id}/buchen`, {
+    _csrf: stockToken, delta: '3', reason: 'Geprüfter Wareneingang'
+  })).status, 302);
+  assert.equal(db.get('SELECT stock FROM variants WHERE id = ?', [stocked.id]).stock, stocked.stock + 3);
+  assert.equal(db.get('SELECT delta FROM stock_movements WHERE variant_id = ? ORDER BY id DESC LIMIT 1', [stocked.id]).delta, 3);
+  assert.equal((await warehouse.post(`/verwaltung/lager/variante/${stocked.id}/buchen`, {
+    _csrf: stockToken, delta: '-999', reason: 'Unzulässige Korrektur'
+  })).status, 302);
+  assert.equal(db.get('SELECT stock FROM variants WHERE id = ?', [stocked.id]).stock, stocked.stock + 3);
+  assert.equal((await service.post(`/verwaltung/lager/variante/${stocked.id}/buchen`, {
+    _csrf: csrf(servicePage.body), delta: '1', reason: 'Fremder Zugriff'
+  })).status, 403);
   for (const role of ['vertrieb', 'produktion', 'lager', 'kasse']) {
     assert.equal((await clients[role].get('/verwaltung/produkte')).status, 403, role + ' ohne Katalogrecht');
     assert.equal((await clients[role].get('/verwaltung/uebersicht')).status, 403, role + ' ohne Finanzdaten');
@@ -137,6 +163,18 @@ function csrf(html) {
   assert.equal((await admin.post('/verwaltung/produkte/' + draft.id, fields)).status, 302);
   variant = db.get('SELECT price_cents FROM variants WHERE product_id = ?', [draft.id]);
   assert.equal(variant.price_cents, 640, 'Grundpreis und alleinige Standardvariante bleiben gleich');
+  const draftVariant = db.get('SELECT id, name, sku FROM variants WHERE product_id = ?', [draft.id]);
+  const variantFields = {
+    _csrf: fields._csrf, variant_id: String(draftVariant.id), variant_name: draftVariant.name,
+    variant_sku: draftVariant.sku, variant_price: '6,40', variant_stock: '5', variant_active: '1'
+  };
+  assert.equal((await admin.post(`/verwaltung/produkte/${draft.id}/varianten`, variantFields)).status, 302);
+  assert.equal(db.get('SELECT stock FROM variants WHERE id = ?', [draftVariant.id]).stock, 0, 'ohne Buchungsgrund keine Änderung');
+  assert.equal((await admin.post(`/verwaltung/produkte/${draft.id}/varianten`, {
+    ...variantFields, stock_reason: 'Lieferung geprüft'
+  })).status, 302);
+  assert.equal(db.get('SELECT stock FROM variants WHERE id = ?', [draftVariant.id]).stock, 5);
+  assert.equal(db.get('SELECT delta FROM stock_movements WHERE variant_id = ? ORDER BY id DESC LIMIT 1', [draftVariant.id]).delta, 5);
 
   const incomplete = db.get("SELECT * FROM products WHERE sku = 'NG-13002'");
   db.run('DELETE FROM variants WHERE product_id = ?', [incomplete.id]);
@@ -146,6 +184,22 @@ function csrf(html) {
   });
   assert.equal(invalid.status, 400);
   assert.equal(db.get('SELECT active FROM products WHERE id = ?', [incomplete.id]).active, 0);
-  console.log('Rollen und Produktfreigabe: acht Logins, Berechtigungen und Entwurf → Shop geprüft.');
+  const createForm = await admin.get('/verwaltung/produkte/neu');
+  const created = await admin.post('/verwaltung/produkte/neu', {
+    _csrf: csrf(createForm.body), name: 'Testartikel Lagerjournal', slug: 'testartikel-lagerjournal',
+    category_id: String(draft.category_id), price: '10,00', sku: 'TEST-LAGER', start_stock: '3'
+  });
+  assert.equal(created.status, 302);
+  const createdId = Number(created.location.split('/').pop());
+  assert.equal(db.get('SELECT delta FROM stock_movements WHERE sku = ? ORDER BY id LIMIT 1', ['TEST-LAGER']).delta, 3);
+  const createdForm = await admin.get(`/verwaltung/produkte/${createdId}`);
+  assert.equal((await admin.post(`/verwaltung/produkte/${createdId}/loeschen`, {
+    _csrf: csrf(createdForm.body)
+  })).status, 302);
+  assert.equal(db.get('SELECT id FROM products WHERE id = ?', [createdId]), undefined);
+  const removed = db.all('SELECT delta FROM stock_movements WHERE sku = ? ORDER BY id', ['TEST-LAGER']);
+  assert.equal(removed.length, 2);
+  assert.equal(removed[1].delta, -3);
+  console.log('Rollen, Produktfreigabe und Lagerbuchung: Zugriffe, Entwurf → Shop, Journal und Sperren geprüft.');
   process.exit(0);
 })().catch((error) => { console.error(error); process.exit(1); });

@@ -3,6 +3,7 @@ const db = require('../db');
 const cartLib = require('./cart');
 const util = require('./util');
 const audit = require('./audit');
+const stock = require('./stock');
 
 const STATUS = ['offen', 'in Bearbeitung', 'abgeschlossen', 'storniert'];
 const PAYMENT_STATUS = ['offen', 'bezahlt', 'erstattet', 'fehlgeschlagen'];
@@ -18,12 +19,15 @@ function placeOrder({ cart, lines, totals, email, shippingAddress, billingAddres
   return db.transaction(() => {
     // Bestand erneut pruefen (Stand innerhalb der Transaktion).
     for (const line of lines) {
-      const v = db.get('SELECT v.stock, v.active, v.name, p.name AS product_name, p.active AS product_active FROM variants v JOIN products p ON p.id = v.product_id WHERE v.id = ?', [line.variant_id]);
+      const v = db.get('SELECT v.stock, v.active, v.name, v.price_cents, p.name AS product_name, p.active AS product_active FROM variants v JOIN products p ON p.id = v.product_id WHERE v.id = ?', [line.variant_id]);
       if (!v || v.active !== 1 || v.product_active !== 1) {
         return { ok: false, message: `„${line.product_name}“ ist nicht mehr verfügbar. Bitte Warenkorb prüfen.` };
       }
       if (v.stock < line.qty) {
         return { ok: false, message: `Von „${v.product_name} – ${v.name}“ sind nur noch ${v.stock} Stück verfügbar. Bitte Menge anpassen.` };
+      }
+      if (v.price_cents !== line.price_cents) {
+        return { ok: false, message: `Der Preis von „${v.product_name}“ hat sich geändert. Bitte Warenkorb neu prüfen.` };
       }
     }
 
@@ -60,9 +64,10 @@ function placeOrder({ cart, lines, totals, email, shippingAddress, billingAddres
         [orderId, line.product_id, line.variant_id, line.product_slug, line.product_name, line.variant_name,
           line.variant_sku || line.product_sku, line.image || '', line.price_cents, line.qty, line.line_total]
       );
-      // Bedingtes UPDATE: schlaegt fehl, wenn zwischenzeitlich jemand schneller war.
-      const upd = db.run('UPDATE variants SET stock = stock - ? WHERE id = ? AND stock >= ?', [line.qty, line.variant_id, line.qty]);
-      if (upd.changes !== 1) {
+      const booked = stock.book(line.variant_id, -line.qty, {
+        source: 'shop.bestellung', reference: String(orderId), reason: number, actor: email
+      });
+      if (!booked.ok) {
         throw new Error('OVERSELL:' + line.product_name);
       }
     }
@@ -119,8 +124,17 @@ function cancel(orderId, actor, ip) {
     const order = db.get('SELECT * FROM orders WHERE id = ?', [orderId]);
     if (!order) return { ok: false, message: 'Bestellung nicht gefunden.' };
     if (order.status === 'storniert') return { ok: false, message: 'Bestellung ist bereits storniert.' };
+    if (order.payment_status === 'bezahlt' || order.payment_status === 'erstattet' ||
+        ['versandt', 'zugestellt', 'retoure'].includes(order.shipping_status)) {
+      return { ok: false, message: 'Bezahlte oder bereits versandte Bestellungen brauchen eine geprüfte Erstattungs- bzw. Retourenabwicklung.' };
+    }
     for (const item of db.all('SELECT * FROM order_items WHERE order_id = ?', [orderId])) {
-      if (item.variant_id) db.run('UPDATE variants SET stock = stock + ? WHERE id = ?', [item.qty, item.variant_id]);
+      if (item.variant_id) {
+        const booked = stock.book(item.variant_id, item.qty, {
+          source: 'shop.storno', reference: String(orderId), reason: order.number, actor
+        });
+        if (!booked.ok) throw new Error(booked.message);
+      }
     }
     db.run("UPDATE orders SET status = 'storniert', shipping_status = 'nicht versandt', updated_at = datetime('now') WHERE id = ?", [orderId]);
     if (order.coupon_code) db.run('UPDATE coupons SET used_count = MAX(0, used_count - 1) WHERE UPPER(code) = UPPER(?)', [order.coupon_code]);
