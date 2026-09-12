@@ -94,15 +94,15 @@ Ein Storno in der Verwaltung bucht den Bestand zurück.
 
 ## Startseite und Bewegung
 
-Die Nordsee-Szene ist ein einzelnes, im Seitenkopf eingebettetes SVG
-(`src/views/partials/scene.ejs`). Bewegt werden ausschließlich `transform` und
-`opacity`, damit die Animationen auf der Grafikkarte laufen:
+Die Nordsee-Szene steckt als SVG-Ebenenstapel in `src/views/partials/scene.ejs`.
+Bewegt werden ausschließlich `transform` und `opacity`:
 
 * Leuchtturm: ein Rotor dreht zwei gegenüberliegende Lichtkegel um die Laterne,
   die Sichtbarkeit wird über die Deckkraft moduliert – der Kegel wirkt beim
   Überstreichen von Hafen und Wasser hell und verliert sich beim Wegdrehen.
 * Rauch: sechs Bewegungsmuster in unterschiedlichen Geschwindigkeiten mit
-  organisch geformten, weichgezeichneten Schwaden, die aufsteigen, driften und auslaufen.
+  organisch geformten Schwaden, die aufsteigen, sich verwirbeln, vom Wind
+  getrieben zur Seite ziehen und weich auslaufen.
 * Wasser: mehrere exakt 480 px periodische Wellenbänder mit unterschiedlichem Tempo,
   dazu Schaumkronen, Gischtstöße, Nebelbänder und schaukelnde Boote.
 * Tiefe: `hero.js` verschiebt die Ebenen beim Scrollen unterschiedlich stark.
