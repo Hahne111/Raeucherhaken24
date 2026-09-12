@@ -269,10 +269,11 @@ function productAnalysis(req, res, print = false) {
 router.get('/auswertung/produkte', (req, res) => productAnalysis(req, res));
 router.get('/auswertung/produkte/druck', (req, res) => productAnalysis(req, res, true));
 
-router.get('/produkte', (req, res) => {
-  const q = String(req.query.q || '').trim();
+function productList(req, res, subset = '') {
+  const q = String(req.query.q || '').trim().slice(0, 80);
   const categoryId = util.toInt(req.query.kategorie, 0);
   const status = String(req.query.status || '');
+  const sort = ['neu', 'name', 'preis', 'bestand'].includes(req.query.sort) ? req.query.sort : 'neu';
   const page = Math.max(1, util.toInt(req.query.seite, 1));
   const perPage = 20;
 
@@ -280,28 +281,34 @@ router.get('/produkte', (req, res) => {
   const params = [];
   if (q) { where.push('(p.name LIKE ? OR p.sku LIKE ? OR p.slug LIKE ?)'); params.push(`%${q}%`, `%${q}%`, `%${q}%`); }
   if (categoryId) { where.push('p.category_id = ?'); params.push(categoryId); }
-  if (status === 'aktiv') where.push('p.active = 1');
-  if (status === 'inaktiv') where.push('p.active = 0');
-  if (status === 'ausverkauft') where.push('(SELECT COALESCE(SUM(stock),0) FROM variants WHERE product_id = p.id) = 0');
+  if (subset === 'online' || subset === 'neuheiten' || subset === 'angebote' || subset === 'niedrig' || (!subset && status === 'aktiv')) where.push('p.active = 1');
+  if (subset === 'entwuerfe' || (!subset && status === 'inaktiv')) where.push('p.active = 0');
+  if (subset === 'neuheiten') where.push("p.created_at >= datetime('now','-30 days')");
+  if (subset === 'angebote') where.push('p.compare_cents > p.price_cents AND p.price_cents > 0');
+  if (subset === 'niedrig') where.push('(SELECT COALESCE(SUM(stock),0) FROM variants WHERE product_id = p.id AND active = 1) <= 10');
+  if (!subset && status === 'ausverkauft') where.push('(SELECT COALESCE(SUM(stock),0) FROM variants WHERE product_id = p.id AND active = 1) = 0');
   const sql = where.length ? ' WHERE ' + where.join(' AND ') : '';
   const total = db.get('SELECT COUNT(*) AS c FROM products p' + sql, params).c;
+  const ordering = { neu: 'p.created_at DESC, p.id DESC', name: 'p.name COLLATE NOCASE, p.id',
+    preis: 'p.price_cents, p.name', bestand: 'stock_total, p.name' }[sort];
   const rows = db.all(
     `SELECT p.*, c.name AS category_name,
        (SELECT url FROM product_images WHERE product_id = p.id ORDER BY sort, id LIMIT 1) AS image,
-       (SELECT COALESCE(SUM(stock),0) FROM variants WHERE product_id = p.id) AS stock_total,
+       (SELECT COALESCE(SUM(stock),0) FROM variants WHERE product_id = p.id AND active = 1) AS stock_total,
        (SELECT COUNT(*) FROM variants WHERE product_id = p.id) AS variant_count,
        (SELECT MIN(price_cents) FROM variants WHERE product_id = p.id) AS min_price
      FROM products p LEFT JOIN categories c ON c.id = p.category_id${sql}
-     ORDER BY p.id DESC LIMIT ? OFFSET ?`,
+     ORDER BY ${ordering} LIMIT ? OFFSET ?`,
     params.concat([perPage, (page - 1) * perPage])
   );
   res.render('admin/products', {
-    title: 'Produkte', rows, total, page,
+    title: { online: 'Online-Artikel', entwuerfe: 'Entwürfe', neuheiten: 'Neuheiten (30 Tage)',
+      angebote: 'Angebote', niedrig: 'Niedrige Bestände' }[subset] || 'Produkte', rows, total, page, subset, sort,
     pages: Math.max(1, Math.ceil(total / perPage)),
     q, categoryId, status,
     categories: catalog.categories({ activeOnly: false })
   });
-});
+}
 
 router.get('/produkte/naturgewuerze', (req, res) => {
   const q = String(req.query.q || '').trim().slice(0, 80);
@@ -327,6 +334,11 @@ router.get('/produkte/naturgewuerze', (req, res) => {
     title: 'Naturgewürze', rows, total, page, pages: Math.max(1, Math.ceil(total / 25)), q, status, sort
   });
 });
+
+router.get('/produkte', (req, res) => productList(req, res));
+for (const subset of ['online', 'entwuerfe', 'neuheiten', 'angebote', 'niedrig']) {
+  router.get('/produkte/' + subset, (req, res) => productList(req, res, subset));
+}
 
 function productForm(res, { product, images, variants, facets, errors = {}, title }) {
   res.render('admin/product-form', {

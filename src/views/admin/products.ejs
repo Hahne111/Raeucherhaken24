@@ -1,9 +1,15 @@
 <%- include('../partials/admin-head') %>
 <% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/produkte/neu">Neues Produkt</a>'; %>
 <%- include('../partials/admin-shell', { headActions: headActions }) %>
+<% var basePath = '/verwaltung/produkte' + (subset ? '/' + subset : ''); %>
+<div class="toolbar">
+  <% [['', 'Alle'], ['online', 'Online-Artikel'], ['entwuerfe', 'Entwürfe'], ['neuheiten', 'Neuheiten'], ['angebote', 'Angebote'], ['niedrig', 'Niedriger Bestand']].forEach(function (item) { %>
+    <a class="btn <%= subset === item[0] ? 'btn--dark' : 'btn--ghost' %> btn--sm" href="/verwaltung/produkte<%= item[0] ? '/' + item[0] : '' %>"><%= item[1] %></a>
+  <% }); %>
+</div>
 
 <div class="toolbar">
-  <form method="get" action="/verwaltung/produkte">
+  <form method="get" action="<%= basePath %>">
     <label class="visually-hidden" for="q">Suche</label>
     <input id="q" type="search" name="q" value="<%= q %>" placeholder="Name, Artikelnummer oder URL">
     <label class="visually-hidden" for="kategorie">Kategorie</label>
@@ -13,20 +19,27 @@
         <option value="<%= c.id %>" <%= categoryId === c.id ? 'selected' : '' %>><%= c.name %></option>
       <% }); %>
     </select>
-    <label class="visually-hidden" for="status">Status</label>
+    <% if (!subset) { %><label class="visually-hidden" for="status">Status</label>
     <select id="status" name="status">
       <option value="">Alle</option>
       <option value="aktiv" <%= status === 'aktiv' ? 'selected' : '' %>>Nur aktive</option>
       <option value="inaktiv" <%= status === 'inaktiv' ? 'selected' : '' %>>Nur inaktive</option>
       <option value="ausverkauft" <%= status === 'ausverkauft' ? 'selected' : '' %>>Ausverkauft</option>
+    </select><% } %>
+    <label class="visually-hidden" for="sort">Sortierung</label>
+    <select id="sort" name="sort">
+      <option value="neu" <%= sort === 'neu' ? 'selected' : '' %>>Neueste</option>
+      <option value="name" <%= sort === 'name' ? 'selected' : '' %>>Name</option>
+      <option value="preis" <%= sort === 'preis' ? 'selected' : '' %>>Preis</option>
+      <option value="bestand" <%= sort === 'bestand' ? 'selected' : '' %>>Bestand</option>
     </select>
     <button class="btn btn--dark btn--sm" type="submit">Filtern</button>
-    <a class="btn btn--ghost btn--sm" href="/verwaltung/produkte">Zurücksetzen</a>
+    <a class="btn btn--ghost btn--sm" href="<%= basePath %>">Zurücksetzen</a>
   </form>
 </div>
 
 <div class="card">
-  <div class="card__head"><h2><%= total %> Produkte</h2></div>
+  <div class="card__head"><h2><%= total %> Produkte<%= subset === 'neuheiten' ? ' · seit 30 Tagen angelegt' : '' %></h2></div>
   <div class="card__body card__body--flush">
     <% if (!rows.length) { %>
       <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Produkte gefunden.</p>
@@ -64,7 +77,7 @@
   <nav class="pager" aria-label="Seiten">
     <% for (var i = 1; i <= pages; i++) { %>
       <% if (i === page) { %><span class="is-current"><%= i %></span>
-      <% } else { %><a href="/verwaltung/produkte?seite=<%= i %>&q=<%= encodeURIComponent(q) %>&kategorie=<%= categoryId || '' %>&status=<%= status %>"><%= i %></a><% } %>
+      <% } else { %><a href="<%= basePath %>?seite=<%= i %>&q=<%= encodeURIComponent(q) %>&kategorie=<%= categoryId || '' %>&status=<%= status %>&sort=<%= sort %>"><%= i %></a><% } %>
     <% } %>
   </nav>
 <% } %>

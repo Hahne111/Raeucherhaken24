@@ -127,6 +127,10 @@ function csrf(html) {
   const editor = clients.redaktion;
   assert.equal((await editor.get('/verwaltung/produkte')).status, 200);
   assert.equal((await editor.get('/verwaltung/produkte/naturgewuerze')).status, 200);
+  for (const subset of ['online', 'entwuerfe', 'neuheiten', 'angebote', 'niedrig']) {
+    assert.equal((await editor.get('/verwaltung/produkte/' + subset + '?sort=name')).status, 200);
+    assert.equal((await clients.lager.get('/verwaltung/produkte/' + subset)).status, 403);
+  }
   assert.equal((await editor.get('/verwaltung/kategorien')).status, 200);
   assert.equal((await editor.get('/verwaltung/kunden')).status, 403);
   assert.equal((await editor.get('/verwaltung/uebersicht')).status, 403);
@@ -197,6 +201,9 @@ function csrf(html) {
   })).status, 302);
   assert.equal(db.get('SELECT id FROM admin_users WHERE email = ?', ['ungueltig@example.test']), undefined);
   const draft = db.get("SELECT * FROM products WHERE sku = 'NG-13001'");
+  const draftLink = `href="/verwaltung/produkte/${draft.id}"`;
+  assert.ok((await editor.get('/verwaltung/produkte/entwuerfe?q=NG-13001')).body.includes(draftLink));
+  assert.equal((await editor.get('/verwaltung/produkte/online?q=NG-13001')).body.includes(draftLink), false);
   const spices = await admin.get('/verwaltung/produkte/naturgewuerze?status=entwurf');
   assert.equal(spices.status, 200);
   assert.ok(spices.body.includes('135 Naturgewürze'));
@@ -211,6 +218,7 @@ function csrf(html) {
   };
   assert.equal((await admin.post('/verwaltung/produkte/' + draft.id, fields)).status, 302);
   assert.equal(db.get('SELECT active FROM products WHERE id = ?', [draft.id]).active, 1);
+  assert.ok((await editor.get('/verwaltung/produkte/online?q=NG-13001')).body.includes(draftLink));
   assert.equal(db.get('SELECT product_group FROM products WHERE id = ?', [draft.id]).product_group, 'naturgewuerze');
   const onlineSpices = await admin.get('/verwaltung/produkte/naturgewuerze?status=online');
   assert.ok(onlineSpices.body.includes('1 Naturgewürze'));
