@@ -1,0 +1,110 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen">Zum Cockpit</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="ad-alert ad-alert--info"><%= apiHint %></div>
+<div class="kpis">
+  <div class="kpi"><span>Bankbestand</span><strong><%= fmt(balance) %></strong><small>Eröffnung plus importierte Umsätze</small></div>
+  <div class="kpi"><span>Offene Umsätze</span><strong><%= rows.filter(function(r){return r.status==='offen';}).length %></strong><small>noch ohne Zuordnung</small></div>
+</div>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/finanzen/bank">
+    <select name="konto" aria-label="Konto">
+      <option value="">Alle Konten</option>
+      <% accounts.forEach(function (a) { %><option value="<%= a.id %>" <%= accountId === a.id ? 'selected' : '' %>><%= a.name %></option><% }); %>
+    </select>
+    <select name="status" aria-label="Status">
+      <option value="">Alle</option>
+      <option value="offen" <%= status === 'offen' ? 'selected' : '' %>>Offen</option>
+      <option value="zugeordnet" <%= status === 'zugeordnet' ? 'selected' : '' %>>Zugeordnet</option>
+      <option value="ignoriert" <%= status === 'ignoriert' ? 'selected' : '' %>>Ignoriert</option>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Filtern</button>
+  </form>
+</div>
+<div class="card">
+  <div class="card__head"><h2>Kontoumsätze</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %><p style="padding:20px;margin:0;color:var(--a-soft)">Noch kein Umsatz importiert.</p><% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Datum</th><th>Konto</th><th>Gegenseite</th><th>Verwendungszweck</th><th class="num">Betrag</th><th>Status</th><th style="width:320px">Zuordnung</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (t) { %>
+          <tr>
+            <td><%= t.booked_on %></td>
+            <td><%= t.account_name %></td>
+            <td><%= t.counterparty || '–' %></td>
+            <td style="max-width:280px"><%= t.purpose %></td>
+            <td class="num" style="color:<%= t.amount_cents < 0 ? 'var(--a-err)' : 'var(--a-ok)' %>"><%= fmt(t.amount_cents) %></td>
+            <td><span class="pill <%= t.status === 'zugeordnet' ? 'pill--ok' : (t.status === 'offen' ? 'pill--warn' : '') %>"><%= t.status %></span></td>
+            <td>
+              <% if (canWrite && t.status === 'offen') { %>
+              <form method="post" action="/verwaltung/finanzen/bank/<%= t.id %>/zuordnen" style="display:flex;gap:6px">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <select name="target" style="flex:1">
+                  <option value="">Ziel wählen …</option>
+                  <% if (t.amount_cents >= 0) { %>
+                    <optgroup label="Offene Rechnungen">
+                      <% openInvoices.forEach(function (d) { %>
+                        <option value="document:<%= d.id %>"><%= d.number %> · <%= fmt(d.open_cents) %></option>
+                      <% }); %>
+                    </optgroup>
+                  <% } else { %>
+                    <optgroup label="Offene Eingangsbelege">
+                      <% openIncoming.forEach(function (i) { %>
+                        <option value="incoming:<%= i.id %>"><%= i.number || ('Beleg ' + i.id) %> · <%= fmt(i.open_cents) %></option>
+                      <% }); %>
+                    </optgroup>
+                  <% } %>
+                  <option value="ignorieren:0">— nicht zuzuordnen —</option>
+                </select>
+                <button class="btn btn--dark btn--sm" type="submit">Zuordnen</button>
+              </form>
+              <% } else { %>
+                <%= t.matched_type ? t.matched_type + ' #' + t.matched_id : (t.note || '–') %>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<% if (canWrite) { %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Umsätze importieren</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/finanzen/bank/import">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="field"><span>Konto</span>
+          <select name="account_id" required>
+            <% accounts.forEach(function (a) { %><option value="<%= a.id %>"><%= a.name %></option><% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Zeilen: Buchungstag;Wertstellung;Betrag;Auftraggeber;IBAN;Verwendungszweck</span>
+          <textarea name="csv" rows="8" placeholder="2026-09-01;2026-09-01;238,00;Nordfisch GmbH;DE02…;Rechnung RE-2026-0001"></textarea>
+        </label>
+        <button class="btn btn--dark" type="submit">Importieren</button>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Ein zweiter Lauf derselben Datei erzeugt keine Dubletten.</p>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Bankkonto anlegen</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/finanzen/bank/konto">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="field"><span>Name *</span><input type="text" name="name" required maxlength="120"></label>
+        <div class="field-row">
+          <label class="field"><span>IBAN</span><input type="text" name="iban" maxlength="34"></label>
+          <label class="field"><span>BIC</span><input type="text" name="bic" maxlength="16"></label>
+        </div>
+        <label class="field"><span>Eröffnungssaldo</span><input type="text" name="opening" placeholder="z. B. 5000,00"></label>
+        <button class="btn btn--primary btn--block" type="submit">Konto anlegen</button>
+      </form>
+    </div>
+  </div>
+</div>
+<% } %>
+<%- include('../partials/admin-foot') %>

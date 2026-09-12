@@ -1,0 +1,81 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen">Zum Cockpit</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/finanzen/planung">
+    <select name="plan" aria-label="Planversion">
+      <% plans.forEach(function (p) { %><option value="<%= p.id %>" <%= plan && plan.id === p.id ? 'selected' : '' %>><%= p.name %> (<%= p.year %>)</option><% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+  </form>
+  <% if (canWrite) { %>
+  <form method="post" action="/verwaltung/finanzen/planung">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <input type="text" name="name" placeholder="Name der Planversion" required maxlength="120">
+    <input type="number" name="year" value="<%= new Date().getFullYear() %>" min="2000" max="2100" style="width:110px">
+    <button class="btn btn--primary btn--sm" type="submit">Version anlegen</button>
+  </form>
+  <% } %>
+</div>
+<% if (!plan) { %>
+  <div class="card"><div class="card__body"><p style="margin:0;color:var(--a-soft)">Noch keine Planversion. Eine Version enthält je Monat geplante Erträge und Aufwände mit der jeweiligen Annahme.</p></div></div>
+<% } else { %>
+<div class="card">
+  <div class="card__head"><h2>Soll-Ist <%= plan.name %> (<%= plan.year %>)</h2></div>
+  <div class="card__body card__body--flush">
+    <table class="tbl">
+      <thead><tr><th>Monat</th><th class="num">Ertrag geplant</th><th class="num">Ertrag ist</th><th class="num">Abweichung</th><th class="num">Aufwand geplant</th><th class="num">Aufwand ist</th><th class="num">Abweichung</th></tr></thead>
+      <tbody>
+        <% compare.forEach(function (c) { %>
+          <tr>
+            <td><%= c.period %></td>
+            <td class="num"><%= fmt(c.plannedRevenue) %></td>
+            <td class="num"><%= fmt(c.actualRevenue) %></td>
+            <td class="num" style="color:<%= c.diffRevenue >= 0 ? 'var(--a-ok)' : 'var(--a-err)' %>"><%= fmt(c.diffRevenue) %></td>
+            <td class="num"><%= fmt(c.plannedCost) %></td>
+            <td class="num"><%= fmt(c.actualCost) %></td>
+            <td class="num" style="color:<%= c.diffCost <= 0 ? 'var(--a-ok)' : 'var(--a-err)' %>"><%= fmt(c.diffCost) %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Planpositionen</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!items.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Position.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Monat</th><th>Kategorie</th><th>Art</th><th class="num">Betrag</th><th>Annahme</th></tr></thead>
+        <tbody>
+          <% items.forEach(function (i) { %>
+            <tr><td><%= i.period %></td><td><%= i.category %></td><td><%= i.kind %></td>
+              <td class="num"><%= fmt(i.amount_cents) %></td><td><%= i.assumption || '–' %></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+  <% if (canWrite) { %>
+  <div class="card">
+    <div class="card__head"><h2>Position hinzufügen</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/finanzen/planung/<%= plan.id %>/position">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <div class="field-row">
+          <label class="field"><span>Monat (JJJJ-MM)</span><input type="text" name="period" required pattern="\d{4}-\d{2}" placeholder="<%= plan.year %>-01"></label>
+          <label class="field"><span>Art</span><select name="kind"><option value="ertrag">Ertrag</option><option value="aufwand">Aufwand</option></select></label>
+        </div>
+        <label class="field"><span>Kategorie</span><input type="text" name="category" maxlength="80" placeholder="z. B. Shopumsatz"></label>
+        <label class="field"><span>Betrag</span><input type="text" name="amount" placeholder="z. B. 12000,00"></label>
+        <label class="field"><span>Annahme</span><input type="text" name="assumption" maxlength="500" placeholder="worauf beruht die Zahl?"></label>
+        <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+      </form>
+    </div>
+  </div>
+  <% } %>
+</div>
+<% } %>
+<%- include('../partials/admin-foot') %>

@@ -34,7 +34,8 @@ migrate.ensureColumns(db, [
   ['customers', 'updated_at', "TEXT NOT NULL DEFAULT ''"],
   ['variants', 'min_stock', 'INTEGER NOT NULL DEFAULT 0'],
   ['variants', 'location_id', 'INTEGER'],
-  ['variants', 'purchase_price_cents', 'INTEGER NOT NULL DEFAULT 0']
+  ['variants', 'purchase_price_cents', 'INTEGER NOT NULL DEFAULT 0'],
+  ['documents', 'paid_cents', 'INTEGER NOT NULL DEFAULT 0']
 ]);
 
 /* Die 16 Bundeslaender sind feste Stammdaten und keine Beispieldaten. */

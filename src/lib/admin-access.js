@@ -18,7 +18,10 @@ const GRANTS = {
     'termine', 'termine.alle', 'beratung', 'belege', 'versand', 'produktion', 'prototypen', 'nachrichten'
   ],
   redaktion: ['produkte', 'kategorien', 'medien', 'nachrichten'],
-  finanzen: ['uebersicht', 'produkt.analyse', 'bestellungen.lesen', 'belege', 'belege.ausstellen', 'kassenbuch', 'kassenbuch.buchen', 'nachrichten'],
+  finanzen: [
+    'uebersicht', 'produkt.analyse', 'bestellungen.lesen', 'belege', 'belege.ausstellen',
+    'kassenbuch', 'kassenbuch.buchen', 'finanzen', 'finanzen.buchen', 'einkauf', 'nachrichten'
+  ],
   vertrieb: [
     'kunden.lesen', 'kunden.bearbeiten', 'kunden.anlegen',
     'haendler', 'gebiete.lesen', 'gebietsbuch',

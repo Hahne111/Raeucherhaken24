@@ -1,0 +1,70 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/finanzen">
+    <select name="monat" aria-label="Monat">
+      <% if (months.indexOf(period) < 0) { %><option value="<%= period %>" selected><%= period %></option><% } %>
+      <% months.forEach(function (m) { %><option value="<%= m %>" <%= period === m ? 'selected' : '' %>><%= m %></option><% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Monat anzeigen</button>
+  </form>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/eingangsbelege">Eingangsbelege</a>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/bank">Banking</a>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/kassenbuch">Kassenbuch</a>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/offene-posten">Offene Posten</a>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/kreditoren">Kreditoren</a>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/anlagen">Anlagen und Konten</a>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/planung">Planung</a>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/steuern">Steuern</a>
+  <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/abschluss">Monatsabschluss</a>
+</div>
+<div class="kpis">
+  <div class="kpi"><span>Umsatz netto <%= period %></span><strong><%= fmt(revenue.net) %></strong><small><%= revenue.count %> Belege · brutto <%= fmt(revenue.gross) %></small></div>
+  <div class="kpi"><span>Kosten netto</span><strong><%= fmt(costs.net) %></strong><small><%= costs.count %> Eingangsbelege</small></div>
+  <div class="kpi"><span>Ergebnis</span><strong style="color:<%= result >= 0 ? 'var(--a-ok)' : 'var(--a-err)' %>"><%= fmt(result) %></strong><small>Umsatz minus Kosten, netto</small></div>
+  <div class="kpi"><span>Liquidität</span><strong><%= fmt(liquidity.total) %></strong><small>Bank <%= fmt(liquidity.bank) %> · Kasse <%= fmt(liquidity.cash) %></small></div>
+  <div class="kpi"><span>Forderungen</span><strong><%= fmt(receivables.sum) %></strong><small><%= receivables.count %> offen · davon überfällig <%= fmt(receivables.overdue) %></small></div>
+  <div class="kpi"><span>Verbindlichkeiten</span><strong><%= fmt(payables.sum) %></strong><small><%= payables.count %> offen · davon überfällig <%= fmt(payables.overdue) %></small></div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>13-Wochen-Vorschau</h2><span style="font-size:13px;color:var(--a-soft)">Start: <%= fmt(forecast.start) %></span></div>
+  <div class="card__body card__body--flush">
+    <table class="tbl">
+      <thead><tr><th>Woche</th><th>Von</th><th class="num">Fällige Eingänge</th><th class="num">Erwartet</th><th class="num">Fällige Ausgänge</th><th class="num">Erwartet</th><th class="num">Saldo</th></tr></thead>
+      <tbody>
+        <% forecast.rows.forEach(function (w) { %>
+          <tr>
+            <td><%= w.week %></td><td><%= w.from %></td>
+            <td class="num"><%= fmt(w.due_in) %></td><td class="num" style="color:var(--a-soft)"><%= fmt(w.expected_in) %></td>
+            <td class="num"><%= fmt(w.due_out) %></td><td class="num" style="color:var(--a-soft)"><%= fmt(w.expected_out) %></td>
+            <td class="num" style="color:<%= w.balance < 0 ? 'var(--a-err)' : 'inherit' %>"><strong><%= fmt(w.balance) %></strong></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <div style="padding:16px;border-top:1px solid var(--a-line)">
+      <strong style="font-size:13px">Annahmen</strong>
+      <ul style="margin:6px 0 0;padding-left:18px;font-size:13px;color:var(--a-soft)">
+        <% forecast.assumptions.forEach(function (a) { %><li><%= a %></li><% }); %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Monatsabschluss <%= period %></h2>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/abschluss?monat=<%= period %>">Öffnen</a>
+  </div>
+  <div class="card__body card__body--flush">
+    <table class="tbl">
+      <tbody>
+        <% closing.checks.forEach(function (c) { %>
+          <tr><td><%= c.label %></td><td><%= c.detail %></td>
+            <td class="num"><span class="pill <%= c.open ? 'pill--warn' : 'pill--ok' %>"><%= c.open ? 'offen' : 'erledigt' %></span></td></tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

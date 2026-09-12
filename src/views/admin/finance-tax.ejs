@@ -1,0 +1,33 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen">Zum Cockpit</a> <a class="btn btn--primary btn--sm" href="/verwaltung/finanzen/steuern/datev.csv?monat=' + period + '">DATEV-Export</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="ad-alert ad-alert--info">
+  Diese Auswertung ersetzt keine Umsatzsteuervoranmeldung. Eine direkte Übertragung an ELSTER ist <strong>nicht</strong>
+  enthalten; der Export ist für die Steuerberatung gedacht und mit ihr abzustimmen.
+</div>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/finanzen/steuern">
+    <select name="monat" aria-label="Monat">
+      <% if (months.indexOf(period) < 0) { %><option value="<%= period %>" selected><%= period %></option><% } %>
+      <% months.forEach(function (m) { %><option value="<%= m %>" <%= period === m ? 'selected' : '' %>><%= m %></option><% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+  </form>
+</div>
+<div class="card" style="max-width:640px">
+  <div class="card__head"><h2>Umsatzsteuer <%= period %></h2></div>
+  <div class="card__body card__body--flush">
+    <table class="tbl">
+      <tbody>
+        <tr><td>Erlöse brutto</td><td class="num"><%= fmt(summary.revenue_gross) %></td></tr>
+        <tr><td>Erlöse netto</td><td class="num"><%= fmt(summary.revenue_net) %></td></tr>
+        <tr><td>Umsatzsteuer (Ausgang)</td><td class="num"><%= fmt(summary.vat_out) %></td></tr>
+        <tr><td>Aufwand brutto</td><td class="num"><%= fmt(summary.cost_gross) %></td></tr>
+        <tr><td>Aufwand netto</td><td class="num"><%= fmt(summary.cost_net) %></td></tr>
+        <tr><td>Vorsteuer (Eingang)</td><td class="num"><%= fmt(summary.vat_in) %></td></tr>
+        <tr><td><strong>Zahllast</strong></td><td class="num"><strong><%= fmt(summary.payable) %></strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

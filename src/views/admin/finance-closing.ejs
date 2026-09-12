@@ -1,0 +1,62 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen">Zum Cockpit</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/finanzen/abschluss">
+    <input type="month" name="monat" value="<%= period %>">
+    <button class="btn btn--dark btn--sm" type="submit">Monat anzeigen</button>
+  </form>
+</div>
+<div class="kpis">
+  <div class="kpi"><span>Umsatz netto</span><strong><%= fmt(state.revenue.net) %></strong></div>
+  <div class="kpi"><span>Kosten netto</span><strong><%= fmt(state.costs.net) %></strong></div>
+  <div class="kpi"><span>Ergebnis</span><strong><%= fmt(state.result) %></strong></div>
+  <div class="kpi"><span>Umsatzsteuer-Zahllast</span><strong><%= fmt(state.tax.payable) %></strong></div>
+</div>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Prüfschritte <%= period %></h2></div>
+    <div class="card__body card__body--flush">
+      <table class="tbl">
+        <tbody>
+          <% state.checks.forEach(function (c) { %>
+            <tr><td><strong><%= c.label %></strong><br><span style="font-size:12.5px;color:var(--a-soft)"><%= c.detail %></span></td>
+              <td class="num"><span class="pill <%= c.open ? 'pill--warn' : 'pill--ok' %>"><%= c.open ? 'offen' : 'erledigt' %></span></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% if (canWrite) { %>
+      <div style="padding:16px;border-top:1px solid var(--a-line)">
+        <form method="post" action="/verwaltung/finanzen/abschluss">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <input type="hidden" name="period" value="<%= period %>">
+          <label class="field"><span>Notiz zum Abschluss</span><input type="text" name="note" maxlength="1000"></label>
+          <button class="btn btn--primary" type="submit" <%= state.checks.some(function(c){return c.open;}) ? 'disabled' : '' %>>Monat abschließen</button>
+          <% if (state.checks.some(function(c){return c.open;})) { %>
+            <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Der Abschluss ist erst möglich, wenn alle Prüfschritte erledigt sind.</p>
+          <% } %>
+        </form>
+      </div>
+      <% } %>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Abgeschlossene Monate</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!closings.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch kein Monat abgeschlossen.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Monat</th><th>Status</th><th class="num">Umsatz</th><th class="num">Kosten</th><th class="num">Steuer</th><th>Abgeschlossen</th></tr></thead>
+        <tbody>
+          <% closings.forEach(function (c) { %>
+            <tr><td><%= c.period %></td><td><span class="pill pill--ok"><%= c.status %></span></td>
+              <td class="num"><%= fmt(c.revenue_cents) %></td><td class="num"><%= fmt(c.cost_cents) %></td>
+              <td class="num"><%= fmt(c.tax_cents) %></td>
+              <td><%= c.closed_by %><br><span style="font-size:12px;color:var(--a-soft)"><%= c.closed_at ? formatDate(c.closed_at) : '' %></span></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

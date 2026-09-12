@@ -15,11 +15,12 @@
     "test:rollen": "node scripts/role-test.js",
     "test:crm": "node scripts/crm-test.js",
     "test:kalender": "node scripts/calendar-test.js",
-    "test:belege": "node scripts/document-test.js && node scripts/purchasing-test.js && node scripts/production-test.js && node scripts/pos-test.js",
-    "test:einkauf": "node scripts/purchasing-test.js && node scripts/production-test.js && node scripts/pos-test.js",
-    "test:produktion": "node scripts/production-test.js && node scripts/pos-test.js",
+    "test:belege": "node scripts/document-test.js",
+    "test:einkauf": "node scripts/purchasing-test.js",
+    "test:produktion": "node scripts/production-test.js",
     "test:kasse": "node scripts/pos-test.js",
-    "test:alle": "node scripts/smoke-test.js && node scripts/role-test.js && node scripts/crm-test.js && node scripts/calendar-test.js && node scripts/document-test.js && node scripts/purchasing-test.js && node scripts/production-test.js && node scripts/pos-test.js"
+    "test:finanzen": "node scripts/finance-test.js",
+    "test:alle": "node scripts/smoke-test.js && node scripts/role-test.js && node scripts/crm-test.js && node scripts/calendar-test.js && node scripts/document-test.js && node scripts/purchasing-test.js && node scripts/production-test.js && node scripts/pos-test.js && node scripts/finance-test.js"
   },
   "dependencies": {
     "ejs": "^3.1.10",

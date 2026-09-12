@@ -1,0 +1,65 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen">Zum Cockpit</a> <a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen/offene-posten/export.csv">CSV-Export</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="kpis">
+  <div class="kpi"><span>Offene Forderungen</span><strong><%= fmt(sum) %></strong><small><%= rows.length %> Rechnungen</small></div>
+  <div class="kpi"><span>Davon überfällig</span><strong><%= fmt(overdue.reduce(function(s,r){return s+r.open_cents;},0)) %></strong><small><%= overdue.length %> Rechnungen</small></div>
+</div>
+<% if (!mailStatus.configured) { %>
+  <div class="ad-alert ad-alert--warn">Systemmail ist nicht eingerichtet – Mahnungen werden erzeugt, aber nicht versendet. Es fehlt: <%= mailStatus.missing.join(', ') %>.</div>
+<% } %>
+<div class="card">
+  <div class="card__head"><h2>Offene Posten</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %><p style="padding:20px;margin:0;color:var(--a-soft)">Keine offene Forderung.</p><% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Beleg</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th class="num">Betrag</th><th class="num">Bezahlt</th><th class="num">Offen</th><th>Mahnstufe</th><th style="width:340px">Aktion</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+          <tr>
+            <td><a class="link" href="/verwaltung/belege/<%= r.id %>"><%= r.number %></a></td>
+            <td><%= r.customer_company || r.customer_email || '–' %></td>
+            <td><%= String(r.issued_at).slice(0,10) %></td>
+            <td><%= r.due_on %><% if (r.overdue_days > 0) { %> <span class="pill pill--err"><%= r.overdue_days %> Tage</span><% } %></td>
+            <td class="num"><%= fmt(r.total_cents) %></td>
+            <td class="num"><%= fmt(r.paid_cents) %></td>
+            <td class="num"><strong><%= fmt(r.open_cents) %></strong></td>
+            <td><%= r.dunning_level || '–' %></td>
+            <td>
+              <% if (canWrite) { %>
+              <form method="post" action="/verwaltung/finanzen/offene-posten/<%= r.id %>/zahlung" style="display:flex;gap:6px;margin-bottom:6px">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <input type="text" name="amount" value="<%= (r.open_cents/100).toFixed(2).replace('.',',') %>" style="width:90px" aria-label="Betrag">
+                <input type="date" name="paid_on" value="<%= new Date().toISOString().slice(0,10) %>" aria-label="Datum">
+                <button class="btn btn--dark btn--sm" type="submit">Zahlung</button>
+              </form>
+              <form method="post" action="/verwaltung/finanzen/offene-posten/<%= r.id %>/mahnen">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <button class="btn btn--ghost btn--sm" type="submit">Mahnstufe erhöhen</button>
+              </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<div class="card">
+  <div class="card__head"><h2>Mahnungen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!notices.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Mahnung.</p><% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Beleg</th><th>Stufe</th><th>Erstellt</th><th>Zahlbar bis</th><th class="num">Offen</th><th class="num">Gebühr</th><th>Status</th></tr></thead>
+      <tbody>
+        <% notices.forEach(function (n) { %>
+          <tr><td><%= n.document_number %></td><td><%= n.level %></td><td><%= n.issued_on %></td><td><%= n.due_on %></td>
+            <td class="num"><%= fmt(n.open_cents) %></td><td class="num"><%= fmt(n.fee_cents) %></td><td><%= n.status %></td></tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

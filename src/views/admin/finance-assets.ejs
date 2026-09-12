@@ -1,0 +1,95 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen">Zum Cockpit</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="kpis">
+  <div class="kpi"><span>Buchwert Anlagen</span><strong><%= fmt(bookValue) %></strong><small><%= assets.filter(function(a){return !a.disposed_on;}).length %> aktive Anlagen</small></div>
+  <div class="kpi"><span>Konten</span><strong><%= accounts.length %></strong><small>im Kontenrahmen gepflegt</small></div>
+</div>
+<div class="card">
+  <div class="card__head"><h2>Anlagen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!assets.length) { %><p style="padding:20px;margin:0;color:var(--a-soft)">Noch keine Anlage erfasst.</p><% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Bezeichnung</th><th>Konto</th><th>Angeschafft</th><th class="num">Anschaffung</th><th class="num">Nutzung</th><th class="num">AfA je Monat</th><th class="num">Abgeschrieben</th><th class="num">Buchwert</th><th>Stand</th></tr></thead>
+      <tbody>
+        <% assets.forEach(function (a) { %>
+          <tr>
+            <td><%= a.name %></td>
+            <td><%= a.account_number ? a.account_number + ' ' + a.account_name : '–' %></td>
+            <td><%= a.purchased_on %></td>
+            <td class="num"><%= fmt(a.cost_cents) %></td>
+            <td class="num"><%= a.useful_months %> Mon.</td>
+            <td class="num"><%= fmt(a.per_month) %></td>
+            <td class="num"><%= fmt(a.written_off) %></td>
+            <td class="num"><strong><%= fmt(a.book_value) %></strong></td>
+            <td><span class="pill <%= a.finished ? 'pill--ok' : '' %>"><%= a.finished ? 'abgeschrieben' : a.elapsed_months + '/' + a.useful_months %></span></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<div class="cols">
+  <% if (canWrite) { %>
+  <div class="card">
+    <div class="card__head"><h2>Anlage erfassen</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/finanzen/anlagen">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="field"><span>Bezeichnung *</span><input type="text" name="name" required maxlength="160"></label>
+        <div class="field-row">
+          <label class="field"><span>Anschaffungswert *</span><input type="text" name="cost" required placeholder="z. B. 2400,00"></label>
+          <label class="field"><span>Restwert</span><input type="text" name="residual" placeholder="0,00"></label>
+        </div>
+        <div class="field-row">
+          <label class="field"><span>Angeschafft am</span><input type="date" name="purchased_on" value="<%= new Date().toISOString().slice(0,10) %>"></label>
+          <label class="field"><span>Nutzungsdauer (Monate)</span><input type="number" name="useful_months" min="1" max="600" value="36"></label>
+        </div>
+        <label class="field"><span>Konto</span>
+          <select name="account_id">
+            <option value="">– ohne –</option>
+            <% accounts.filter(function(a){return a.kind==='anlage';}).forEach(function (a) { %><option value="<%= a.id %>"><%= a.number %> · <%= a.name %></option><% }); %>
+          </select>
+        </label>
+        <button class="btn btn--primary btn--block" type="submit">Anlage erfassen</button>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Die Abschreibung wird linear je Monat berechnet. Die steuerliche Nutzungsdauer ist mit der Buchhaltung abzustimmen.</p>
+      </form>
+    </div>
+  </div>
+  <% } %>
+  <div class="card">
+    <div class="card__head"><h2>Konten</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!accounts.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch kein Konto angelegt. Der Kontenrahmen wird vom Betrieb gepflegt.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Nummer</th><th>Bezeichnung</th><th>Art</th><th>Steuerschlüssel</th></tr></thead>
+        <tbody>
+          <% accounts.forEach(function (a) { %>
+            <tr><td><%= a.number %></td><td><%= a.name %></td><td><%= kinds[a.kind] || a.kind %></td><td><%= a.tax_key || '–' %></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+      <% if (canWrite) { %>
+      <div style="padding:16px;border-top:1px solid var(--a-line)">
+        <form method="post" action="/verwaltung/finanzen/konten">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <div class="field-row">
+            <label class="field"><span>Nummer *</span><input type="text" name="number" required maxlength="20"></label>
+            <label class="field"><span>Bezeichnung *</span><input type="text" name="name" required maxlength="120"></label>
+            <label class="field"><span>Art</span>
+              <select name="kind">
+                <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>"><%= kinds[k] %></option><% }); %>
+              </select>
+            </label>
+            <label class="field"><span>Steuerschlüssel</span><input type="text" name="tax_key" maxlength="20"></label>
+          </div>
+          <button class="btn btn--dark" type="submit">Konto anlegen</button>
+        </form>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

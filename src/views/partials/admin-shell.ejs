@@ -15,6 +15,16 @@
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lager" class="<%= currentPath === '/lager' || currentPath.indexOf('/lager/') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Lager</a><% } %>
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lagerorte" class="<%= currentPath.indexOf('/lagerorte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Lagerorte</a><% } %>
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/inventur" class="<%= currentPath.indexOf('/inventur') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Inventur</a><% } %>
+      <% if (adminCan('finanzen')) { %><span class="ad-nav__sep">Finanzen</span>
+      <a href="/verwaltung/finanzen" class="<%= currentPath === '/finanzen' ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Cockpit</a>
+      <a href="/verwaltung/finanzen/eingangsbelege" class="<%= currentPath.indexOf('/finanzen/eingangsbelege') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Eingangsbelege</a>
+      <a href="/verwaltung/finanzen/bank" class="<%= currentPath.indexOf('/finanzen/bank') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Banking</a>
+      <a href="/verwaltung/finanzen/offene-posten" class="<%= currentPath.indexOf('/finanzen/offene-posten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-cart"/></svg>Offene Posten</a>
+      <a href="/verwaltung/finanzen/kreditoren" class="<%= currentPath.indexOf('/finanzen/kreditoren') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-truck"/></svg>Kreditoren</a>
+      <a href="/verwaltung/finanzen/anlagen" class="<%= currentPath.indexOf('/finanzen/anlagen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Anlagen und Konten</a>
+      <a href="/verwaltung/finanzen/planung" class="<%= currentPath.indexOf('/finanzen/planung') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Planung</a>
+      <a href="/verwaltung/finanzen/steuern" class="<%= currentPath.indexOf('/finanzen/steuern') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-lock"/></svg>Steuern</a>
+      <a href="/verwaltung/finanzen/abschluss" class="<%= currentPath.indexOf('/finanzen/abschluss') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Monatsabschluss</a><% } %>
       <% if (adminCan('kasse') || adminCan('kassenbuch')) { %><span class="ad-nav__sep">Kasse</span><% } %>
       <% if (adminCan('kasse')) { %><a href="/verwaltung/kasse" class="<%= currentPath.indexOf('/kasse') === 0 && currentPath.indexOf('/kassenbuch') !== 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-cart"/></svg>Kasse</a><% } %>
       <% if (adminCan('kassenbuch')) { %><a href="/verwaltung/kassenbuch" class="<%= currentPath.indexOf('/kassenbuch') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Kassenbuch</a><% } %>

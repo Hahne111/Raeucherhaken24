@@ -950,3 +950,156 @@ CREATE TABLE IF NOT EXISTS cash_book (
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_cash_book ON cash_book(booked_on, id);
+
+/* ============================== Finanzen ============================== */
+
+/* Sachkonten. Der Kontenrahmen wird vom Betrieb gepflegt, nicht erfunden. */
+CREATE TABLE IF NOT EXISTS ledger_accounts (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  number     TEXT NOT NULL UNIQUE,
+  name       TEXT NOT NULL,
+  kind       TEXT NOT NULL DEFAULT 'aufwand',
+  tax_key    TEXT NOT NULL DEFAULT '',
+  active     INTEGER NOT NULL DEFAULT 1,
+  note       TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS bank_accounts (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  name       TEXT NOT NULL,
+  iban       TEXT NOT NULL DEFAULT '',
+  bic        TEXT NOT NULL DEFAULT '',
+  opening_cents INTEGER NOT NULL DEFAULT 0,
+  active     INTEGER NOT NULL DEFAULT 1,
+  note       TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/* Kontoumsätze. `import_hash` verhindert, dass derselbe Umsatz zweimal
+   importiert wird – auch wenn dieselbe Datei erneut eingelesen wird. */
+CREATE TABLE IF NOT EXISTS bank_transactions (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  account_id   INTEGER NOT NULL REFERENCES bank_accounts(id) ON DELETE CASCADE,
+  booked_on    TEXT NOT NULL,
+  value_on     TEXT NOT NULL DEFAULT '',
+  amount_cents INTEGER NOT NULL,
+  counterparty TEXT NOT NULL DEFAULT '',
+  iban         TEXT NOT NULL DEFAULT '',
+  purpose      TEXT NOT NULL DEFAULT '',
+  reference    TEXT NOT NULL DEFAULT '',
+  import_hash  TEXT NOT NULL UNIQUE,
+  status       TEXT NOT NULL DEFAULT 'offen',
+  matched_type TEXT NOT NULL DEFAULT '',
+  matched_id   TEXT NOT NULL DEFAULT '',
+  note         TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_bank_tx ON bank_transactions(account_id, booked_on);
+CREATE INDEX IF NOT EXISTS idx_bank_tx_status ON bank_transactions(status);
+
+/* Eingangsbelege (Lieferantenrechnungen und sonstige Belege). */
+CREATE TABLE IF NOT EXISTS incoming_documents (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  number       TEXT NOT NULL DEFAULT '',
+  supplier_id  INTEGER REFERENCES suppliers(id) ON DELETE SET NULL,
+  purchase_id  INTEGER REFERENCES purchase_orders(id) ON DELETE SET NULL,
+  account_id   INTEGER REFERENCES ledger_accounts(id) ON DELETE SET NULL,
+  doc_date     TEXT NOT NULL,
+  due_at       TEXT,
+  gross_cents  INTEGER NOT NULL DEFAULT 0,
+  tax_cents    INTEGER NOT NULL DEFAULT 0,
+  paid_cents   INTEGER NOT NULL DEFAULT 0,
+  category     TEXT NOT NULL DEFAULT '',
+  status       TEXT NOT NULL DEFAULT 'neu',
+  url          TEXT NOT NULL DEFAULT '',
+  note         TEXT NOT NULL DEFAULT '',
+  checked_by   TEXT NOT NULL DEFAULT '',
+  checked_at   TEXT,
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_incoming_status ON incoming_documents(status, due_at);
+
+/* Zahlungen auf Ausgangs- und Eingangsbelege. */
+CREATE TABLE IF NOT EXISTS payments (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind         TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL,
+  paid_on      TEXT NOT NULL,
+  method       TEXT NOT NULL DEFAULT 'ueberweisung',
+  document_id  INTEGER REFERENCES documents(id) ON DELETE SET NULL,
+  incoming_id  INTEGER REFERENCES incoming_documents(id) ON DELETE SET NULL,
+  bank_tx_id   INTEGER REFERENCES bank_transactions(id) ON DELETE SET NULL,
+  note         TEXT NOT NULL DEFAULT '',
+  actor        TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_payments_doc ON payments(document_id);
+CREATE INDEX IF NOT EXISTS idx_payments_in ON payments(incoming_id);
+
+/* Mahnwesen. */
+CREATE TABLE IF NOT EXISTS dunning_notices (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  level       INTEGER NOT NULL DEFAULT 1,
+  issued_on   TEXT NOT NULL,
+  due_on      TEXT NOT NULL,
+  fee_cents   INTEGER NOT NULL DEFAULT 0,
+  open_cents  INTEGER NOT NULL DEFAULT 0,
+  status      TEXT NOT NULL DEFAULT 'offen',
+  note        TEXT NOT NULL DEFAULT '',
+  created_by  TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_dunning_doc ON dunning_notices(document_id, level);
+
+/* Anlagen mit linearer Abschreibung. */
+CREATE TABLE IF NOT EXISTS assets (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  name          TEXT NOT NULL,
+  account_id    INTEGER REFERENCES ledger_accounts(id) ON DELETE SET NULL,
+  purchased_on  TEXT NOT NULL,
+  cost_cents    INTEGER NOT NULL DEFAULT 0,
+  useful_months INTEGER NOT NULL DEFAULT 36,
+  residual_cents INTEGER NOT NULL DEFAULT 0,
+  disposed_on   TEXT,
+  note          TEXT NOT NULL DEFAULT '',
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/* Planung: Version, Annahme, Zeitraum. */
+CREATE TABLE IF NOT EXISTS plan_versions (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  name       TEXT NOT NULL,
+  year       INTEGER NOT NULL,
+  status     TEXT NOT NULL DEFAULT 'entwurf',
+  note       TEXT NOT NULL DEFAULT '',
+  created_by TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS plan_items (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  plan_id    INTEGER NOT NULL REFERENCES plan_versions(id) ON DELETE CASCADE,
+  period     TEXT NOT NULL,
+  category   TEXT NOT NULL,
+  kind       TEXT NOT NULL DEFAULT 'ertrag',
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  assumption TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_plan_items ON plan_items(plan_id, period);
+
+/* Monatsabschluss mit Prüfschritten. */
+CREATE TABLE IF NOT EXISTS month_closings (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  period     TEXT NOT NULL UNIQUE,
+  status     TEXT NOT NULL DEFAULT 'offen',
+  checks     TEXT NOT NULL DEFAULT '{}',
+  revenue_cents INTEGER NOT NULL DEFAULT 0,
+  cost_cents INTEGER NOT NULL DEFAULT 0,
+  tax_cents  INTEGER NOT NULL DEFAULT 0,
+  note       TEXT NOT NULL DEFAULT '',
+  closed_by  TEXT NOT NULL DEFAULT '',
+  closed_at  TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

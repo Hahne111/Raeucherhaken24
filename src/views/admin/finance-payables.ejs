@@ -1,0 +1,55 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/finanzen">Zum Cockpit</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="kpis">
+  <div class="kpi"><span>Offene Verbindlichkeiten</span><strong><%= fmt(sum) %></strong><small><%= rows.length %> Belege</small></div>
+  <div class="kpi"><span>Davon überfällig</span><strong><%= fmt(rows.filter(function(r){return r.overdue_days>0;}).reduce(function(s,r){return s+r.open_cents;},0)) %></strong><small><%= rows.filter(function(r){return r.overdue_days>0;}).length %> Belege</small></div>
+</div>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Offene Eingangsbelege</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!rows.length) { %><p style="padding:20px;margin:0;color:var(--a-soft)">Keine offene Verbindlichkeit.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Beleg</th><th>Lieferant</th><th>Fällig</th><th class="num">Brutto</th><th class="num">Bezahlt</th><th class="num">Offen</th><th style="width:260px">Zahlung</th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (r) { %>
+            <tr>
+              <td><%= r.number || ('Beleg ' + r.id) %></td>
+              <td><%= r.supplier_name || '–' %></td>
+              <td><%= r.due_on %><% if (r.overdue_days > 0) { %> <span class="pill pill--err"><%= r.overdue_days %> Tage</span><% } %></td>
+              <td class="num"><%= fmt(r.gross_cents) %></td>
+              <td class="num"><%= fmt(r.paid_sum) %></td>
+              <td class="num"><strong><%= fmt(r.open_cents) %></strong></td>
+              <td>
+                <% if (canWrite) { %>
+                <form method="post" action="/verwaltung/finanzen/kreditoren/<%= r.id %>/zahlung" style="display:flex;gap:6px">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                  <input type="text" name="amount" value="<%= (r.open_cents/100).toFixed(2).replace('.',',') %>" style="width:90px" aria-label="Betrag">
+                  <input type="date" name="paid_on" value="<%= new Date().toISOString().slice(0,10) %>" aria-label="Datum">
+                  <button class="btn btn--dark btn--sm" type="submit">Buchen</button>
+                </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Je Lieferant</h2></div>
+    <div class="card__body card__body--flush">
+      <table class="tbl">
+        <thead><tr><th>Lieferant</th><th class="num">Belege</th><th class="num">Offen</th><th class="num">Überfällig</th></tr></thead>
+        <tbody>
+          <% bySupplier.forEach(function (s) { %>
+            <tr><td><%= s.name %></td><td class="num"><%= s.count %></td><td class="num"><%= fmt(s.sum) %></td><td class="num"><%= fmt(s.overdue) %></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>
