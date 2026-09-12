@@ -1,0 +1,130 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = (canManage ? '<a class="btn btn--ghost btn--sm" href="/verwaltung/provision/regeln">Regelversionen</a> <a class="btn btn--ghost btn--sm" href="/verwaltung/rangliste?monat=' + period + '">Rangliste</a> ' : '') + '<a class="btn btn--ghost btn--sm" href="/verwaltung/verdienst">Verdienstrechner</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+
+<form method="get" class="filterbar">
+  <label>Monat <input type="month" name="monat" value="<%= period %>"></label>
+  <% if (!mine) { %>
+  <label>Berater
+    <select name="berater">
+      <option value="0">Alle</option>
+      <% advisors.forEach(function (a) { %>
+        <option value="<%= a.id %>" <%= advisorId === a.id ? 'selected' : '' %>><%= a.name || a.email %></option>
+      <% }); %>
+    </select>
+  </label>
+  <% } %>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+
+<div class="kpis">
+  <div class="kpi"><span>Offen</span><strong><%= fmt(totals.offen || 0) %></strong></div>
+  <div class="kpi"><span>Freigegeben</span><strong><%= fmt(totals.freigegeben || 0) %></strong></div>
+  <div class="kpi"><span>Ausgezahlt</span><strong><%= fmt(totals.ausgezahlt || 0) %></strong></div>
+  <div class="kpi"><span>Regel</span><strong><%= rule ? rule.name : 'keine' %></strong><small><%= rule ? 'gültig ab ' + rule.valid_from : 'Ohne Regelversion wird nichts gebucht.' %></small></div>
+</div>
+
+<% if (!mine) { %>
+<div class="card">
+  <div class="card__head">
+    <h2>Vorschau <%= period %></h2>
+    <% if (canManage) { %>
+    <form method="post" action="/verwaltung/provision/buchen">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="period" value="<%= period %>">
+      <button class="btn btn--dark btn--sm" type="submit">Monat buchen</button>
+    </form>
+    <% } %>
+  </div>
+  <div class="card__body card__body--flush">
+    <% if (!preview || !preview.rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">In diesem Monat gibt es keinen Umsatz mit zugeordnetem Berater.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Berater</th><th>Art</th><th class="num">Grundlage</th><th class="num">Satz</th><th class="num">Provision</th><th>Rechenweg</th></tr></thead>
+      <tbody>
+        <% preview.rows.forEach(function (r) { %>
+        <tr>
+          <td><%= r.advisor_name || r.advisor_email %></td>
+          <td><%= kinds[r.kind] %></td>
+          <td class="num"><%= fmt(r.base_cents) %></td>
+          <td class="num"><%= r.percent.toFixed(2).replace('.', ',') %> %</td>
+          <td class="num"><strong><%= fmt(r.amount_cents) %></strong></td>
+          <td><small><%= (r.steps || []).map(function (s) { return s.label + ': ' + s.value; }).join(' · ') %></small></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <p style="padding:12px 20px;margin:0;color:var(--a-soft)"><small>Die Zeile „Teamleitung“ ist eine Vorschau ohne Auftragsbezug und wird nicht gebucht.</small></p>
+    <% } %>
+  </div>
+</div>
+<% } %>
+
+<div class="card">
+  <div class="card__head"><h2>Gebuchte Provision</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Für diesen Monat ist noch nichts gebucht.</p>
+    <% } else { %>
+    <form method="post" action="/verwaltung/provision/freigeben">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="period" value="<%= period %>">
+      <table class="tbl">
+        <thead><tr><% if (canManage) { %><th style="width:34px"></th><% } %><th>Auftrag</th><th>Berater</th><th class="num">Grundlage</th><th class="num">Satz</th><th class="num">Betrag</th><th>Status</th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (r) { %>
+          <tr>
+            <% if (canManage) { %><td><% if (r.status === 'offen') { %><input type="checkbox" name="id" value="<%= r.id %>" aria-label="Zeile wählen"><% } %></td><% } %>
+            <td><a href="/verwaltung/provision/<%= r.id %>"><%= r.order_number %></a></td>
+            <td><%= r.advisor_name || r.advisor_email %></td>
+            <td class="num"><%= fmt(r.base_cents) %></td>
+            <td class="num"><%= r.percent.toFixed(2).replace('.', ',') %> %</td>
+            <td class="num"><strong><%= fmt(r.amount_cents) %></strong></td>
+            <td><span class="pill"><%= states[r.status] || r.status %></span></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% if (canManage) { %>
+      <div style="padding:14px 20px"><button class="btn btn--dark btn--sm" type="submit">Ausgewählte freigeben</button></div>
+      <% } %>
+    </form>
+    <% } %>
+  </div>
+</div>
+
+<% if (canManage && advisorId) { %>
+<div class="card">
+  <div class="card__head"><h2>Auszahlung</h2></div>
+  <div class="card__body">
+    <form method="post" action="/verwaltung/provision/auszahlen" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="advisor_id" value="<%= advisorId %>">
+      <input type="hidden" name="period" value="<%= period %>">
+      <label style="flex:1 1 260px">Notiz <input type="text" name="note" placeholder="z. B. Abrechnung mit der Lohnbuchhaltung"></label>
+      <button class="btn btn--dark btn--sm" type="submit">Freigegebene Provision auszahlen</button>
+    </form>
+  </div>
+</div>
+<% } %>
+
+<div class="card">
+  <div class="card__head"><h2>Auszahlungen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!payouts.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Noch keine Auszahlung gebucht.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Monat</th><th>Berater</th><th class="num">Betrag</th><th>Gebucht von</th><th>Notiz</th></tr></thead>
+      <tbody>
+        <% payouts.forEach(function (p) { %>
+        <tr><td><%= p.period %></td><td><%= p.advisor_name || p.advisor_email %></td>
+          <td class="num"><%= fmt(p.amount_cents) %></td><td><%= p.created_by %></td><td><%= p.note %></td></tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

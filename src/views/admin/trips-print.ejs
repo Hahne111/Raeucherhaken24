@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Fahrtenbuch</title>
+<link rel="stylesheet" href="/css/admin.css"></head><body class="is-print">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+  <div>
+    <h1 style="font-size:20px;margin:0">Fahrtenbuch</h1>
+    <p style="margin:2px 0 0;font-size:12px;color:#555">
+      Zeitraum <%= filter.from || 'ohne Anfang' %> bis <%= filter.to || 'ohne Ende' %>
+    </p>
+  </div>
+  <div style="text-align:right;font-size:12px">
+    <strong><%= summary.count %> Fahrten</strong><br><%= summary.km %> km gesamt<br>
+    davon geschäftlich <%= summary.geschaeftlich || 0 %> km
+  </div>
+</div>
+<table class="tbl" style="font-size:11px">
+  <thead><tr><th>Datum</th><th>Fahrzeug</th><th>Fahrer</th><th>Art</th><th>Zweck</th><th>Von</th><th>Nach</th><th class="num">Start</th><th class="num">Ende</th><th class="num">km</th></tr></thead>
+  <tbody>
+    <% rows.forEach(function (r) { %>
+    <tr>
+      <td><%= r.drove_on %></td><td><%= r.vehicle_label %><%= r.plate ? ' (' + r.plate + ')' : '' %></td>
+      <td><%= r.advisor_name %></td><td><%= kinds[r.kind] || r.kind %></td>
+      <td><%= r.purpose %></td><td><%= r.route_from %></td><td><%= r.route_to %></td>
+      <td class="num"><%= r.start_km %></td><td class="num"><%= r.end_km %></td><td class="num"><%= r.km %></td>
+    </tr>
+    <% }); %>
+  </tbody>
+</table>
+<p style="margin-top:18px;font-size:11px;color:#555">
+  Die Kilometerfolge je Fahrzeug ist lückenlos: der Startstand einer Fahrt entspricht dem Endstand der vorigen.
+  Ob dieses Fahrtenbuch den Anforderungen des Finanzamts im Einzelfall genügt, ist mit der Steuerberatung zu klären.
+</p>
+<script>window.onload = function () { window.print(); };</script>
+</body></html>

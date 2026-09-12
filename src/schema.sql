@@ -1103,3 +1103,125 @@ CREATE TABLE IF NOT EXISTS month_closings (
   closed_at  TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+/* ===================== Aussendienst: Provision und Fahrten ===================== */
+
+/*
+ * Provisionsregeln sind versioniert: eine Regel gilt ab `valid_from` und wird
+ * nicht mehr veraendert. Aenderungen entstehen als neue Version, damit eine
+ * bereits gebuchte Provision nachvollziehbar bleibt.
+ */
+CREATE TABLE IF NOT EXISTS commission_rules (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  name           TEXT NOT NULL,
+  valid_from     TEXT NOT NULL,
+  base_percent   REAL NOT NULL DEFAULT 0,
+  leader_percent REAL NOT NULL DEFAULT 0,
+  tiers          TEXT NOT NULL DEFAULT '[]',
+  note           TEXT NOT NULL DEFAULT '',
+  created_by     TEXT NOT NULL DEFAULT '',
+  created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_commission_rules_from ON commission_rules(valid_from);
+
+/*
+ * Eine Provisionsbuchung je Auftrag, Berater und Art. Der Snapshot haelt die
+ * angewandte Regel und den Rechenweg fest.
+ */
+CREATE TABLE IF NOT EXISTS commissions (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id     INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  advisor_id   INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+  rule_id      INTEGER REFERENCES commission_rules(id) ON DELETE SET NULL,
+  kind         TEXT NOT NULL DEFAULT 'basis',
+  period       TEXT NOT NULL,
+  base_cents   INTEGER NOT NULL DEFAULT 0,
+  percent      REAL NOT NULL DEFAULT 0,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  status       TEXT NOT NULL DEFAULT 'offen',
+  snapshot     TEXT NOT NULL DEFAULT '{}',
+  payout_id    INTEGER,
+  note         TEXT NOT NULL DEFAULT '',
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  released_by  TEXT NOT NULL DEFAULT '',
+  released_at  TEXT,
+  UNIQUE (order_id, advisor_id, kind)
+);
+CREATE INDEX IF NOT EXISTS idx_commissions_period ON commissions(period, advisor_id);
+
+/* Auszahlung fasst freigegebene Provisionen eines Beraters zusammen. */
+CREATE TABLE IF NOT EXISTS commission_payouts (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  advisor_id   INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+  period       TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  status       TEXT NOT NULL DEFAULT 'ausgezahlt',
+  note         TEXT NOT NULL DEFAULT '',
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/* Monatsrangliste: erst nach Freigabe fuer den Vertrieb sichtbar. */
+CREATE TABLE IF NOT EXISTS sales_rankings (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  period      TEXT NOT NULL UNIQUE,
+  status      TEXT NOT NULL DEFAULT 'entwurf',
+  rows        TEXT NOT NULL DEFAULT '[]',
+  note        TEXT NOT NULL DEFAULT '',
+  released_by TEXT NOT NULL DEFAULT '',
+  released_at TEXT,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/* Fahrzeuge des Aussendienstes. */
+CREATE TABLE IF NOT EXISTS vehicles (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  label      TEXT NOT NULL,
+  plate      TEXT NOT NULL DEFAULT '',
+  advisor_id INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  start_km   INTEGER NOT NULL DEFAULT 0,
+  active     INTEGER NOT NULL DEFAULT 1,
+  note       TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/*
+ * Fahrtenbuch: je Fahrzeug lueckenlose Kilometerfolge. Der Startstand einer
+ * Fahrt muss dem Endstand der letzten Fahrt desselben Fahrzeugs entsprechen.
+ */
+CREATE TABLE IF NOT EXISTS trips (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  vehicle_id   INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+  advisor_id   INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+  drove_on     TEXT NOT NULL,
+  start_km     INTEGER NOT NULL DEFAULT 0,
+  end_km       INTEGER NOT NULL DEFAULT 0,
+  km           INTEGER NOT NULL DEFAULT 0,
+  kind         TEXT NOT NULL DEFAULT 'geschaeftlich',
+  purpose      TEXT NOT NULL DEFAULT '',
+  route_from   TEXT NOT NULL DEFAULT '',
+  route_to     TEXT NOT NULL DEFAULT '',
+  customer_id  INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  dealer_id    INTEGER REFERENCES dealers(id) ON DELETE SET NULL,
+  note         TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_trips_vehicle ON trips(vehicle_id, drove_on);
+CREATE INDEX IF NOT EXISTS idx_trips_advisor ON trips(advisor_id, drove_on);
+
+/* Reisekostenbeleg zu einer Fahrt oder zu einem Berater. */
+CREATE TABLE IF NOT EXISTS trip_expenses (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  trip_id      INTEGER REFERENCES trips(id) ON DELETE SET NULL,
+  advisor_id   INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+  spent_on     TEXT NOT NULL,
+  category     TEXT NOT NULL DEFAULT 'kraftstoff',
+  gross_cents  INTEGER NOT NULL DEFAULT 0,
+  tax_cents    INTEGER NOT NULL DEFAULT 0,
+  media_url    TEXT NOT NULL DEFAULT '',
+  status       TEXT NOT NULL DEFAULT 'eingereicht',
+  note         TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_trip_expenses ON trip_expenses(advisor_id, spent_on);

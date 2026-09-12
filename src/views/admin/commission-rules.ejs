@@ -1,0 +1,54 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/provision">Zur Provision</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Neue Regelversion</h2></div>
+    <div class="card__body">
+      <p style="color:var(--a-soft)"><small>Eine Regel gilt ab dem angegebenen Datum. Bestehende Versionen bleiben unverändert, damit gebuchte Provisionen nachvollziehbar bleiben.</small></p>
+      <form method="post" action="/verwaltung/provision/regeln">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label>Name <input type="text" name="name" required maxlength="120" placeholder="z. B. Provision 2026"></label>
+        <label>Gültig ab <input type="date" name="valid_from" value="<%= today %>" required></label>
+        <label>Grundsatz in % <input type="text" name="base_percent" value="5" inputmode="decimal"></label>
+        <label>Satz Teamleitung in % <input type="text" name="leader_percent" value="1" inputmode="decimal"></label>
+        <fieldset style="border:1px solid var(--a-line);border-radius:8px;padding:12px">
+          <legend>Stufen (optional)</legend>
+          <% for (var i = 0; i < 3; i++) { %>
+          <div style="display:flex;gap:8px;margin-bottom:6px">
+            <label style="flex:1">ab € <input type="text" name="tier_from" inputmode="decimal" placeholder="z. B. 10000"></label>
+            <label style="flex:1">Satz % <input type="text" name="tier_percent" inputmode="decimal" placeholder="z. B. 7"></label>
+          </div>
+          <% } %>
+        </fieldset>
+        <label>Notiz <textarea name="note" rows="2" maxlength="500"></textarea></label>
+        <button class="btn btn--dark" type="submit">Regelversion speichern</button>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Versionen</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!rows.length) { %>
+        <p style="padding:20px;margin:0;color:var(--a-soft)">Noch keine Regelversion. Ohne Regel wird keine Provision gebucht.</p>
+      <% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Name</th><th>Gültig ab</th><th class="num">Grundsatz</th><th class="num">Leitung</th><th>Stufen</th><th>Angelegt</th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (r) { %>
+          <tr>
+            <td><%= r.name %></td>
+            <td><%= r.valid_from %></td>
+            <td class="num"><%= r.base_percent.toFixed(2).replace('.', ',') %> %</td>
+            <td class="num"><%= r.leader_percent.toFixed(2).replace('.', ',') %> %</td>
+            <td><% if (!r.tier_list.length) { %>–<% } else { %><%= r.tier_list.map(function (t) { return 'ab ' + (t.from_cents / 100).toFixed(0) + ' € → ' + t.percent + ' %'; }).join(', ') %><% } %></td>
+            <td><small><%= r.created_by %></small></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

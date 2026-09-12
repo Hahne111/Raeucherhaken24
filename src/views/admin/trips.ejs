@@ -1,0 +1,133 @@
+<%- include('../partials/admin-head') %>
+<% var qs = 'von=' + encodeURIComponent(filter.from) + '&bis=' + encodeURIComponent(filter.to) + '&fahrzeug=' + filter.vehicleId + '&berater=' + filter.advisorId + '&art=' + encodeURIComponent(filter.kind);
+   var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/fahrten/neu">Fahrt erfassen</a> <a class="btn btn--ghost btn--sm" href="/verwaltung/fahrten/druck?' + qs + '">Druckansicht</a> <a class="btn btn--ghost btn--sm" href="/verwaltung/fahrten/export.csv?' + qs + '">CSV</a>' + (canReview ? ' <a class="btn btn--ghost btn--sm" href="/verwaltung/fahrzeuge">Fahrzeuge</a>' : ''); %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+
+<form method="get" class="filterbar">
+  <label>Von <input type="date" name="von" value="<%= filter.from %>"></label>
+  <label>Bis <input type="date" name="bis" value="<%= filter.to %>"></label>
+  <label>Fahrzeug
+    <select name="fahrzeug"><option value="0">alle</option>
+      <% vehicles.forEach(function (v) { %><option value="<%= v.id %>" <%= filter.vehicleId === v.id ? 'selected' : '' %>><%= v.label %></option><% }); %>
+    </select>
+  </label>
+  <% if (advisors.length) { %>
+  <label>Fahrer
+    <select name="berater"><option value="0">alle</option>
+      <% advisors.forEach(function (a) { %><option value="<%= a.id %>" <%= filter.advisorId === a.id ? 'selected' : '' %>><%= a.name || a.email %></option><% }); %>
+    </select>
+  </label>
+  <% } %>
+  <label>Art
+    <select name="art"><option value="">alle</option>
+      <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>" <%= filter.kind === k ? 'selected' : '' %>><%= kinds[k] %></option><% }); %>
+    </select>
+  </label>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+
+<div class="kpis">
+  <div class="kpi"><span>Fahrten</span><strong><%= summary.count %></strong></div>
+  <div class="kpi"><span>Kilometer gesamt</span><strong><%= summary.km %> km</strong></div>
+  <div class="kpi"><span>Geschäftlich</span><strong><%= summary.geschaeftlich || 0 %> km</strong></div>
+  <div class="kpi"><span>Privat</span><strong><%= summary.privat || 0 %> km</strong></div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Fahrten</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Fahrt im gewählten Zeitraum.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Datum</th><th>Fahrzeug</th><th>Fahrer</th><th>Art</th><th>Zweck</th><th>Strecke</th><th class="num">Start</th><th class="num">Ende</th><th class="num">km</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+        <tr>
+          <td><%= r.drove_on %></td>
+          <td><%= r.vehicle_label %></td>
+          <td><%= r.advisor_name %></td>
+          <td><%= kinds[r.kind] || r.kind %></td>
+          <td><%= r.purpose || '–' %><% if (r.dealer_name) { %><br><small><%= r.dealer_name %></small><% } else if (r.customer_name) { %><br><small><%= r.customer_name %></small><% } %></td>
+          <td><small><%= r.route_from %><%= r.route_to ? ' → ' + r.route_to : '' %></small></td>
+          <td class="num"><%= r.start_km %></td>
+          <td class="num"><%= r.end_km %></td>
+          <td class="num"><strong><%= r.km %></strong></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Beleg erfassen</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/fahrten/beleg">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <% if (advisors.length) { %>
+        <label>Person
+          <select name="advisor_id">
+            <% advisors.forEach(function (a) { %><option value="<%= a.id %>"><%= a.name || a.email %></option><% }); %>
+          </select>
+        </label>
+        <% } %>
+        <label>Datum <input type="date" name="spent_on" required></label>
+        <label>Kategorie
+          <select name="category">
+            <% Object.keys(expenseCategories).forEach(function (k) { %><option value="<%= k %>"><%= expenseCategories[k] %></option><% }); %>
+          </select>
+        </label>
+        <div style="display:flex;gap:10px">
+          <label style="flex:1">Brutto € <input type="text" name="gross" inputmode="decimal" required></label>
+          <label style="flex:1">davon Steuer € <input type="text" name="tax" inputmode="decimal" value="0"></label>
+        </div>
+        <label>Fahrt
+          <select name="trip_id"><option value="">ohne Fahrt</option>
+            <% rows.slice(0, 50).forEach(function (r) { %><option value="<%= r.id %>"><%= r.drove_on %> – <%= r.vehicle_label %> (<%= r.km %> km)</option><% }); %>
+          </select>
+        </label>
+        <label>Datei aus der Medienablage <input type="text" name="media_url" placeholder="/uploads/…"></label>
+        <label>Notiz <input type="text" name="note" maxlength="300"></label>
+        <button class="btn btn--dark" type="submit">Beleg speichern</button>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Belege</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!expenses.length) { %>
+        <p style="padding:20px;margin:0;color:var(--a-soft)">Kein Beleg im gewählten Zeitraum.</p>
+      <% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Datum</th><th>Person</th><th>Kategorie</th><th class="num">Brutto</th><th>Status</th><% if (canReview) { %><th style="width:180px">Prüfen</th><% } %></tr></thead>
+        <tbody>
+          <% expenses.forEach(function (e) { %>
+          <tr>
+            <td><%= e.spent_on %></td>
+            <td><%= e.advisor_name %></td>
+            <td><%= expenseCategories[e.category] || e.category %><% if (e.media_url) { %> <a href="<%= e.media_url %>">Datei</a><% } %></td>
+            <td class="num"><%= fmt(e.gross_cents) %></td>
+            <td><span class="pill"><%= expenseStates[e.status] || e.status %></span></td>
+            <% if (canReview) { %>
+            <td>
+              <form method="post" action="/verwaltung/fahrten/beleg/<%= e.id %>/status" style="display:flex;gap:6px">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <select name="status" aria-label="Status">
+                  <% Object.keys(expenseStates).forEach(function (k) { %><option value="<%= k %>" <%= e.status === k ? 'selected' : '' %>><%= expenseStates[k] %></option><% }); %>
+                </select>
+                <button class="btn btn--ghost btn--sm" type="submit">Setzen</button>
+              </form>
+            </td>
+            <% } %>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

@@ -1,0 +1,37 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/provision">Zur Übersicht</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Provision zu <%= row.order_number %></h2></div>
+    <div class="card__body">
+      <table class="tbl tbl--plain">
+        <tr><th>Berater</th><td><%= row.advisor_name || row.advisor_email %></td></tr>
+        <tr><th>Art</th><td><%= kinds[row.kind] || row.kind %></td></tr>
+        <tr><th>Monat</th><td><%= row.period %></td></tr>
+        <tr><th>Grundlage</th><td><%= fmt(row.base_cents) %> (Warenwert ohne Versand, netto)</td></tr>
+        <tr><th>Satz</th><td><%= row.percent.toFixed(2).replace('.', ',') %> %</td></tr>
+        <tr><th>Betrag</th><td><strong><%= fmt(row.amount_cents) %></strong></td></tr>
+        <tr><th>Status</th><td><span class="pill"><%= states[row.status] || row.status %></span></td></tr>
+        <tr><th>Auftragsstatus</th><td><%= row.order_status %></td></tr>
+        <% if (row.released_at) { %><tr><th>Freigegeben</th><td><%= row.released_at %> durch <%= row.released_by %></td></tr><% } %>
+        <% if (row.note) { %><tr><th>Notiz</th><td><%= row.note %></td></tr><% } %>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Rechenweg zum Zeitpunkt der Buchung</h2></div>
+    <div class="card__body">
+      <% if (snapshot.rule) { %>
+        <p>Regel „<%= snapshot.rule.name %>“, gültig ab <%= snapshot.rule.valid_from %>.</p>
+      <% } %>
+      <table class="tbl tbl--plain">
+        <% (snapshot.steps || []).forEach(function (s) { %>
+          <tr><th><%= s.label %></th><td><%= s.value %></td></tr>
+        <% }); %>
+      </table>
+      <p style="color:var(--a-soft)"><small>Dieser Rechenweg ist mit der Buchung festgeschrieben. Eine spätere Regeländerung verschiebt ihn nicht.</small></p>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

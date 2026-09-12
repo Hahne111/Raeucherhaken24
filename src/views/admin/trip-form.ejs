@@ -1,0 +1,64 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/fahrten">Zurück</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="card" style="max-width:760px">
+  <div class="card__head"><h2>Fahrt erfassen</h2></div>
+  <div class="card__body">
+    <% if (!vehicles.length) { %>
+      <p style="color:var(--a-soft)">Es ist kein aktives Fahrzeug angelegt. Ein Fahrzeug legt die Verwaltung unter „Fahrzeuge“ an.</p>
+    <% } else { %>
+    <form method="get" style="margin-bottom:16px">
+      <label>Fahrzeug wählen
+        <select name="fahrzeug" onchange="this.form.submit()">
+          <% vehicles.forEach(function (v) { %>
+            <option value="<%= v.id %>" <%= vehicleId === v.id ? 'selected' : '' %>><%= v.label %><%= v.plate ? ' (' + v.plate + ')' : '' %></option>
+          <% }); %>
+        </select>
+      </label>
+      <noscript><button class="btn btn--ghost btn--sm" type="submit">Wechseln</button></noscript>
+    </form>
+    <form method="post" action="/verwaltung/fahrten">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="vehicle_id" value="<%= vehicleId %>">
+      <% if (advisors.length) { %>
+      <label>Fahrer
+        <select name="advisor_id">
+          <% advisors.forEach(function (a) { %><option value="<%= a.id %>"><%= a.name || a.email %></option><% }); %>
+        </select>
+      </label>
+      <% } %>
+      <label>Datum <input type="date" name="drove_on" value="<%= today %>" required></label>
+      <div style="display:flex;gap:10px">
+        <label style="flex:1">Start km <input type="number" name="start_km" value="<%= currentKm %>" readonly></label>
+        <label style="flex:1">Ende km <input type="number" name="end_km" min="<%= currentKm + 1 %>" required></label>
+      </div>
+      <p style="color:var(--a-soft);margin-top:-6px"><small>Der Startstand ist der letzte erfasste Stand dieses Fahrzeugs. So bleibt die Kilometerfolge lückenlos.</small></p>
+      <label>Art
+        <select name="kind">
+          <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>"><%= kinds[k] %></option><% }); %>
+        </select>
+      </label>
+      <label>Zweck <input type="text" name="purpose" maxlength="200" placeholder="z. B. Händlerbesuch Nordfisch GmbH"></label>
+      <div style="display:flex;gap:10px">
+        <label style="flex:1">Von <input type="text" name="route_from" maxlength="160"></label>
+        <label style="flex:1">Nach <input type="text" name="route_to" maxlength="160"></label>
+      </div>
+      <div style="display:flex;gap:10px">
+        <label style="flex:1">Kunde
+          <select name="customer_id"><option value="">–</option>
+            <% customers.forEach(function (c) { %><option value="<%= c.id %>"><%= c.name %></option><% }); %>
+          </select>
+        </label>
+        <label style="flex:1">Händler
+          <select name="dealer_id"><option value="">–</option>
+            <% dealers.forEach(function (d) { %><option value="<%= d.id %>"><%= d.name %></option><% }); %>
+          </select>
+        </label>
+      </div>
+      <label>Notiz <textarea name="note" rows="2" maxlength="500"></textarea></label>
+      <button class="btn btn--dark" type="submit">Fahrt speichern</button>
+    </form>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

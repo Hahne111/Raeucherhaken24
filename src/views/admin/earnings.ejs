@@ -1,0 +1,50 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/provision">Zur Provision</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Annahme</h2></div>
+    <div class="card__body">
+      <form method="get">
+        <% if (!mine) { %>
+        <label>Berater
+          <select name="berater">
+            <option value="0">ohne Profil</option>
+            <% advisors.forEach(function (a) { %>
+              <option value="<%= a.id %>" <%= input.advisorId === a.id ? 'selected' : '' %>><%= a.name || a.email %></option>
+            <% }); %>
+          </select>
+        </label>
+        <% } %>
+        <label>Erwarteter Eigenumsatz (netto, ohne Versand) in €
+          <input type="text" name="umsatz" inputmode="decimal" value="<%= input.baseEuro %>" placeholder="z. B. 12000"></label>
+        <label>Erwarteter Teamumsatz in € <input type="text" name="team" inputmode="decimal" value="<%= input.teamBaseEuro %>" placeholder="nur für Teamleitungen"></label>
+        <label>Stichtag <input type="date" name="stichtag" value="<%= input.date %>"></label>
+        <button class="btn btn--dark" type="submit">Rechnen</button>
+      </form>
+      <p style="color:var(--a-soft)"><small><% if (rule) { %>Gerechnet wird mit der Regel „<%= rule.name %>“ (gültig ab <%= rule.valid_from %>).<% } else { %>Für diesen Stichtag ist keine Regelversion hinterlegt.<% } %></small></p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Ergebnis</h2></div>
+    <div class="card__body">
+      <% if (!result) { %>
+        <p style="color:var(--a-soft)">Gib einen erwarteten Umsatz ein und drücke auf „Rechnen“.</p>
+      <% } else { %>
+      <div class="kpis">
+        <div class="kpi"><span>Provision gesamt</span><strong><%= fmt(result.total_cents) %></strong></div>
+        <% if (result.target_cents) { %>
+        <div class="kpi"><span>Zielerreichung</span><strong><%= result.target_reached %> %</strong><small>Ziel <%= fmt(result.target_cents) %></small></div>
+        <% } %>
+      </div>
+      <table class="tbl tbl--plain">
+        <% result.steps.forEach(function (s) { %>
+          <tr><th><%= s.label %></th><td><%= s.value %></td></tr>
+        <% }); %>
+      </table>
+      <p style="color:var(--a-soft)"><small><%= result.hint %></small></p>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

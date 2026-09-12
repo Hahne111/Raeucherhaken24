@@ -20,12 +20,13 @@ const GRANTS = {
   redaktion: ['produkte', 'kategorien', 'medien', 'nachrichten'],
   finanzen: [
     'uebersicht', 'produkt.analyse', 'bestellungen.lesen', 'belege', 'belege.ausstellen',
-    'kassenbuch', 'kassenbuch.buchen', 'finanzen', 'finanzen.buchen', 'einkauf', 'nachrichten'
+    'kassenbuch', 'kassenbuch.buchen', 'finanzen', 'finanzen.buchen', 'einkauf',
+    'provision.eigene', 'provision.verwalten', 'fahrtenbuch', 'fahrtenbuch.pruefen', 'nachrichten'
   ],
   vertrieb: [
     'kunden.lesen', 'kunden.bearbeiten', 'kunden.anlegen',
     'haendler', 'gebiete.lesen', 'gebietsbuch',
-    'termine', 'beratung', 'provision.eigene', 'nachrichten'
+    'termine', 'beratung', 'provision.eigene', 'fahrtenbuch', 'nachrichten'
   ],
   produktion: [
     'produktion', 'produktion.bearbeiten', 'prototypen', 'prototypen.bearbeiten',

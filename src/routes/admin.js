@@ -159,6 +159,11 @@ for (const [prefix, permission] of [
   ['/kassen', 'kasse.einrichten'],
   ['/kassenbuch', 'kassenbuch'],
   ['/finanzen', 'finanzen'],
+  ['/provision', 'provision.eigene'],
+  ['/verdienst', 'provision.eigene'],
+  ['/rangliste', 'provision.eigene'],
+  ['/fahrten', 'fahrtenbuch'],
+  ['/fahrzeuge', 'fahrtenbuch.pruefen'],
   ['/gutscheine', 'gutscheine'],
   ['/versandarten', 'versandarten'],
   ['/einstellungen', 'einstellungen'],
@@ -174,6 +179,7 @@ router.use('/', require('./admin-purchasing'));
 router.use('/', require('./admin-production'));
 router.use('/', require('./admin-pos'));
 router.use('/', require('./admin-finance'));
+router.use('/', require('./admin-sales'));
 
 /* ------------------------------ Lager --------------------------------- */
 router.get('/lager', (req, res) => {

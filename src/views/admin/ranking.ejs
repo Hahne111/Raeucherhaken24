@@ -1,0 +1,55 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/provision?monat=' + period + '">Zur Provision</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="get" class="filterbar">
+  <label>Monat <input type="month" name="monat" value="<%= period %>"></label>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+
+<div class="card">
+  <div class="card__head">
+    <h2>Rangliste <%= period %></h2>
+    <span class="pill <%= state.released ? 'pill--ok' : '' %>"><%= state.released ? 'Freigegeben' : 'Entwurf' %></span>
+  </div>
+  <div class="card__body card__body--flush">
+    <% if (!visible) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Die Rangliste für diesen Monat ist noch nicht freigegeben.</p>
+    <% } else if (!state.rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Für diesen Monat gibt es keine Umsätze.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th style="width:60px">Platz</th><th>Berater</th><th class="num">Umsatz</th><th class="num">Ziel</th><th class="num">Erreicht</th><th>Sterne</th><th class="num">Provision</th></tr></thead>
+      <tbody>
+        <% state.rows.forEach(function (r) { %>
+        <tr<%= mine && r.advisor_id === mine ? ' style="background:var(--a-soft-bg)"' : '' %>>
+          <td><strong><%= r.rank %></strong></td>
+          <td><%= r.advisor_name %></td>
+          <td class="num"><%= fmt(r.base_cents) %></td>
+          <td class="num"><%= r.target_cents ? fmt(r.target_cents) : '–' %></td>
+          <td class="num"><%= r.target_cents ? r.target_reached + ' %' : '–' %></td>
+          <td><%= '★'.repeat(r.stars) + '☆'.repeat(5 - r.stars) %></td>
+          <td class="num"><%= fmt(r.amount_cents) %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <p style="padding:12px 20px;margin:0;color:var(--a-soft)"><small>Sterne nach Zielerreichung: ab 50 % ein Stern, ab 75 % zwei, ab 100 % drei, ab 120 % vier, ab 150 % fünf.</small></p>
+    <% } %>
+  </div>
+</div>
+
+<% if (canManage && !state.released) { %>
+<div class="card">
+  <div class="card__head"><h2>Freigeben</h2></div>
+  <div class="card__body">
+    <p style="color:var(--a-soft)"><small>Mit der Freigabe wird der Stand festgeschrieben und für den Vertrieb sichtbar.</small></p>
+    <form method="post" action="/verwaltung/rangliste/freigeben" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="period" value="<%= period %>">
+      <label style="flex:1 1 260px">Notiz <input type="text" name="note" maxlength="300"></label>
+      <button class="btn btn--dark btn--sm" type="submit">Rangliste freigeben</button>
+    </form>
+  </div>
+</div>
+<% } %>
+<%- include('../partials/admin-foot') %>
