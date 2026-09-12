@@ -1,0 +1,37 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><a href="/warenkorb">Warenkorb</a><span>/</span><span>Kasse</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1>Zahlung</h1></div>
+      <%- include('../partials/checkout-steps') %>
+      <div class="cart-layout">
+        <div class="panel">
+          <div class="panel__head"><h2>Zahlungsart wählen</h2></div>
+          <div class="panel__body">
+            <form method="post" action="/kasse/zahlung">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <% payments.forEach(function (p, i) { %>
+                <label class="shipping-option <%= (draft.payment || (i === 0 ? p.code : '')) === p.code ? 'is-active' : '' %>">
+                  <input type="radio" name="payment_method" value="<%= p.code %>" <%= (draft.payment || (i === 0 ? p.code : '')) === p.code ? 'checked' : '' %> required>
+                  <span><strong><%= p.name %></strong><span><%= p.hint %></span></span>
+                </label>
+              <% }); %>
+              <label class="field" style="margin-top:20px">
+                <span>Anmerkung zur Bestellung (optional)</span>
+                <textarea name="note" rows="3" placeholder="z. B. Wunschtermin oder Hinweise zur Lieferung"><%= draft.note || '' %></textarea>
+              </label>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <a class="btn btn--ghost" href="/kasse/versand">Zurück</a>
+                <button class="btn btn--primary" type="submit">Weiter zur Prüfung <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <%- include('../partials/checkout-summary') %>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

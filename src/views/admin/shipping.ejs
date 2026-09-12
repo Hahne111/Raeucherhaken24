@@ -1,0 +1,46 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<form method="post" action="/verwaltung/versandarten">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <div class="card">
+    <div class="card__head"><h2>Vorhandene Versandarten</h2></div>
+    <div class="card__body card__body--flush">
+      <table class="tbl">
+        <thead><tr><th>Kennung</th><th>Name</th><th>Beschreibung</th><th class="num">Preis</th><th class="num">frei ab</th><th class="num">Sortierung</th><th>Aktiv</th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (m) { %>
+            <tr>
+              <td><code style="font-size:12px"><%= m.code %></code><input type="hidden" name="id" value="<%= m.id %>"></td>
+              <td><input class="inp" type="text" name="name" value="<%= m.name %>"></td>
+              <td><input class="inp" type="text" name="description" value="<%= m.description %>"></td>
+              <td class="num"><input class="inp" type="text" name="price" value="<%= (m.price_cents/100).toFixed(2).replace('.', ',') %>" style="text-align:right"></td>
+              <td class="num"><input class="inp" type="text" name="free_from" value="<%= m.free_from_cents == null ? '' : (m.free_from_cents/100).toFixed(2).replace('.', ',') %>" style="text-align:right" placeholder="—"></td>
+              <td class="num"><input class="inp" type="number" name="sort" value="<%= m.sort %>" style="text-align:right"></td>
+              <td><select class="inp" name="active"><option value="1" <%= m.active ? 'selected' : '' %>>ja</option><option value="0" <%= m.active ? '' : 'selected' %>>nein</option></select></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card__head"><h2>Neue Versandart</h2></div>
+    <div class="card__body">
+      <div class="grid3">
+        <label class="field"><span>Kennung</span><input type="text" name="new_code" placeholder="z. B. eu-standard"></label>
+        <label class="field"><span>Name</span><input type="text" name="new_name" placeholder="Versand EU"></label>
+        <label class="field"><span>Preis</span><input type="text" name="new_price" placeholder="9,90"></label>
+      </div>
+      <div class="grid2">
+        <label class="field"><span>Beschreibung</span><input type="text" name="new_description"></label>
+        <label class="field"><span>Versandfrei ab (optional)</span><input type="text" name="new_free_from" placeholder="99,00"></label>
+      </div>
+      <button class="btn btn--primary" type="submit">Speichern</button>
+    </div>
+  </div>
+</form>
+<div class="ad-alert ad-alert--info">
+  Zusätzlich gilt die globale Versandkostenfrei-Grenze aus den Einstellungen (Gruppe „shop“). Sie greift für alle Versandarten außer Express.
+</div>
+<%- include('../partials/admin-foot') %>

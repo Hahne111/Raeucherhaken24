@@ -1,0 +1,36 @@
+<%- include('../partials/admin-head') %>
+<div class="login-shell">
+  <div class="login-card">
+    <h1>Ersteinrichtung</h1>
+    <p class="sub">Es gibt noch keinen Zugang. Lege jetzt den ersten Verwaltungszugang an – danach ist diese Seite gesperrt.</p>
+    <form method="post" action="/verwaltung/einrichten">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <% if (tokenRequired) { %>
+        <label class="field <%= errors.token ? 'field--error' : '' %>"><span>Einrichtungs-Token</span>
+          <input type="password" name="token" required autocomplete="off">
+          <span class="field__hint">Wert aus der Umgebungsvariable ADMIN_SETUP_TOKEN.</span>
+          <% if (errors.token) { %><span class="field__err"><%= errors.token %></span><% } %>
+        </label>
+      <% } else { %>
+        <div class="ad-alert ad-alert--warn">
+          Es ist kein ADMIN_SETUP_TOKEN gesetzt. Für den produktiven Betrieb sollte dieser Wert in der .env stehen,
+          damit niemand anders den ersten Zugang anlegen kann.
+        </div>
+      <% } %>
+      <label class="field"><span>Name</span><input type="text" name="name" value="<%= values.name %>" autocomplete="name"></label>
+      <label class="field"><span>E-Mail-Adresse</span><input type="email" name="email" value="<%= values.email %>" required autocomplete="username"></label>
+      <label class="field <%= errors.password ? 'field--error' : '' %>"><span>Passwort</span>
+        <input type="password" name="password" required autocomplete="new-password">
+        <span class="field__hint">Mindestens 8 Zeichen, Buchstaben und Ziffern.</span>
+        <% if (errors.password) { %><span class="field__err"><%= errors.password %></span><% } %>
+      </label>
+      <label class="field <%= errors.password2 ? 'field--error' : '' %>"><span>Passwort wiederholen</span>
+        <input type="password" name="password2" required autocomplete="new-password">
+        <% if (errors.password2) { %><span class="field__err"><%= errors.password2 %></span><% } %>
+      </label>
+      <button class="btn btn--dark btn--block" type="submit">Zugang anlegen</button>
+    </form>
+    <a class="back" href="/">Zurück zum Shop</a>
+  </div>
+</div>
+</body></html>

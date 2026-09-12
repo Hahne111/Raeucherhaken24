@@ -1,0 +1,63 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap wrap--narrow">
+    <div class="section">
+      <div style="text-align:center;margin-bottom:34px">
+        <span style="display:inline-grid;place-items:center;width:64px;height:64px;border-radius:50%;background:#e4f3ea;color:var(--ok);margin-bottom:16px">
+          <svg style="width:32px;height:32px"><use href="#i-check"/></svg>
+        </span>
+        <h1 style="font-size:36px;color:var(--navy-800);margin-bottom:10px">Danke für deine Bestellung!</h1>
+        <p style="color:var(--ink-soft);margin:0">
+          Bestellnummer <strong><%= order.number %></strong> · Eingegangen am <%= formatDate(order.created_at) %>
+        </p>
+      </div>
+
+      <div class="panel" style="margin-bottom:20px">
+        <div class="panel__head"><h2>Zusammenfassung</h2><span class="order-status order-status--offen"><%= order.status %></span></div>
+        <% items.forEach(function (item) { %>
+          <div class="lineitem">
+            <span class="lineitem__media"><img src="<%= item.image %>" alt="" width="92" height="78" loading="lazy"></span>
+            <div>
+              <span class="lineitem__title"><%= item.name %></span>
+              <p class="lineitem__meta"><%= item.variant_name %> · <%= item.qty %> × <%= fmt(item.unit_price_cents) %></p>
+            </div>
+            <div class="lineitem__right"><strong><%= fmt(item.total_cents) %></strong></div>
+          </div>
+        <% }); %>
+        <div class="panel__body">
+          <div class="sumrow"><span>Zwischensumme</span><span><%= fmt(order.subtotal_cents) %></span></div>
+          <% if (order.discount_cents > 0) { %><div class="sumrow sumrow--discount"><span>Gutschein <%= order.coupon_code %></span><span>− <%= fmt(order.discount_cents) %></span></div><% } %>
+          <div class="sumrow"><span>Versand (<%= order.shipping_name %>)</span><span><%= order.shipping_cents === 0 ? 'kostenlos' : fmt(order.shipping_cents) %></span></div>
+          <div class="sumrow sumrow--total"><span>Gesamt</span><span><%= fmt(order.total_cents) %></span></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:20px">
+        <div class="panel__head"><h2>Lieferung und Zahlung</h2></div>
+        <div class="panel__body" style="display:grid;grid-template-columns:1fr 1fr;gap:22px;font-size:14.5px">
+          <div>
+            <h3 style="font-size:13px;font-family:var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:8px">Lieferadresse</h3>
+            <p style="white-space:pre-line;margin:0"><%= addressLib.format(shipping) %></p>
+          </div>
+          <div>
+            <h3 style="font-size:13px;font-family:var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:8px">Zahlung</h3>
+            <p style="margin:0"><strong><%= payment ? payment.name : order.payment_method %></strong><br>
+            <span style="color:var(--ink-soft)"><%= payment ? payment.hint : '' %></span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert--info" style="margin-bottom:24px">
+        <span>Der E-Mail-Versand ist noch nicht angebunden – die Bestellbestätigung findest du jederzeit in deinem Konto beziehungsweise unter dieser Bestellnummer.</span>
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a class="btn btn--primary" href="/produkte">Weiter einkaufen</a>
+        <% if (customer) { %><a class="btn btn--ghost" href="/konto/bestellungen">Meine Bestellungen</a>
+        <% } else { %><a class="btn btn--ghost" href="/konto/registrieren">Konto anlegen</a><% } %>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

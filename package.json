@@ -1,0 +1,21 @@
+{
+  "name": "raeucherhaken24",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Räucherhaken24 – Onlineshop für Räucherzubehör und Räucherbedarf",
+  "type": "commonjs",
+  "engines": { "node": ">=22.5" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/seed.js",
+    "reset": "node scripts/seed.js --reset",
+    "create-admin": "node scripts/create-admin.js",
+    "test": "node scripts/smoke-test.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "multer": "^2.0.2"
+  }
+}

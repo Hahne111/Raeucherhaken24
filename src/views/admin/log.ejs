@@ -1,0 +1,44 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/protokoll">
+    <label class="visually-hidden" for="q">Suche</label>
+    <input id="q" type="search" name="q" value="<%= q %>" placeholder="Aktion, Detail oder Person">
+    <label class="visually-hidden" for="bereich">Bereich</label>
+    <select id="bereich" name="bereich">
+      <option value="">Alle Bereiche</option>
+      <% entities.forEach(function (e) { %><option value="<%= e %>" <%= entity === e ? 'selected' : '' %>><%= e %></option><% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Filtern</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/protokoll">Zurücksetzen</a>
+  </form>
+</div>
+<div class="card">
+  <div class="card__head"><h2><%= total %> Einträge</h2></div>
+  <div class="card__body card__body--flush">
+    <table class="tbl">
+      <thead><tr><th>Zeitpunkt</th><th>Person</th><th>Aktion</th><th>Bereich</th><th>Detail</th><th>IP</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (l) { %>
+          <tr>
+            <td style="white-space:nowrap"><%= formatDate(l.created_at) %></td>
+            <td><%= l.actor %></td>
+            <td><code style="font-size:12px"><%= l.action %></code></td>
+            <td><%= l.entity %><%= l.entity_id ? ' #' + l.entity_id : '' %></td>
+            <td><%= l.detail %></td>
+            <td style="color:var(--a-soft);font-size:12px"><%= l.ip %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% if (pages > 1) { %>
+  <nav class="pager">
+    <% for (var i = 1; i <= Math.min(pages, 30); i++) { %>
+      <% if (i === page) { %><span class="is-current"><%= i %></span>
+      <% } else { %><a href="/verwaltung/protokoll?seite=<%= i %>&q=<%= encodeURIComponent(q) %>&bereich=<%= encodeURIComponent(entity) %>"><%= i %></a><% } %>
+    <% } %>
+  </nav>
+<% } %>
+<%- include('../partials/admin-foot') %>

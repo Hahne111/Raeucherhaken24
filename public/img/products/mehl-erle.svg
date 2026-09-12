@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Räuchermehl aus Erle im Papierbeutel">
+  <defs>
+    <linearGradient id="p8bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f4ed"/><stop offset="1" stop-color="#e7e1d3"/></linearGradient>
+    <linearGradient id="p8p" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b39566"/><stop offset=".3" stop-color="#d9c197"/><stop offset=".72" stop-color="#c2a878"/><stop offset="1" stop-color="#93784d"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#p8bg)"/>
+  <ellipse cx="200" cy="258" rx="130" ry="16" fill="#bcb4a4" opacity=".4"/>
+  <path d="M120 84h160l10 168H110z" fill="url(#p8p)"/>
+  <path d="M120 84h50l-6 168h-54z" fill="#fff" opacity=".16"/>
+  <path d="M120 84l14-20h132l14 20z" fill="#a98d5e"/>
+  <path d="M134 64h132l-8 10H142z" fill="#8c734a"/>
+  <rect x="140" y="130" width="120" height="86" rx="4" fill="#f2e8d2"/>
+  <g text-anchor="middle" font-family="Playfair Display, Georgia, serif" fill="#3a2a14">
+    <text x="200" y="158" font-size="19" font-weight="700">RÄUCHER</text>
+    <text x="200" y="180" font-size="19" font-weight="700">MEHL</text>
+    <text x="200" y="202" font-size="12" font-family="Inter, sans-serif" letter-spacing="3" fill="#7a5a30">ERLE · FEIN</text>
+  </g>
+  <g fill="#8a6a3c" opacity=".7">
+    <circle cx="96" cy="244" r="4"/><circle cx="112" cy="252" r="3"/><circle cx="300" cy="246" r="4"/><circle cx="288" cy="254" r="3"/>
+  </g>
+</svg>

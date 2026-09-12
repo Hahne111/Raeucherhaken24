@@ -1,0 +1,28 @@
+<aside class="panel panel--summary">
+  <div class="panel__head"><h2>Deine Bestellung</h2></div>
+  <div class="panel__body">
+    <% checkout.lines.forEach(function (line) { %>
+      <div style="display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--line)">
+        <span style="width:52px;height:46px;background:#f2efe8;border-radius:3px;overflow:hidden;flex:none;display:grid;place-items:center">
+          <img src="<%= line.image %>" alt="" width="52" height="46" style="object-fit:contain" loading="lazy">
+        </span>
+        <span style="flex:1 1 auto;font-size:13.5px;line-height:1.35">
+          <%= line.product_name %><br>
+          <span style="color:var(--ink-soft);font-size:12.5px"><%= line.variant_name %> · <%= line.qty %> ×</span>
+        </span>
+        <span style="font-weight:600;white-space:nowrap"><%= fmt(line.line_total) %></span>
+      </div>
+    <% }); %>
+    <div class="sumrow" style="margin-top:10px"><span>Zwischensumme</span><span><%= fmt(checkout.totals.subtotal) %></span></div>
+    <% if (checkout.totals.discount > 0) { %>
+      <div class="sumrow sumrow--discount"><span>Gutschein <%= checkout.totals.coupon.code %></span><span>− <%= fmt(checkout.totals.discount) %></span></div>
+    <% } %>
+    <div class="sumrow">
+      <span>Versand<%= checkout.totals.method ? ' (' + checkout.totals.method.name + ')' : '' %></span>
+      <span><%= checkout.totals.shipping === 0 ? 'kostenlos' : fmt(checkout.totals.shipping) %></span>
+    </div>
+    <div class="sumrow sumrow--total"><span>Gesamt</span><span><%= fmt(checkout.totals.total) %></span></div>
+    <p style="font-size:12.5px;color:var(--ink-soft);margin:6px 0 0">inkl. <%= checkout.totals.taxRate %> % MwSt. (<%= fmt(checkout.totals.tax) %>)</p>
+    <a class="btn btn--ghost btn--sm btn--block" href="/warenkorb" style="margin-top:14px">Warenkorb ändern</a>
+  </div>
+</aside>

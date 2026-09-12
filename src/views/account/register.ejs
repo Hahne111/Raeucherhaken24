@@ -1,0 +1,46 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap wrap--tight">
+    <div class="section">
+      <div class="pagehead" style="text-align:center"><h1>Konto anlegen</h1><p style="margin:0 auto">Bestellungen verfolgen, Adressen speichern, schneller zur Kasse.</p></div>
+      <div class="panel">
+        <div class="panel__body">
+          <form method="post" action="/konto/registrieren" novalidate>
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <input type="hidden" name="weiter" value="<%= next %>">
+            <div class="field-row">
+              <label class="field <%= errors.first_name ? 'field--error' : '' %>"><span>Vorname</span>
+                <input type="text" name="first_name" value="<%= values.first_name %>" required autocomplete="given-name">
+                <% if (errors.first_name) { %><span class="field__error"><%= errors.first_name %></span><% } %>
+              </label>
+              <label class="field <%= errors.last_name ? 'field--error' : '' %>"><span>Nachname</span>
+                <input type="text" name="last_name" value="<%= values.last_name %>" required autocomplete="family-name">
+                <% if (errors.last_name) { %><span class="field__error"><%= errors.last_name %></span><% } %>
+              </label>
+            </div>
+            <label class="field <%= errors.email ? 'field--error' : '' %>"><span>E-Mail-Adresse</span>
+              <input type="email" name="email" value="<%= values.email %>" required autocomplete="email">
+              <% if (errors.email) { %><span class="field__error"><%= errors.email %></span><% } %>
+            </label>
+            <label class="field <%= errors.password ? 'field--error' : '' %>"><span>Passwort</span>
+              <input type="password" name="password" required autocomplete="new-password">
+              <span class="field__hint">Mindestens 8 Zeichen, Buchstaben und Ziffern.</span>
+              <% if (errors.password) { %><span class="field__error"><%= errors.password %></span><% } %>
+            </label>
+            <label class="field <%= errors.password2 ? 'field--error' : '' %>"><span>Passwort wiederholen</span>
+              <input type="password" name="password2" required autocomplete="new-password">
+              <% if (errors.password2) { %><span class="field__error"><%= errors.password2 %></span><% } %>
+            </label>
+            <label class="check"><input type="checkbox" name="newsletter" value="1"><span>Ich möchte die Rauchzeichen per E-Mail erhalten.</span></label>
+            <button class="btn btn--primary btn--block" type="submit">Konto anlegen</button>
+          </form>
+          <p style="text-align:center;margin:18px 0 0;font-size:14px;color:var(--ink-soft)">
+            Schon registriert? <a href="/konto/anmelden?weiter=<%= encodeURIComponent(next) %>" style="text-decoration:underline">Zur Anmeldung</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

@@ -1,0 +1,59 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><a href="/warenkorb">Warenkorb</a><span>/</span><span>Kasse</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1>Versand</h1></div>
+      <%- include('../partials/checkout-steps') %>
+      <div class="cart-layout">
+        <div>
+          <div class="panel" style="margin-bottom:20px">
+            <div class="panel__head"><h2>Versandart wählen</h2></div>
+            <div class="panel__body">
+              <form method="post" action="/kasse/versand">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <% checkout.totals.methods.forEach(function (m) { %>
+                  <label class="shipping-option <%= checkout.totals.method && checkout.totals.method.code === m.code ? 'is-active' : '' %>">
+                    <input type="radio" name="shipping_code" value="<%= m.code %>" <%= checkout.totals.method && checkout.totals.method.code === m.code ? 'checked' : '' %> required>
+                    <span><strong><%= m.name %></strong><span><%= m.description %></span></span>
+                    <span class="p"><%= m.price_cents === 0 ? 'kostenlos' : fmt(m.price_cents) %><% if (m.free_from_cents) { %><br><span style="font-size:11.5px;font-weight:400;color:var(--ink-soft)">frei ab <%= fmt(m.free_from_cents) %></span><% } %></span>
+                  </label>
+                <% }); %>
+                <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap">
+                  <a class="btn btn--ghost" href="/kasse/adresse">Zurück</a>
+                  <button class="btn btn--primary" type="submit">Weiter zur Zahlung <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Gutschein</h2></div>
+            <div class="panel__body">
+              <form class="coupon-form" method="post" action="/warenkorb/gutschein">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <input type="hidden" name="redirect" value="/kasse/versand">
+                <label class="visually-hidden" for="coupon">Gutscheincode</label>
+                <input id="coupon" class="input" type="text" name="code" value="<%= checkout.totals.coupon ? checkout.totals.coupon.code : '' %>" placeholder="Code eingeben">
+                <button class="btn btn--dark btn--sm" type="submit">Einlösen</button>
+              </form>
+              <% if (checkout.totals.couponError) { %><p class="field__error"><%= checkout.totals.couponError %></p><% } %>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:20px">
+            <div class="panel__head"><h2>Lieferadresse</h2><a class="linkbtn" href="/kasse/adresse">Ändern</a></div>
+            <div class="panel__body" style="white-space:pre-line;font-size:14.5px">
+<%= draft.shipping.first_name %> <%= draft.shipping.last_name %>
+<%= draft.shipping.street %>
+<%= draft.shipping.zip %> <%= draft.shipping.city %>
+<%= draft.email %></div>
+          </div>
+        </div>
+        <%- include('../partials/checkout-summary') %>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

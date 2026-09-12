@@ -1,0 +1,88 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><a href="/warenkorb">Warenkorb</a><span>/</span><span>Kasse</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1>Bestellung prüfen</h1></div>
+      <%- include('../partials/checkout-steps') %>
+      <div class="cart-layout">
+        <div>
+          <div class="panel" style="margin-bottom:20px">
+            <div class="panel__head"><h2>Adressen</h2><a class="linkbtn" href="/kasse/adresse">Ändern</a></div>
+            <div class="panel__body" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+              <div>
+                <h3 style="font-size:14px;font-family:var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:8px">Lieferadresse</h3>
+                <p style="white-space:pre-line;margin:0;font-size:14.5px"><%= addressLib.format(draft.shipping) %></p>
+              </div>
+              <div>
+                <h3 style="font-size:14px;font-family:var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:8px">Rechnungsadresse</h3>
+                <p style="white-space:pre-line;margin:0;font-size:14.5px"><%= addressLib.format(draft.billing || draft.shipping) %></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-bottom:20px">
+            <div class="panel__head"><h2>Versand und Zahlung</h2></div>
+            <div class="panel__body" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:14.5px">
+              <div>
+                <strong><%= checkout.totals.method ? checkout.totals.method.name : 'Versandart offen' %></strong>
+                <div style="color:var(--ink-soft)"><%= checkout.totals.method ? checkout.totals.method.description : '' %></div>
+                <a class="linkbtn" href="/kasse/versand" style="margin-top:6px;display:inline-block">Versandart ändern</a>
+              </div>
+              <div>
+                <strong><%= payment ? payment.name : '' %></strong>
+                <div style="color:var(--ink-soft)"><%= payment ? payment.hint : '' %></div>
+                <a class="linkbtn" href="/kasse/zahlung" style="margin-top:6px;display:inline-block">Zahlungsart ändern</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2><%= checkout.totals.count %> Artikel</h2><a class="linkbtn" href="/warenkorb">Warenkorb ändern</a></div>
+            <% checkout.lines.forEach(function (line) { %>
+              <div class="lineitem">
+                <span class="lineitem__media"><img src="<%= line.image %>" alt="" width="92" height="78" loading="lazy"></span>
+                <div>
+                  <span class="lineitem__title"><%= line.product_name %></span>
+                  <p class="lineitem__meta"><%= line.variant_name %> · <%= line.qty %> × <%= fmt(line.price_cents) %></p>
+                </div>
+                <div class="lineitem__right"><strong><%= fmt(line.line_total) %></strong></div>
+              </div>
+            <% }); %>
+          </div>
+
+          <% if (draft.note) { %>
+            <div class="panel" style="margin-top:20px">
+              <div class="panel__head"><h2>Anmerkung</h2></div>
+              <div class="panel__body" style="white-space:pre-line"><%= draft.note %></div>
+            </div>
+          <% } %>
+        </div>
+
+        <div>
+          <%- include('../partials/checkout-summary') %>
+          <div class="panel" style="margin-top:16px">
+            <div class="panel__body">
+              <form method="post" action="/kasse/bestellen">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <label class="check">
+                  <input type="checkbox" name="agb" value="1" required>
+                  <span>Ich habe die <a href="/seite/agb" target="_blank" style="text-decoration:underline">AGB</a> und die
+                  <a href="/seite/widerruf" target="_blank" style="text-decoration:underline">Widerrufsbelehrung</a> gelesen und stimme zu.</span>
+                </label>
+                <button class="btn btn--primary btn--block" type="submit" style="margin-top:8px">
+                  Zahlungspflichtig bestellen
+                </button>
+                <p style="font-size:12px;color:var(--ink-soft);margin:10px 0 0">
+                  Mit dem Klick geht die Bestellung verbindlich bei uns ein. Du erhältst eine Bestätigung an <%= draft.email %>.
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

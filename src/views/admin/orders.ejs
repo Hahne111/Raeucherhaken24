@@ -1,0 +1,57 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/bestellungen">
+    <label class="visually-hidden" for="q">Suche</label>
+    <input id="q" type="search" name="q" value="<%= q %>" placeholder="Nummer, E-Mail oder Name">
+    <label class="visually-hidden" for="status">Status</label>
+    <select id="status" name="status">
+      <option value="">Alle Status</option>
+      <% statuses.forEach(function (s) { %><option value="<%= s %>" <%= status === s ? 'selected' : '' %>><%= s %></option><% }); %>
+    </select>
+    <label class="visually-hidden" for="versand">Versandstatus</label>
+    <select id="versand" name="versand">
+      <option value="">Alle Versandstatus</option>
+      <% shippingStatuses.forEach(function (s) { %><option value="<%= s %>" <%= shipping === s ? 'selected' : '' %>><%= s %></option><% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Filtern</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/bestellungen">Zurücksetzen</a>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2><%= total %> Bestellungen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Bestellungen gefunden.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Nummer</th><th>Datum</th><th>Kunde</th><th class="num">Artikel</th><th>Status</th><th>Zahlung</th><th>Versand</th><th class="num">Summe</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (o) { %>
+          <tr>
+            <td><a class="link" href="/verwaltung/bestellungen/<%= o.id %>"><%= o.number %></a></td>
+            <td><%= formatDay(o.created_at) %></td>
+            <td><%= o.email %></td>
+            <td class="num"><%= o.item_count %></td>
+            <td><span class="pill <%= o.status === 'offen' ? 'pill--warn' : (o.status === 'abgeschlossen' ? 'pill--ok' : (o.status === 'storniert' ? 'pill--err' : 'pill--info')) %>"><%= o.status %></span></td>
+            <td><span class="pill <%= o.payment_status === 'bezahlt' ? 'pill--ok' : '' %>"><%= o.payment_status %></span></td>
+            <td><span class="pill <%= o.shipping_status === 'zugestellt' ? 'pill--ok' : (o.shipping_status === 'versandt' ? 'pill--info' : '') %>"><%= o.shipping_status %></span></td>
+            <td class="num"><%= fmt(o.total_cents) %></td>
+            <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/bestellungen/<%= o.id %>">Öffnen</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<% if (pages > 1) { %>
+  <nav class="pager">
+    <% for (var i = 1; i <= pages; i++) { %>
+      <% if (i === page) { %><span class="is-current"><%= i %></span>
+      <% } else { %><a href="/verwaltung/bestellungen?seite=<%= i %>&q=<%= encodeURIComponent(q) %>&status=<%= encodeURIComponent(status) %>&versand=<%= encodeURIComponent(shipping) %>"><%= i %></a><% } %>
+    <% } %>
+  </nav>
+<% } %>
+<%- include('../partials/admin-foot') %>

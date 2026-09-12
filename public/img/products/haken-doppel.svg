@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Doppelhaken aus Edelstahl für schwere Ware">
+  <defs>
+    <linearGradient id="p6bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f4ed"/><stop offset="1" stop-color="#e7e2d6"/></linearGradient>
+    <linearGradient id="p6s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7e8891"/><stop offset=".32" stop-color="#f1f5f8"/><stop offset=".65" stop-color="#a2adb5"/><stop offset="1" stop-color="#68727b"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#p6bg)"/>
+  <ellipse cx="200" cy="256" rx="128" ry="15" fill="#b9b2a4" opacity=".35"/>
+  <g fill="none" stroke="url(#p6s)" stroke-width="12" stroke-linecap="round">
+    <path d="M130 62c0-16 12-26 26-26s26 10 26 26"/>
+    <path d="M156 36v92c0 26-18 44-42 44s-38-18-38-40"/>
+    <path d="M156 128c0 26 18 44 42 44s38-18 38-40"/>
+    <path d="M268 70c0-16 12-26 26-26s26 10 26 26"/>
+    <path d="M294 44v84c0 24-16 40-38 40"/>
+    <path d="M294 128c0 24 16 40 38 40s34-16 34-36"/>
+  </g>
+  <g stroke="#fff" stroke-width="2.6" fill="none" opacity=".5" stroke-linecap="round">
+    <path d="M150 44v84"/><path d="M288 52v76"/>
+  </g>
+</svg>

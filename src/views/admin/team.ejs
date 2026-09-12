@@ -1,0 +1,67 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Zugänge</h2></div>
+    <div class="card__body card__body--flush">
+      <table class="tbl">
+        <thead><tr><th>Name</th><th>E-Mail</th><th>Rolle</th><th>Zuletzt angemeldet</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (u) { %>
+            <tr>
+              <td><%= u.name || '–' %></td>
+              <td><%= u.email %></td>
+              <td><%= u.role %></td>
+              <td><%= u.last_login_at ? formatDate(u.last_login_at) : 'nie' %></td>
+              <td><span class="pill <%= u.active ? 'pill--ok' : 'pill--err' %>"><%= u.active ? 'aktiv' : 'gesperrt' %></span></td>
+              <td class="num">
+                <% if (u.id !== admin.id) { %>
+                  <form method="post" action="/verwaltung/team/<%= u.id %>/status">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <input type="hidden" name="active" value="<%= u.active ? '0' : '1' %>">
+                    <button class="btn btn--ghost btn--sm" type="submit"><%= u.active ? 'Sperren' : 'Freigeben' %></button>
+                  </form>
+                <% } else { %><span style="color:var(--a-soft);font-size:12.5px">eigener Zugang</span><% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Neuen Zugang anlegen</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/team">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Name</span><input type="text" name="name"></label>
+          <label class="field"><span>E-Mail</span><input type="email" name="email" required autocomplete="off"></label>
+          <label class="field"><span>Rolle</span>
+            <select name="role"><option value="admin">Administration</option><option value="redaktion">Redaktion</option></select>
+          </label>
+          <label class="field"><span>Passwort</span>
+            <input type="password" name="password" required autocomplete="new-password">
+            <span class="field__hint">Mindestens 8 Zeichen, Buchstaben und Ziffern.</span>
+          </label>
+          <button class="btn btn--primary btn--block" type="submit">Zugang anlegen</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Eigenes Passwort ändern</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/team/passwort">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Aktuelles Passwort</span><input type="password" name="current" required autocomplete="current-password"></label>
+          <label class="field"><span>Neues Passwort</span><input type="password" name="password" required autocomplete="new-password"></label>
+          <label class="field"><span>Wiederholen</span><input type="password" name="password2" required autocomplete="new-password"></label>
+          <button class="btn btn--dark btn--block" type="submit">Passwort ändern</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

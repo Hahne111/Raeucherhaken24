@@ -1,0 +1,29 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap wrap--tight">
+    <div class="section">
+      <div class="pagehead" style="text-align:center"><h1>Anmelden</h1><p style="margin:0 auto">Melde dich an, um Bestellungen und Adressen zu verwalten.</p></div>
+      <div class="panel">
+        <div class="panel__body">
+          <% if (error) { %><div class="alert alert--error" style="margin-bottom:18px"><span><%= error %></span></div><% } %>
+          <form method="post" action="/konto/anmelden">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <input type="hidden" name="weiter" value="<%= next %>">
+            <label class="field"><span>E-Mail-Adresse</span>
+              <input type="email" name="email" value="<%= email %>" required autocomplete="email" autofocus>
+            </label>
+            <label class="field"><span>Passwort</span>
+              <input type="password" name="password" required autocomplete="current-password">
+            </label>
+            <button class="btn btn--primary btn--block" type="submit">Anmelden</button>
+          </form>
+          <p style="text-align:center;margin:18px 0 0;font-size:14px;color:var(--ink-soft)">
+            Noch kein Konto? <a href="/konto/registrieren?weiter=<%= encodeURIComponent(next) %>" style="text-decoration:underline">Jetzt registrieren</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

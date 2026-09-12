@@ -1,0 +1,20 @@
+<%- include('../partials/admin-head') %>
+<div class="login-shell">
+  <div class="login-card">
+    <h1>Verwaltung</h1>
+    <p class="sub">Interner Bereich von <%= site.name %>. Bitte anmelden.</p>
+    <% if (error) { %><div class="ad-alert ad-alert--error"><%= error %></div><% } %>
+    <form method="post" action="/verwaltung/anmelden">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <label class="field"><span>E-Mail-Adresse</span>
+        <input type="email" name="email" value="<%= email %>" required autocomplete="username" autofocus>
+      </label>
+      <label class="field"><span>Passwort</span>
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      <button class="btn btn--dark btn--block" type="submit">Anmelden</button>
+    </form>
+    <a class="back" href="/">Zurück zum Shop</a>
+  </div>
+</div>
+</body></html>

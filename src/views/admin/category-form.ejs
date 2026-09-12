@@ -1,0 +1,83 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<form method="post" action="<%= category.id ? '/verwaltung/kategorien/' + category.id : '/verwaltung/kategorien/neu' %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <div class="cols">
+    <div class="card">
+      <div class="card__head"><h2>Kategorie</h2></div>
+      <div class="card__body">
+        <label class="field <%= errors.name ? 'field--error' : '' %>"><span>Name</span>
+          <input type="text" name="name" value="<%= category.name || '' %>" required data-slug-source>
+          <% if (errors.name) { %><span class="field__err"><%= errors.name %></span><% } %>
+        </label>
+        <label class="field <%= errors.slug ? 'field--error' : '' %>"><span>URL-Kennung</span>
+          <input type="text" name="slug" value="<%= category.slug || '' %>" data-slug-target>
+          <span class="field__hint">Adresse: /kategorie/<em><%= category.slug || 'kennung' %></em></span>
+          <% if (errors.slug) { %><span class="field__err"><%= errors.slug %></span><% } %>
+        </label>
+        <label class="field"><span>Unterzeile (auf der Kachel)</span>
+          <input type="text" name="tagline" value="<%= category.tagline || '' %>" maxlength="120">
+        </label>
+        <label class="field"><span>Beschreibung</span>
+          <textarea name="description" rows="5"><%= category.description || '' %></textarea>
+        </label>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card__head"><h2>Kachelbild</h2></div>
+        <div class="card__body">
+          <label class="field <%= errors.image ? 'field--error' : '' %>"><span>Bildpfad</span>
+            <input id="image-input" type="text" name="image" value="<%= category.image || '' %>" placeholder="/img/cat/beispiel.svg">
+            <% if (errors.image) { %><span class="field__err"><%= errors.image %></span><% } %>
+          </label>
+          <div style="border:1px solid var(--a-line);border-radius:4px;overflow:hidden;background:#f2efe8;margin-bottom:14px">
+            <img id="image-preview" src="<%= category.image || '/img/ui/favicon.svg' %>" alt="Vorschau" style="width:100%;height:150px;object-fit:cover">
+          </div>
+          <p style="font-size:12.5px;color:var(--a-soft);margin:0 0 8px">Vorhandene Bilder:</p>
+          <div class="imggrid">
+            <% media.slice(0, 12).forEach(function (m) { %>
+              <button class="imgcard" type="button" data-pick-image="<%= m.url %>" data-pick-target="image-input" style="cursor:pointer;border:1px solid var(--a-line);padding:0;background:#fff">
+                <span class="imgcard__media"><img src="<%= m.url %>" alt=""></span>
+              </button>
+            <% }); %>
+          </div>
+          <p style="font-size:12.5px;color:var(--a-soft);margin:10px 0 0">
+            Weitere Bilder unter <a class="link" href="/verwaltung/medien">Medien</a> hochladen.
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__head"><h2>Sichtbarkeit</h2></div>
+        <div class="card__body">
+          <label class="check"><input type="checkbox" name="active" value="1" <%= category.active ? 'checked' : '' %>><span>Im Shop und in der Navigation sichtbar</span></label>
+          <label class="check"><input type="checkbox" name="show_home" value="1" <%= category.show_home ? 'checked' : '' %>><span>Als Kachel auf der Startseite</span></label>
+          <label class="field"><span>Reihenfolge</span><input type="number" name="sort" value="<%= category.sort || 0 %>"></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__body" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn--primary" type="submit">Speichern</button>
+          <a class="btn btn--ghost" href="/verwaltung/kategorien">Zurück</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<% if (category.id) { %>
+  <div class="card">
+    <div class="card__head"><h2>Kategorie löschen</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/kategorien/<%= category.id %>/loeschen" data-confirm="Kategorie wirklich löschen?">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn btn--danger" type="submit">Kategorie löschen</button>
+        <span style="color:var(--a-soft);font-size:13px;margin-left:10px">Nur möglich, wenn keine Produkte zugeordnet sind.</span>
+      </form>
+    </div>
+  </div>
+<% } %>
+<%- include('../partials/admin-foot') %>

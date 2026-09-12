@@ -1,0 +1,32 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/kategorien/neu">Neue Kategorie</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="card">
+  <div class="card__head"><h2><%= rows.length %> Kategorien</h2></div>
+  <div class="card__body card__body--flush">
+    <table class="tbl">
+      <thead><tr><th>Bild</th><th>Name</th><th>Kennung</th><th class="num">Produkte</th><th>Sichtbar</th><th>Startseite</th><th class="num">Reihenfolge</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (c) { %>
+          <tr>
+            <td><% if (c.image) { %><img class="thumb" src="<%= c.image %>" alt=""><% } %></td>
+            <td><a class="link" href="/verwaltung/kategorien/<%= c.id %>"><%= c.name %></a><br><small style="color:var(--a-soft)"><%= c.tagline %></small></td>
+            <td><code style="font-size:12px"><%= c.slug %></code></td>
+            <td class="num"><%= c.product_count %></td>
+            <td><span class="pill <%= c.active ? 'pill--ok' : '' %>"><%= c.active ? 'ja' : 'nein' %></span></td>
+            <td><span class="pill <%= c.show_home ? 'pill--info' : '' %>"><%= c.show_home ? 'ja' : 'nein' %></span></td>
+            <td class="num"><%= c.sort %></td>
+            <td class="num">
+              <a class="btn btn--ghost btn--sm" href="/verwaltung/kategorien/<%= c.id %>">Bearbeiten</a>
+              <a class="btn btn--ghost btn--sm" href="/kategorie/<%= c.slug %>" target="_blank" rel="noopener">Ansehen</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="ad-alert ad-alert--info">
+  Die ersten fünf Kategorien mit „Startseite: ja“ erscheinen als Kacheln auf der Startseite – in der angegebenen Reihenfolge.
+</div>
+<%- include('../partials/admin-foot') %>

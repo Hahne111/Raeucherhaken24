@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Hakenleiste aus Edelstahl mit sechs Haken">
+  <defs>
+    <linearGradient id="p5bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f4ed"/><stop offset="1" stop-color="#e6e1d4"/></linearGradient>
+    <linearGradient id="p5r" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dfe6ea"/><stop offset=".4" stop-color="#9aa5ad"/><stop offset=".7" stop-color="#c6cfd5"/><stop offset="1" stop-color="#65707a"/>
+    </linearGradient>
+    <linearGradient id="p5h" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7e8891"/><stop offset=".35" stop-color="#eff4f7"/><stop offset="1" stop-color="#6d7780"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#p5bg)"/>
+  <ellipse cx="200" cy="236" rx="150" ry="14" fill="#bcb4a4" opacity=".35"/>
+  <rect x="46" y="86" width="308" height="26" rx="6" fill="url(#p5r)"/>
+  <rect x="46" y="90" width="308" height="5" rx="2.5" fill="#fff" opacity=".6"/>
+  <g fill="#59636c"><circle cx="70" cy="99" r="5"/><circle cx="330" cy="99" r="5"/></g>
+  <g fill="none" stroke="url(#p5h)" stroke-width="8" stroke-linecap="round">
+    <path d="M104 112v34c0 14 10 24 23 24s22-11 22-25"/>
+    <path d="M150 112v34c0 14 10 24 23 24s22-11 22-25"/>
+    <path d="M196 112v34c0 14 10 24 23 24s22-11 22-25"/>
+    <path d="M242 112v34c0 14 10 24 23 24s22-11 22-25"/>
+    <path d="M288 112v34c0 14 10 24 23 24s22-11 22-25"/>
+    <path d="M58 112v34c0 14 10 24 23 24s22-11 22-25"/>
+  </g>
+</svg>

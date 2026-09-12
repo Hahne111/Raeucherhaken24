@@ -1,0 +1,10 @@
+<nav class="account-nav" aria-label="Kontobereich">
+  <a href="/konto" class="<%= currentPath === '/konto' ? 'is-active' : '' %>">Übersicht</a>
+  <a href="/konto/bestellungen" class="<%= currentPath.indexOf('/konto/bestellungen') === 0 ? 'is-active' : '' %>">Bestellungen</a>
+  <a href="/konto/adressen" class="<%= currentPath.indexOf('/konto/adressen') === 0 ? 'is-active' : '' %>">Adressen</a>
+  <a href="/konto/daten" class="<%= currentPath === '/konto/daten' ? 'is-active' : '' %>">Meine Daten</a>
+</nav>
+<form method="post" action="/konto/abmelden" style="margin-top:14px">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <button class="btn btn--ghost btn--sm btn--block" type="submit">Abmelden</button>
+</form>

@@ -1,0 +1,49 @@
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__brand">
+      <span class="logo__word">Räucherhaken<em style="font-style:normal;color:var(--copper-500)">24</em></span>
+      <span class="logo__sub" style="display:block"><%= site.claim %></span>
+      <p><%= settings.get('footer.about', 'Räucherhaken, Räucheröfen, Räucherholz, Gewürze und Zubehör für alle, die echten Rauchgeschmack schätzen.') %></p>
+    </div>
+    <div>
+      <h3>Sortiment</h3>
+      <ul>
+        <% navCategories.forEach(function (cat) { %><li><a href="/kategorie/<%= cat.slug %>"><%= cat.name %></a></li><% }); %>
+        <li><a href="/angebote">Angebote</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Service</h3>
+      <ul>
+        <li><a href="/konto">Mein Konto</a></li>
+        <li><a href="/konto/bestellungen">Bestellungen</a></li>
+        <li><a href="/warenkorb">Warenkorb</a></li>
+        <li><a href="/seite/versand">Versand &amp; Lieferung</a></li>
+        <li><a href="/seite/hilfe">Hilfe &amp; Kontakt</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Unternehmen</h3>
+      <ul>
+        <li><a href="/seite/ueber-uns">Über uns</a></li>
+        <li><a href="/seite/impressum">Impressum</a></li>
+        <li><a href="/seite/datenschutz">Datenschutz</a></li>
+        <li><a href="/seite/agb">AGB</a></li>
+        <li><a href="/seite/widerruf">Widerruf</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="site-footer__bottom">
+    <span>© <%= new Date().getFullYear() %> <%= site.name %><%= site.city ? ' · ' + site.city : '' %></span>
+    <nav>
+      <a href="/seite/impressum">Impressum</a>
+      <a href="/seite/datenschutz">Datenschutz</a>
+      <a href="/seite/agb">AGB</a>
+      <a class="crew-link" href="/verwaltung" title="Crew" aria-label="Interner Bereich"><svg aria-hidden="true"><use href="#i-anchor"/></svg></a>
+    </nav>
+  </div>
+</footer>
+<script src="/js/site.js" defer></script>
+<% if (typeof pageScript !== 'undefined' && pageScript) { %><script src="<%= pageScript %>" defer></script><% } %>
+</body>
+</html>

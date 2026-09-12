@@ -1,0 +1,65 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Bestellungen</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!orders.length) { %>
+          <p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Bestellung.</p>
+        <% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Nummer</th><th>Datum</th><th>Status</th><th class="num">Summe</th><th></th></tr></thead>
+          <tbody>
+            <% orders.forEach(function (o) { %>
+              <tr>
+                <td><%= o.number %></td><td><%= formatDay(o.created_at) %></td>
+                <td><span class="pill"><%= o.status %></span></td>
+                <td class="num"><%= fmt(o.total_cents) %></td>
+                <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/bestellungen/<%= o.id %>">Öffnen</a></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Adressen</h2></div>
+      <div class="card__body">
+        <% if (!addresses.length) { %>
+          <p style="margin:0;color:var(--a-soft)">Keine gespeicherten Adressen.</p>
+        <% } else { %>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
+            <% addresses.forEach(function (a) { %>
+              <div style="border:1px solid var(--a-line);border-radius:4px;padding:12px;font-size:13.5px">
+                <strong><%= a.first_name %> <%= a.last_name %></strong><br>
+                <span style="color:var(--a-soft)"><%= a.street %><br><%= a.zip %> <%= a.city %><br><%= a.country %></span>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card__head"><h2>Stammdaten</h2></div>
+    <div class="card__body">
+      <p style="margin:0 0 14px;font-size:14px">
+        <strong><%= row.first_name %> <%= row.last_name %></strong><br>
+        <span style="color:var(--a-soft)"><%= row.email %><%= row.phone ? ' · ' + row.phone : '' %></span><br>
+        <span style="color:var(--a-soft)">Kunde seit <%= formatDay(row.created_at) %><%= row.last_login_at ? ' · zuletzt aktiv ' + formatDate(row.last_login_at) : '' %></span>
+      </p>
+      <form method="post" action="/verwaltung/kunden/<%= row.id %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="check"><input type="checkbox" name="active" value="1" <%= row.active ? 'checked' : '' %>><span>Konto aktiv</span></label>
+        <label class="check"><input type="checkbox" name="newsletter" value="1" <%= row.newsletter ? 'checked' : '' %>><span>Newsletter</span></label>
+        <label class="field"><span>Interne Notiz</span><textarea name="note" rows="5"><%= row.note %></textarea></label>
+        <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+      </form>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

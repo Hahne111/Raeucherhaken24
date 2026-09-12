@@ -1,0 +1,136 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<main id="inhalt">
+  <section class="stage">
+    <div class="stage__scene" aria-hidden="true"><%- include('partials/scene') %></div>
+
+    <div class="stage__inner">
+      <div class="hero">
+        <p class="hero__eyebrow reveal"><%= settings.get('home.hero_eyebrow', 'Nordische Tradition. Echter Geschmack.') %></p>
+        <h1 class="hero__title reveal reveal--d1">
+          <%= settings.get('home.hero_title', 'Räuchern mit') %>
+          <em><%= settings.get('home.hero_title_accent', 'Nordseele.') %></em>
+        </h1>
+        <p class="hero__text reveal reveal--d2"><%= settings.get('home.hero_text', '') %></p>
+        <a class="btn btn--hero reveal reveal--d3" href="<%= settings.get('home.hero_cta_url', '/produkte') %>">
+          <%= settings.get('home.hero_cta_label', 'Jetzt entdecken') %>
+          <svg aria-hidden="true"><use href="#i-arrow"/></svg>
+        </a>
+        <p class="hero__coords"><%- esc(settings.get('home.hero_coords', '')).replace(/\n/g, '<br>') %></p>
+      </div>
+
+      <div class="tilerow">
+        <% homeCategories.forEach(function (cat, i) { %>
+          <a class="tile reveal reveal--d<%= Math.min(3, i) %>" href="/kategorie/<%= cat.slug %>">
+            <span class="tile__media">
+              <img src="<%= cat.image || '/img/cat/' + cat.slug + '.svg' %>" alt="" width="300" height="170" loading="<%= i > 2 ? 'lazy' : 'eager' %>">
+            </span>
+            <span class="tile__body">
+              <span class="tile__title"><%= cat.name %></span>
+              <span class="tile__sub"><%= cat.tagline %></span>
+            </span>
+            <span class="tile__go" aria-hidden="true"><svg><use href="#i-arrow"/></svg></span>
+          </a>
+        <% }); %>
+      </div>
+
+      <div class="favorites">
+        <div class="favorites__head">
+          <div class="reveal">
+            <p class="favorites__eyebrow"><%= settings.get('home.fav_eyebrow', 'Ausgewählt mit Leidenschaft') %></p>
+            <h2 class="favorites__title"><%= settings.get('home.fav_title', 'Unsere Favoriten') %></h2>
+          </div>
+          <a class="favorites__link reveal reveal--d1" href="/produkte">
+            <%= settings.get('home.fav_link_label', 'Alle Produkte ansehen') %>
+            <svg aria-hidden="true" style="width:15px;height:15px"><use href="#i-arrow"/></svg>
+          </a>
+        </div>
+
+        <div class="minirow">
+          <% featured.forEach(function (p, i) { %>
+            <div class="minicard reveal reveal--d<%= Math.min(3, i) %>">
+              <a class="minicard__media" href="/produkt/<%= p.slug %>" aria-label="<%= p.name %>">
+                <img src="<%= p.image || '/img/ui/placeholder.svg' %>" alt="<%= p.image_alt || p.name %>" width="400" height="300" loading="lazy">
+              </a>
+              <div class="minicard__body">
+                <a class="minicard__title" href="/produkt/<%= p.slug %>"><%= p.name %></a>
+                <div class="minicard__foot">
+                  <span class="minicard__price">
+                    <%= fmt(p.price_from) %>
+                    <% if (p.on_sale) { %><s><%= fmt(p.compare_cents) %></s><% } %>
+                  </span>
+                  <form action="/warenkorb/hinzufuegen" method="post" data-cart-form>
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <input type="hidden" name="variant_id" value="<%= p.default_variant_id %>">
+                    <input type="hidden" name="qty" value="1">
+                    <input type="hidden" name="redirect" value="/">
+                    <button class="btn-cart" type="submit" <%= p.in_stock ? '' : 'disabled' %>
+                            aria-label="<%= p.name %> in den Warenkorb legen"
+                            title="<%= p.in_stock ? 'In den Warenkorb' : 'Derzeit ausverkauft' %>">
+                      <svg aria-hidden="true"><use href="#i-cart"/></svg>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+
+    <span class="stage__vertical"><%= settings.get('home.side_note', 'Nordsee im Herzen') %></span>
+  </section>
+
+  <section class="usp-band">
+    <div class="usp-band__inner">
+      <div class="usp">
+        <svg aria-hidden="true"><use href="#i-truck"/></svg>
+        <div><h3>Versandfertig in 24 h</h3><p><% if (site.freeFrom) { %>Versandkostenfrei ab <%= fmt(site.freeFrom) %>.<% } else { %>Schneller Versand mit DHL.<% } %></p></div>
+      </div>
+      <div class="usp">
+        <svg aria-hidden="true"><use href="#i-leaf"/></svg>
+        <div><h3>Sortenreines Holz</h3><p>Rindenfrei, trocken gelagert, ohne Bindemittel.</p></div>
+      </div>
+      <div class="usp">
+        <svg aria-hidden="true"><use href="#i-shield"/></svg>
+        <div><h3>Edelstahl statt Kompromiss</h3><p>Haken und Leisten aus lebensmittelechtem V2A.</p></div>
+      </div>
+      <div class="usp">
+        <svg aria-hidden="true"><use href="#i-headset"/></svg>
+        <div><h3>Wir räuchern selbst</h3><p>Beratung von Leuten, die den Ofen kennen.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="story">
+    <div class="story__inner">
+      <div>
+        <p class="pagehead__eyebrow">Handwerk</p>
+        <h2><%= settings.get('home.story_title', 'Vom Hafen auf deinen Tisch') %></h2>
+        <%- textToHtml(settings.get('home.story_text', '')) %>
+        <a class="btn btn--ghost" href="/seite/ueber-uns">Mehr über uns <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="story__art">
+        <img src="/img/cat/raeucherholz.svg" alt="Räucherholz in einer Holzkiste" width="300" height="170" loading="lazy" style="width:100%;height:auto">
+      </div>
+    </div>
+  </section>
+
+  <section class="newsletter">
+    <div class="newsletter__inner">
+      <div>
+        <h2><%= settings.get('home.newsletter_title', 'Rauchzeichen abonnieren') %></h2>
+        <p><%= settings.get('home.newsletter_text', '') %></p>
+      </div>
+      <form action="/newsletter" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="visually-hidden" for="nl-mail">E-Mail-Adresse</label>
+        <input id="nl-mail" type="email" name="email" placeholder="deine@email.de" required>
+        <button class="btn btn--primary" type="submit">Abonnieren</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

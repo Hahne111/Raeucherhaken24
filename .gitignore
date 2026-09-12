@@ -1,0 +1,10 @@
+node_modules/
+data/*.db
+data/*.db-*
+.env
+.env.local
+public/uploads/*
+!public/uploads/.gitkeep
+npm-debug.log*
+tmp/
+screenshots/

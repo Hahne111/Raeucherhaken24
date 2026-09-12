@@ -1,0 +1,14 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap wrap--narrow">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><span><%= heading %></span></nav>
+    <div class="section">
+      <div class="pagehead"><h1><%= heading %></h1></div>
+      <div class="panel"><div class="panel__body" style="font-size:15.5px;line-height:1.75">
+        <%- textToHtml(body) %>
+      </div></div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

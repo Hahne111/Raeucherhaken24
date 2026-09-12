@@ -1,0 +1,121 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><span>Warenkorb</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1>Warenkorb</h1></div>
+
+      <% if (!lines.length) { %>
+        <div class="empty">
+          <h2>Dein Warenkorb ist leer</h2>
+          <p>Stöbere durch unser Sortiment – Haken, Öfen, Holz, Gewürze und Zubehör warten auf dich.</p>
+          <a class="btn btn--primary" href="/produkte" style="margin-top:14px">Produkte ansehen</a>
+        </div>
+      <% } else { %>
+        <div class="cart-layout">
+          <div class="panel">
+            <div class="panel__head">
+              <h2><%= totals.count %> Artikel</h2>
+              <form action="/warenkorb/leeren" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <button class="linkbtn" type="submit">Warenkorb leeren</button>
+              </form>
+            </div>
+            <% lines.forEach(function (line) { %>
+              <div class="lineitem">
+                <a class="lineitem__media" href="/produkt/<%= line.product_slug %>">
+                  <img src="<%= line.image %>" alt="<%= line.product_name %>" width="92" height="78" loading="lazy">
+                </a>
+                <div>
+                  <a class="lineitem__title" href="/produkt/<%= line.product_slug %>"><%= line.product_name %></a>
+                  <p class="lineitem__meta">
+                    <%= line.variant_name %> · Art.-Nr. <%= line.variant_sku || line.product_sku %><br>
+                    Einzelpreis <%= fmt(line.price_cents) %>
+                  </p>
+                  <% if (line.stock_problem) { %>
+                    <p class="field__error">Nur noch <%= line.stock %> Stück verfügbar – bitte Menge anpassen.</p>
+                  <% } %>
+                </div>
+                <div class="lineitem__right">
+                  <strong style="font-family:var(--serif);font-size:19px;color:var(--navy-800)"><%= fmt(line.line_total) %></strong>
+                  <form action="/warenkorb/menge" method="post">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <input type="hidden" name="item_id" value="<%= line.id %>">
+                    <div class="qty">
+                      <button type="button" data-qty="down" aria-label="Menge verringern">−</button>
+                      <label class="visually-hidden" for="qty-<%= line.id %>">Menge für <%= line.product_name %></label>
+                      <input id="qty-<%= line.id %>" type="number" name="qty" value="<%= line.qty %>" min="0" max="<%= Math.max(1, line.stock) %>" inputmode="numeric">
+                      <button type="button" data-qty="up" aria-label="Menge erhöhen">+</button>
+                    </div>
+                    <button class="btn btn--ghost btn--sm" type="submit">Ändern</button>
+                  </form>
+                  <form action="/warenkorb/entfernen" method="post">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <input type="hidden" name="item_id" value="<%= line.id %>">
+                    <button class="linkbtn" type="submit">Entfernen</button>
+                  </form>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+
+          <aside class="panel panel--summary">
+            <div class="panel__head"><h2>Zusammenfassung</h2></div>
+            <div class="panel__body">
+              <div class="sumrow"><span>Zwischensumme</span><span><%= fmt(totals.subtotal) %></span></div>
+              <% if (totals.discount > 0) { %>
+                <div class="sumrow sumrow--discount"><span>Gutschein <%= totals.coupon.code %></span><span>− <%= fmt(totals.discount) %></span></div>
+              <% } %>
+              <div class="sumrow">
+                <span>Versand<%= totals.method ? ' (' + totals.method.name + ')' : '' %></span>
+                <span><%= totals.shipping === 0 ? 'kostenlos' : fmt(totals.shipping) %></span>
+              </div>
+              <% if (totals.missingForFree > 0) { %>
+                <p style="font-size:13px;color:var(--copper-700);margin:4px 0 0">Noch <%= fmt(totals.missingForFree) %> bis zum kostenlosen Versand.</p>
+              <% } %>
+              <div class="sumrow sumrow--total"><span>Gesamt</span><span><%= fmt(totals.total) %></span></div>
+              <p style="font-size:12.5px;color:var(--ink-soft);margin:4px 0 16px">inkl. <%= totals.taxRate %> % MwSt. (<%= fmt(totals.tax) %>)</p>
+
+              <a class="btn btn--primary btn--block" href="/kasse">Zur Kasse <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+              <a class="btn btn--ghost btn--block" href="/produkte" style="margin-top:10px">Weiter einkaufen</a>
+
+              <h3 style="font-size:14px;font-family:var(--sans);text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin:24px 0 10px">Versandart</h3>
+              <form action="/warenkorb/versand" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <input type="hidden" name="redirect" value="/warenkorb">
+                <% totals.methods.forEach(function (m) { %>
+                  <label class="shipping-option <%= totals.method && totals.method.code === m.code ? 'is-active' : '' %>">
+                    <input type="radio" name="shipping_code" value="<%= m.code %>" <%= totals.method && totals.method.code === m.code ? 'checked' : '' %> data-submit-on-change>
+                    <span><strong><%= m.name %></strong><span><%= m.description %></span></span>
+                    <span class="p"><%= m.price_cents === 0 ? 'kostenlos' : fmt(m.price_cents) %></span>
+                  </label>
+                <% }); %>
+                <noscript><button class="btn btn--ghost btn--sm btn--block" type="submit">Versandart übernehmen</button></noscript>
+              </form>
+
+              <h3 style="font-size:14px;font-family:var(--sans);text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin:22px 0 8px">Gutschein</h3>
+              <form class="coupon-form" action="/warenkorb/gutschein" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <input type="hidden" name="redirect" value="/warenkorb">
+                <label class="visually-hidden" for="coupon">Gutscheincode</label>
+                <input id="coupon" class="input" type="text" name="code" value="<%= totals.coupon ? totals.coupon.code : '' %>" placeholder="Code eingeben">
+                <button class="btn btn--dark btn--sm" type="submit"><%= totals.coupon ? 'Ändern' : 'Einlösen' %></button>
+              </form>
+              <% if (totals.couponError) { %><p class="field__error"><%= totals.couponError %></p><% } %>
+              <% if (totals.coupon) { %>
+                <form action="/warenkorb/gutschein" method="post">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                  <input type="hidden" name="code" value="">
+                  <input type="hidden" name="redirect" value="/warenkorb">
+                  <button class="linkbtn" type="submit">Gutschein entfernen</button>
+                </form>
+              <% } %>
+            </div>
+          </aside>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

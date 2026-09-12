@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Tisch-Räucherofen aus Edelstahl mit Deckel">
+  <defs>
+    <linearGradient id="p7bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f4ed"/><stop offset="1" stop-color="#e6e0d2"/></linearGradient>
+    <linearGradient id="p7s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6f7a83"/><stop offset="1" stop-color="#6f7a83"/></linearGradient>
+    <linearGradient id="p7m" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6d7881"/><stop offset=".24" stop-color="#e8eef2"/><stop offset=".58" stop-color="#aab5bd"/><stop offset=".86" stop-color="#eef3f6"/><stop offset="1" stop-color="#5e6871"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#p7bg)"/>
+  <ellipse cx="200" cy="252" rx="140" ry="16" fill="#b9b2a4" opacity=".38"/>
+  <path d="M78 168h244l-14 74H92z" fill="url(#p7m)"/>
+  <path d="M78 168h244l-4 20H82z" fill="#cfd8de" opacity=".7"/>
+  <path d="M70 148h260l-8 22H78z" fill="#8f9aa2"/>
+  <path d="M86 148l14-40h200l14 40z" fill="url(#p7m)"/>
+  <path d="M86 148l14-40h32l-10 40z" fill="#fff" opacity=".22"/>
+  <rect x="176" y="92" width="48" height="18" rx="8" fill="#2b3238"/>
+  <rect x="184" y="84" width="32" height="10" rx="5" fill="#3c454c"/>
+  <g stroke="#4d5760" stroke-width="6" stroke-linecap="round">
+    <path d="M78 196H54"/><path d="M322 196h24"/>
+  </g>
+  <g fill="#3d464d"><rect x="96" y="242" width="22" height="12" rx="3"/><rect x="282" y="242" width="22" height="12" rx="3"/></g>
+  <g fill="#cfdbe3" opacity=".3"><ellipse cx="200" cy="70" rx="26" ry="12"/><ellipse cx="224" cy="52" rx="18" ry="9"/></g>
+</svg>

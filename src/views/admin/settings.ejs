@@ -1,0 +1,42 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="toolbar">
+  <% groups.forEach(function (g) { %>
+    <a class="btn <%= g === group ? 'btn--dark' : 'btn--ghost' %> btn--sm" href="/verwaltung/einstellungen?gruppe=<%= encodeURIComponent(g) %>"><%= g %></a>
+  <% }); %>
+</div>
+
+<form method="post" action="/verwaltung/einstellungen">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <input type="hidden" name="gruppe" value="<%= group %>">
+  <div class="card">
+    <div class="card__head">
+      <h2>Gruppe: <%= group %></h2>
+      <button class="btn btn--primary btn--sm" type="submit">Speichern</button>
+    </div>
+    <div class="card__body">
+      <% if (!rows.length) { %>
+        <p style="margin:0;color:var(--a-soft)">Keine Einstellungen in dieser Gruppe.</p>
+      <% } %>
+      <% rows.forEach(function (row) { %>
+        <label class="field">
+          <span><%= row.label || row.key %></span>
+          <% if (row.kind === 'textarea') { %>
+            <textarea name="v_<%= row.key.replace(/\./g, '__') %>" rows="5"><%= row.value %></textarea>
+          <% } else if (row.kind === 'number') { %>
+            <input type="number" name="v_<%= row.key.replace(/\./g, '__') %>" value="<%= row.value %>">
+          <% } else { %>
+            <input type="text" name="v_<%= row.key.replace(/\./g, '__') %>" value="<%= row.value %>">
+          <% } %>
+          <span class="field__hint"><code><%= row.key %></code></span>
+        </label>
+      <% }); %>
+      <button class="btn btn--primary" type="submit">Speichern</button>
+    </div>
+  </div>
+</form>
+<div class="ad-alert ad-alert--info">
+  Alle Werte greifen sofort nach dem Speichern – ein Neustart oder ein neuer Build ist nicht nötig.
+  Beträge in Cent angeben, wo es im Feldnamen steht.
+</div>
+<%- include('../partials/admin-foot') %>

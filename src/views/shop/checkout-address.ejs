@@ -1,0 +1,143 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><a href="/warenkorb">Warenkorb</a><span>/</span><span>Kasse</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1>Kasse</h1></div>
+      <%- include('../partials/checkout-steps') %>
+      <div class="cart-layout">
+        <div class="panel">
+          <div class="panel__head"><h2>Lieferadresse</h2></div>
+          <div class="panel__body">
+            <% if (!customer) { %>
+              <div class="alert alert--info" style="margin-bottom:20px">
+                <span>Du bestellst als Gast. <a href="/konto/anmelden?weiter=/kasse/adresse" style="text-decoration:underline">Anmelden</a> oder
+                <a href="/konto/registrieren?weiter=/kasse/adresse" style="text-decoration:underline">Konto anlegen</a> geht auch.</span>
+              </div>
+            <% } %>
+
+            <form method="post" action="/kasse/adresse" novalidate>
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+
+              <% if (addresses.length) { %>
+                <p class="field__label">Gespeicherte Adresse verwenden</p>
+                <div class="addressgrid" style="margin-bottom:20px">
+                  <% addresses.forEach(function (a) { %>
+                    <label class="addresscard">
+                      <input type="radio" name="saved_address" value="<%= a.id %>" <%= shipping && shipping.street === a.street && shipping.zip === a.zip ? 'checked' : '' %>>
+                      <h3><%= a.first_name %> <%= a.last_name %></h3>
+                      <div style="color:var(--ink-soft)"><%= a.street %><br><%= a.zip %> <%= a.city %></div>
+                    </label>
+                  <% }); %>
+                  <label class="addresscard">
+                    <input type="radio" name="saved_address" value="0">
+                    <h3>Neue Adresse eingeben</h3>
+                    <div style="color:var(--ink-soft)">Formular unten ausfüllen</div>
+                  </label>
+                </div>
+              <% } %>
+
+              <label class="field <%= errors.email ? 'field--error' : '' %>">
+                <span>E-Mail für die Bestellbestätigung</span>
+                <input type="email" name="email" value="<%= email %>" required autocomplete="email">
+                <% if (errors.email) { %><span class="field__error"><%= errors.email %></span><% } %>
+              </label>
+
+              <div class="field-row">
+                <label class="field <%= errors.first_name ? 'field--error' : '' %>">
+                  <span>Vorname</span>
+                  <input type="text" name="s_first_name" value="<%= shipping.first_name || '' %>" autocomplete="given-name" required>
+                  <% if (errors.first_name) { %><span class="field__error"><%= errors.first_name %></span><% } %>
+                </label>
+                <label class="field <%= errors.last_name ? 'field--error' : '' %>">
+                  <span>Nachname</span>
+                  <input type="text" name="s_last_name" value="<%= shipping.last_name || '' %>" autocomplete="family-name" required>
+                  <% if (errors.last_name) { %><span class="field__error"><%= errors.last_name %></span><% } %>
+                </label>
+              </div>
+              <label class="field"><span>Firma (optional)</span>
+                <input type="text" name="s_company" value="<%= shipping.company || '' %>" autocomplete="organization">
+              </label>
+              <label class="field <%= errors.street ? 'field--error' : '' %>"><span>Straße und Hausnummer</span>
+                <input type="text" name="s_street" value="<%= shipping.street || '' %>" autocomplete="street-address" required>
+                <% if (errors.street) { %><span class="field__error"><%= errors.street %></span><% } %>
+              </label>
+              <div class="field-row">
+                <label class="field <%= errors.zip ? 'field--error' : '' %>"><span>PLZ</span>
+                  <input type="text" name="s_zip" value="<%= shipping.zip || '' %>" autocomplete="postal-code" required>
+                  <% if (errors.zip) { %><span class="field__error"><%= errors.zip %></span><% } %>
+                </label>
+                <label class="field <%= errors.city ? 'field--error' : '' %>"><span>Ort</span>
+                  <input type="text" name="s_city" value="<%= shipping.city || '' %>" autocomplete="address-level2" required>
+                  <% if (errors.city) { %><span class="field__error"><%= errors.city %></span><% } %>
+                </label>
+              </div>
+              <div class="field-row">
+                <label class="field"><span>Land</span>
+                  <select name="s_country">
+                    <% countries.forEach(function (c) { %>
+                      <option value="<%= c[0] %>" <%= (shipping.country || 'DE') === c[0] ? 'selected' : '' %>><%= c[1] %></option>
+                    <% }); %>
+                  </select>
+                </label>
+                <label class="field"><span>Telefon (optional)</span>
+                  <input type="tel" name="s_phone" value="<%= shipping.phone || '' %>" autocomplete="tel">
+                </label>
+              </div>
+
+              <label class="check">
+                <input type="checkbox" name="billing_differs" value="1" id="billing-toggle" data-toggle="billing-fields" <%= billingDiffers ? 'checked' : '' %>>
+                <span>Rechnungsadresse weicht ab</span>
+              </label>
+
+              <div id="billing-fields" <%= billingDiffers ? '' : 'hidden' %> style="border-top:1px solid var(--line);margin-top:16px;padding-top:18px">
+                <h3 style="font-size:17px;margin-bottom:14px">Rechnungsadresse</h3>
+                <div class="field-row">
+                  <label class="field <%= errors.b_first_name ? 'field--error' : '' %>"><span>Vorname</span>
+                    <input type="text" name="b_first_name" value="<%= billing.first_name || '' %>">
+                    <% if (errors.b_first_name) { %><span class="field__error"><%= errors.b_first_name %></span><% } %>
+                  </label>
+                  <label class="field <%= errors.b_last_name ? 'field--error' : '' %>"><span>Nachname</span>
+                    <input type="text" name="b_last_name" value="<%= billing.last_name || '' %>">
+                    <% if (errors.b_last_name) { %><span class="field__error"><%= errors.b_last_name %></span><% } %>
+                  </label>
+                </div>
+                <label class="field"><span>Firma (optional)</span><input type="text" name="b_company" value="<%= billing.company || '' %>"></label>
+                <label class="field <%= errors.b_street ? 'field--error' : '' %>"><span>Straße und Hausnummer</span>
+                  <input type="text" name="b_street" value="<%= billing.street || '' %>">
+                  <% if (errors.b_street) { %><span class="field__error"><%= errors.b_street %></span><% } %>
+                </label>
+                <div class="field-row">
+                  <label class="field <%= errors.b_zip ? 'field--error' : '' %>"><span>PLZ</span>
+                    <input type="text" name="b_zip" value="<%= billing.zip || '' %>">
+                    <% if (errors.b_zip) { %><span class="field__error"><%= errors.b_zip %></span><% } %>
+                  </label>
+                  <label class="field <%= errors.b_city ? 'field--error' : '' %>"><span>Ort</span>
+                    <input type="text" name="b_city" value="<%= billing.city || '' %>">
+                    <% if (errors.b_city) { %><span class="field__error"><%= errors.b_city %></span><% } %>
+                  </label>
+                </div>
+                <label class="field"><span>Land</span>
+                  <select name="b_country">
+                    <% countries.forEach(function (c) { %>
+                      <option value="<%= c[0] %>" <%= (billing.country || 'DE') === c[0] ? 'selected' : '' %>><%= c[1] %></option>
+                    <% }); %>
+                  </select>
+                </label>
+              </div>
+
+              <% if (customer) { %>
+                <label class="check"><input type="checkbox" name="save_address" value="1"><span>Diese Adresse in meinem Konto speichern</span></label>
+              <% } %>
+
+              <button class="btn btn--primary" type="submit" style="margin-top:8px">Weiter zum Versand <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+            </form>
+          </div>
+        </div>
+        <%- include('../partials/checkout-summary') %>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>
