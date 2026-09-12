@@ -1,0 +1,24 @@
+{
+  "name": "Räucherhaken24",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "postCreateCommand": "npm install && npm run seed",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Räucherhaken24",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint"],
+      "settings": {
+        "files.eol": "\n"
+      }
+    }
+  },
+  "remoteEnv": {
+    "NODE_ENV": "development",
+    "PORT": "3000"
+  }
+}

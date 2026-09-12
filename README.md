@@ -18,6 +18,30 @@ Nützliche Zufallswerte erzeugen:
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
+### In GitHub Codespaces starten
+
+Der Codespace bringt über `.devcontainer/devcontainer.json` bereits Node 22 mit
+und führt `npm install` sowie `npm run seed` beim Anlegen aus. Danach genügt:
+
+```bash
+npm start
+```
+
+Codespaces leitet Port 3000 automatisch weiter und öffnet die Vorschau; über
+„Ports" lässt sich die Adresse auch im Browser öffnen. Ohne `.env` läuft der
+Shop im Entwicklungsmodus mit einem Sitzungsschlüssel, der bei jedem Neustart
+wechselt – dann wird man nach einem Neustart abgemeldet. Für dauerhafte
+Sitzungen einmalig:
+
+```bash
+printf 'SESSION_SECRET=%s\n' "$(node -e "console.log(require('crypto').randomBytes(48).toString('hex'))")" > .env
+```
+
+Läuft der Shop hinter der HTTPS-Weiterleitung von Codespaces, zusätzlich
+`TRUST_PROXY=1` in die `.env` schreiben. Wichtig: Node 22.5 oder neuer wird
+benötigt, weil die Datenbank das eingebaute Modul `node:sqlite` nutzt; ältere
+Versionen brechen mit einer entsprechenden Meldung ab.
+
 ### Ersten Verwaltungszugang anlegen
 
 Zwei Wege, beide ohne Passwort im Code oder in Git:

@@ -20,6 +20,14 @@ if (fs.existsSync(envFile)) {
   }
 }
 
+// node:sqlite gibt es erst ab Node 22.5 – ohne klare Meldung wäre der Fehler kryptisch.
+const [major, minor] = process.versions.node.split('.').map(Number);
+if (major < 22 || (major === 22 && minor < 5)) {
+  console.error(`[config] Node ${process.versions.node} ist zu alt. Benötigt wird Node 22.5 oder neuer ` +
+    '(die Datenbank nutzt das eingebaute Modul node:sqlite).');
+  process.exit(1);
+}
+
 const rootDir = path.join(__dirname, '..');
 const dataDir = path.join(rootDir, 'data');
 fs.mkdirSync(dataDir, { recursive: true });
