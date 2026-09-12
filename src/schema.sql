@@ -510,3 +510,109 @@ CREATE TABLE IF NOT EXISTS mail_outbox (
   sent_at     TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_mail_outbox_status ON mail_outbox(status, due_at);
+
+/* ======================= Belege und Dokumente ========================== */
+
+/* Fortlaufende Nummernkreise. Eine Nummer wird nie zweimal vergeben. */
+CREATE TABLE IF NOT EXISTS document_counters (
+  series     TEXT PRIMARY KEY,
+  next_seq   INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS documents (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  doc_type      TEXT NOT NULL,
+  number        TEXT NOT NULL UNIQUE,
+  series        TEXT NOT NULL DEFAULT '',
+  seq           INTEGER NOT NULL DEFAULT 0,
+  order_id      INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  customer_id   INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  issued_at     TEXT NOT NULL DEFAULT (datetime('now')),
+  due_at        TEXT,
+  status        TEXT NOT NULL DEFAULT 'ausgestellt',
+  net_cents     INTEGER NOT NULL DEFAULT 0,
+  tax_cents     INTEGER NOT NULL DEFAULT 0,
+  discount_cents INTEGER NOT NULL DEFAULT 0,
+  shipping_cents INTEGER NOT NULL DEFAULT 0,
+  total_cents   INTEGER NOT NULL DEFAULT 0,
+  paid_cents    INTEGER NOT NULL DEFAULT 0,
+  /* Unveraenderlicher Stand zum Zeitpunkt der Ausstellung (JSON). */
+  snapshot      TEXT NOT NULL DEFAULT '{}',
+  cancels_id    INTEGER REFERENCES documents(id) ON DELETE SET NULL,
+  note          TEXT NOT NULL DEFAULT '',
+  created_by    TEXT NOT NULL DEFAULT '',
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_documents_order ON documents(order_id);
+CREATE INDEX IF NOT EXISTS idx_documents_type ON documents(doc_type, issued_at);
+
+CREATE TABLE IF NOT EXISTS document_events (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  event       TEXT NOT NULL,
+  detail      TEXT NOT NULL DEFAULT '',
+  actor       TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_document_events ON document_events(document_id, id);
+
+/* ============================= Versand ================================= */
+
+CREATE TABLE IF NOT EXISTS carriers (
+  code        TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  active      INTEGER NOT NULL DEFAULT 1,
+  tracking_url TEXT NOT NULL DEFAULT '',
+  note        TEXT NOT NULL DEFAULT '',
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS shipments (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id     INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  carrier_code TEXT NOT NULL DEFAULT '',
+  service      TEXT NOT NULL DEFAULT '',
+  status       TEXT NOT NULL DEFAULT 'vorbereitet',
+  /* manuell = von Hand eingetragen, api = vom Dienstleister erzeugt */
+  source       TEXT NOT NULL DEFAULT 'manuell',
+  tracking_code TEXT NOT NULL DEFAULT '',
+  label_url    TEXT NOT NULL DEFAULT '',
+  weight_g     INTEGER NOT NULL DEFAULT 0,
+  note         TEXT NOT NULL DEFAULT '',
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  shipped_at   TEXT,
+  delivered_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_shipments_order ON shipments(order_id);
+
+CREATE TABLE IF NOT EXISTS shipment_packages (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  shipment_id  INTEGER NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+  package_no   INTEGER NOT NULL DEFAULT 1,
+  tracking_code TEXT NOT NULL DEFAULT '',
+  weight_g     INTEGER NOT NULL DEFAULT 0,
+  length_mm    INTEGER NOT NULL DEFAULT 0,
+  width_mm     INTEGER NOT NULL DEFAULT 0,
+  height_mm    INTEGER NOT NULL DEFAULT 0,
+  note         TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_shipment_packages ON shipment_packages(shipment_id);
+
+CREATE TABLE IF NOT EXISTS shipment_items (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  shipment_id   INTEGER NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+  order_item_id INTEGER NOT NULL,
+  qty           INTEGER NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS idx_shipment_items ON shipment_items(shipment_id);
+
+CREATE TABLE IF NOT EXISTS shipment_events (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  shipment_id INTEGER NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+  status      TEXT NOT NULL,
+  detail      TEXT NOT NULL DEFAULT '',
+  actor       TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);

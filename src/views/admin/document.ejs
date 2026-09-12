@@ -1,0 +1,99 @@
+<%- include('../partials/admin-head') %>
+<%
+var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/belege">Zur Belegliste</a>'
+  + ' <a class="btn btn--ghost btn--sm" target="_blank" rel="noopener" href="/verwaltung/belege/' + row.id + '/druck">Druckansicht</a>'
+  + ' <a class="btn btn--primary btn--sm" target="_blank" rel="noopener" href="/verwaltung/belege/' + row.id + '/pdf">PDF</a>';
+%>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<% if (row.status === 'storniert') { %>
+  <div class="ad-alert ad-alert--warn">Dieser Beleg ist storniert. Er bleibt unverändert erhalten; der Stornobeleg steht im Verlauf.</div>
+<% } %>
+<% if (replaces) { %>
+  <div class="ad-alert ad-alert--info">Stornobeleg zu <a class="link" href="/verwaltung/belege/<%= replaces.id %>"><%= replaces.number %></a>.</div>
+<% } %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Positionen zum Zeitpunkt der Ausstellung</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <thead><tr><th>Artikel</th><th>Art.-Nr.</th><th class="num">Menge</th><th class="num">Einzel</th><th class="num">Summe</th></tr></thead>
+          <tbody>
+            <% (snapshot.items || []).forEach(function (i) { %>
+              <tr>
+                <td><%= i.name %><% if (i.variant_name) { %><br><span style="font-size:12px;color:var(--a-soft)"><%= i.variant_name %></span><% } %></td>
+                <td><%= i.sku %></td>
+                <td class="num"><%= i.qty %></td>
+                <td class="num"><%= fmt(i.unit_price_cents) %></td>
+                <td class="num"><%= fmt(i.total_cents) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="4" class="num">Zwischensumme</td><td class="num"><%= fmt((snapshot.totals||{}).subtotal_cents || 0) %></td></tr>
+            <tr><td colspan="4" class="num"><strong>Belegbetrag</strong></td><td class="num"><strong><%= fmt(row.total_cents) %></strong></td></tr>
+            <tr><td colspan="4" class="num" style="color:var(--a-soft)">darin Umsatzsteuer</td><td class="num" style="color:var(--a-soft)"><%= fmt(row.tax_cents) %></td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Verlauf</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <tbody>
+            <% events.forEach(function (e) { %>
+              <tr><td><%= e.event %></td><td><%= e.detail %></td><td style="color:var(--a-soft)"><%= e.actor %> · <%= formatDate(e.created_at) %></td></tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Beleg</h2></div>
+      <div class="card__body">
+        <table class="tbl tbl--plain"><tbody>
+          <tr><th style="text-align:left">Nummer</th><td><strong><%= row.number %></strong></td></tr>
+          <tr><th style="text-align:left">Art</th><td><%= (types[row.doc_type] || {}).label || row.doc_type %></td></tr>
+          <tr><th style="text-align:left">Status</th><td><%= states[row.status] || row.status %></td></tr>
+          <tr><th style="text-align:left">Datum</th><td><%= formatDate(row.issued_at) %></td></tr>
+          <tr><th style="text-align:left">Fällig</th><td><%= row.due_at || '–' %></td></tr>
+          <tr><th style="text-align:left">Bestellung</th><td><% if (row.order_id) { %><a class="link" href="/verwaltung/bestellungen/<%= row.order_id %>"><%= row.order_number %></a><% } else { %>–<% } %></td></tr>
+          <tr><th style="text-align:left">Kunde</th><td><% if (row.customer_id) { %><a class="link" href="/verwaltung/kunden/<%= row.customer_id %>"><%= row.customer_company || row.customer_email %></a><% } else { %><%= (snapshot.order||{}).email || '–' %><% } %></td></tr>
+          <tr><th style="text-align:left">Ausgestellt von</th><td><%= row.created_by %></td></tr>
+        </tbody></table>
+        <% if (row.note) { %><p style="margin:14px 0 0;font-size:13.5px;white-space:pre-line"><%= row.note %></p><% } %>
+      </div>
+    </div>
+    <% if (canWrite) { %>
+    <div class="card">
+      <div class="card__head"><h2>Per E-Mail senden</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/belege/<%= row.id %>/senden">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Empfänger</span><input type="email" name="email" value="<%= (snapshot.order||{}).email || row.customer_email || '' %>" required></label>
+          <button class="btn btn--dark btn--block" type="submit">In den Ausgangskorb</button>
+        </form>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">
+          Systemmail: <strong><%= mailStatus.configured ? 'eingerichtet' : 'nicht eingerichtet' %></strong><% if (!mailStatus.configured) { %> – es fehlt <%= mailStatus.missing.join(', ') %><% } %>.
+        </p>
+      </div>
+    </div>
+    <% if (row.status === 'ausgestellt' && row.doc_type !== 'storno') { %>
+    <div class="card">
+      <div class="card__head"><h2>Stornieren</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/belege/<%= row.id %>/stornieren" data-confirm="Beleg stornieren? Es entsteht ein Stornobeleg; der alte Beleg bleibt erhalten.">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Grund</span><input type="text" name="reason" maxlength="300"></label>
+          <button class="btn btn--danger btn--block" type="submit">Beleg stornieren</button>
+        </form>
+      </div>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

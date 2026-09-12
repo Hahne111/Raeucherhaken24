@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title><%= row.number %></title>
+<link rel="stylesheet" href="/css/admin.css"></head><body class="is-print">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
+  <div>
+    <h1 style="font-size:20px;margin:0"><%= (snapshot.shop || {}).name || 'Räucherhaken24' %></h1>
+    <p style="margin:2px 0 0;font-size:12px;color:#555"><%= (snapshot.shop || {}).address || '' %></p>
+  </div>
+  <div style="text-align:right">
+    <h2 style="font-size:18px;margin:0"><%= (types[row.doc_type] || {}).label || row.doc_type %></h2>
+    <p style="margin:2px 0 0;font-size:12px">Nr. <strong><%= row.number %></strong><br>Datum <%= formatDay(row.issued_at) %><br>Bestellung <%= row.order_number || '–' %><% if (row.due_at) { %><br>Fällig <%= row.due_at %><% } %></p>
+  </div>
+</div>
+<div style="display:flex;gap:40px;margin-bottom:22px">
+  <div><strong style="font-size:11px;text-transform:uppercase;color:#555">Rechnungsanschrift</strong>
+    <p style="margin:4px 0 0;font-size:13px;white-space:pre-line"><%
+      var b = snapshot.billing_address || {};
+      %><%= [b.company, ((b.first_name||'') + ' ' + (b.last_name||'')).trim(), b.street, ((b.zip||'') + ' ' + (b.city||'')).trim()].filter(Boolean).join('\n') %></p>
+  </div>
+  <% if (row.doc_type === 'lieferschein') { var sh = snapshot.shipping_address || {}; %>
+  <div><strong style="font-size:11px;text-transform:uppercase;color:#555">Lieferanschrift</strong>
+    <p style="margin:4px 0 0;font-size:13px;white-space:pre-line"><%= [sh.company, ((sh.first_name||'') + ' ' + (sh.last_name||'')).trim(), sh.street, ((sh.zip||'') + ' ' + (sh.city||'')).trim()].filter(Boolean).join('\n') %></p>
+  </div>
+  <% } %>
+</div>
+<table class="tbl">
+  <thead><tr><th>Artikel</th><th>Art.-Nr.</th><th class="num">Menge</th><% if (row.doc_type !== 'lieferschein') { %><th class="num">Einzel</th><th class="num">Summe</th><% } %></tr></thead>
+  <tbody>
+    <% (snapshot.items || []).forEach(function (i) { %>
+      <tr><td><%= i.name %><%= i.variant_name ? ' – ' + i.variant_name : '' %></td><td><%= i.sku %></td><td class="num"><%= i.qty %></td>
+      <% if (row.doc_type !== 'lieferschein') { %><td class="num"><%= fmt(i.unit_price_cents) %></td><td class="num"><%= fmt(i.total_cents) %></td><% } %></tr>
+    <% }); %>
+  </tbody>
+  <% if (row.doc_type !== 'lieferschein') { %>
+  <tfoot>
+    <tr><td colspan="4" class="num">Zwischensumme</td><td class="num"><%= fmt((snapshot.totals||{}).subtotal_cents||0) %></td></tr>
+    <tr><td colspan="4" class="num">Versand</td><td class="num"><%= fmt((snapshot.totals||{}).shipping_cents||0) %></td></tr>
+    <tr><td colspan="4" class="num"><strong>Gesamt</strong></td><td class="num"><strong><%= fmt(row.total_cents) %></strong></td></tr>
+    <tr><td colspan="4" class="num" style="color:#555">darin Umsatzsteuer</td><td class="num" style="color:#555"><%= fmt(row.tax_cents) %></td></tr>
+  </tfoot>
+  <% } %>
+</table>
+<p style="margin-top:20px;font-size:11px;color:#555">
+  <% if ((snapshot.shop||{}).tax_id) { %>Steuernummer / USt-IdNr.: <%= snapshot.shop.tax_id %><br><% } %>
+  <% if ((snapshot.shop||{}).bank) { %><%= snapshot.shop.bank %><br><% } %>
+  Vor produktivem Einsatz sind die Pflichtangaben fachlich zu prüfen.
+</p>
+</body></html>

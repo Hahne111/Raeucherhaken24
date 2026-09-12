@@ -1,0 +1,59 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<% if (!shopReady) { %>
+  <div class="ad-alert ad-alert--warn">
+    Für rechtssichere Belege fehlen noch Firmierung und Steuernummer.
+    <a class="link" href="/verwaltung/einstellungen?gruppe=shop">Unter Einstellungen → Shop eintragen.</a>
+    Die Pflichtangaben sind vor produktivem Einsatz fachlich zu prüfen.
+  </div>
+<% } %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/belege">
+    <input type="search" name="q" value="<%= q %>" placeholder="Belegnummer, Bestellung, Kunde" aria-label="Suche">
+    <select name="art" aria-label="Belegart">
+      <option value="">Alle Arten</option>
+      <% Object.keys(types).forEach(function (k) { %><option value="<%= k %>" <%= type === k ? 'selected' : '' %>><%= types[k].label %></option><% }); %>
+    </select>
+    <select name="status" aria-label="Status">
+      <option value="">Alle Status</option>
+      <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Suchen</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/belege">Zurücksetzen</a>
+  </form>
+</div>
+<div class="card">
+  <div class="card__head"><h2><%= result.total %> Belege</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!result.rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Noch kein Beleg. Belege entstehen aus einer Bestellung.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Nummer</th><th>Art</th><th>Bestellung</th><th>Kunde</th><th>Datum</th><th>Fällig</th><th class="num">Betrag</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <% result.rows.forEach(function (d) { %>
+          <tr>
+            <td><a class="link" href="/verwaltung/belege/<%= d.id %>"><%= d.number %></a></td>
+            <td><%= (types[d.doc_type] || {}).label || d.doc_type %></td>
+            <td><%= d.order_number || '–' %></td>
+            <td><%= d.customer_company || d.customer_email || '–' %></td>
+            <td><%= formatDay(d.issued_at) %></td>
+            <td><%= d.due_at || '–' %></td>
+            <td class="num"><%= fmt(d.total_cents) %></td>
+            <td><span class="pill <%= d.status === 'storniert' ? 'pill--err' : 'pill--ok' %>"><%= states[d.status] || d.status %></span></td>
+            <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/belege/<%= d.id %>/pdf" target="_blank" rel="noopener">PDF</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<% if (result.pages > 1) { %>
+  <div class="toolbar">
+    <% for (var i = 1; i <= result.pages; i++) { %>
+      <a class="btn btn--sm <%= i === page ? 'btn--dark' : 'btn--ghost' %>" href="/verwaltung/belege?seite=<%= i %>&q=<%= encodeURIComponent(q) %>&art=<%= type %>&status=<%= status %>"><%= i %></a>
+    <% } %>
+  </div>
+<% } %>
+<%- include('../partials/admin-foot') %>

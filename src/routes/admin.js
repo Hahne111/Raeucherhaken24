@@ -146,6 +146,8 @@ for (const [prefix, permission] of [
   ['/termine', 'termine'],
   ['/beratung', 'beratung'],
   ['/gebietsbuch', 'gebietsbuch'],
+  ['/belege', 'belege'],
+  ['/versand', 'versand'],
   ['/gutscheine', 'gutscheine'],
   ['/versandarten', 'versandarten'],
   ['/einstellungen', 'einstellungen'],
@@ -156,6 +158,7 @@ router.use('/nachrichten', require('./admin-messages'));
 router.use('/', require('./admin-crm'));
 router.use('/', require('./admin-calendar'));
 router.use('/', require('./admin-consulting'));
+router.use('/', require('./admin-documents'));
 
 /* ------------------------------ Lager --------------------------------- */
 router.get('/lager', (req, res) => {
@@ -868,6 +871,12 @@ router.get('/bestellungen/:id', (req, res, next) => {
     paymentStatuses: orders.PAYMENT_STATUS,
     shippingStatuses: orders.SHIPPING_STATUS,
     customer: order.customer_id ? db.get('SELECT * FROM customers WHERE id = ?', [order.customer_id]) : null,
+    documents: require('../lib/documents').forOrder(order.id),
+    documentTypes: require('../lib/documents').TYPES,
+    shipments: require('../lib/shipping').forOrder(order.id),
+    openItems: require('../lib/shipping').openQuantities(order.id),
+    carriers: require('../lib/shipping').carriers(),
+    shipmentStates: require('../lib/shipping').STATES,
     log: db.all("SELECT * FROM audit_log WHERE entity = 'order' AND entity_id = ? ORDER BY id DESC LIMIT 20", [String(order.id)])
   });
 });

@@ -55,6 +55,110 @@
       </div>
     <% } %>
 
+    <% if (adminCan('belege')) { %>
+    <div class="card">
+      <div class="card__head"><h2>Belege</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!documents.length) { %>
+          <p style="padding:18px;margin:0;color:var(--a-soft)">Noch kein Beleg ausgestellt.</p>
+        <% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Beleg</th><th>Art</th><th>Datum</th><th>Fällig</th><th class="num">Betrag</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <% documents.forEach(function (d) { %>
+              <tr>
+                <td><a class="link" href="/verwaltung/belege/<%= d.id %>"><%= d.number %></a></td>
+                <td><%= (documentTypes[d.doc_type] || {}).label || d.doc_type %></td>
+                <td><%= formatDay(d.issued_at) %></td>
+                <td><%= d.due_at || '–' %></td>
+                <td class="num"><%= fmt(d.total_cents) %></td>
+                <td><span class="pill <%= d.status === 'storniert' ? 'pill--err' : 'pill--ok' %>"><%= d.status %></span></td>
+                <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/belege/<%= d.id %>/pdf" target="_blank" rel="noopener">PDF</a></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+        <% if (adminCan('belege.ausstellen') && order.status !== 'storniert') { %>
+        <div style="padding:16px;border-top:1px solid var(--a-line)">
+          <form method="post" action="/verwaltung/bestellungen/<%= order.id %>/beleg" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <label class="field" style="margin:0"><span>Belegart</span>
+              <select name="doc_type">
+                <option value="rechnung">Rechnung</option>
+                <option value="lieferschein">Lieferschein</option>
+                <option value="gutschrift">Gutschrift</option>
+              </select>
+            </label>
+            <label class="field" style="margin:0;flex:1 1 240px"><span>Hinweis auf dem Beleg</span><input type="text" name="note" maxlength="500"></label>
+            <button class="btn btn--dark" type="submit">Beleg ausstellen</button>
+          </form>
+          <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Ein ausgestellter Beleg bleibt unverändert. Korrekturen entstehen als Storno und neuer Beleg.</p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <% if (adminCan('versand')) { %>
+    <div class="card">
+      <div class="card__head"><h2>Sendungen</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!shipments.length) { %>
+          <p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Sendung angelegt.</p>
+        <% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Sendung</th><th>Dienstleister</th><th class="num">Packstücke</th><th>Sendungsnummer</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <% shipments.forEach(function (s) { %>
+              <tr>
+                <td><a class="link" href="/verwaltung/versand/<%= s.id %>">#<%= s.id %></a><br><span style="font-size:12px;color:var(--a-soft)"><%= s.items.length %> Position(en)</span></td>
+                <td><%= s.carrier_name || s.carrier_code || '–' %><br><span style="font-size:12px;color:var(--a-soft)"><%= s.source === 'api' ? 'über Schnittstelle' : 'manuell erfasst' %></span></td>
+                <td class="num"><%= s.packages.length %></td>
+                <td><% if (s.tracking_link) { %><a class="link" href="<%= s.tracking_link %>" target="_blank" rel="noopener nofollow"><%= s.tracking_code %></a><% } else { %><%= s.tracking_code || '–' %><% } %></td>
+                <td><span class="pill"><%= shipmentStates[s.status] || s.status %></span></td>
+                <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/versand/<%= s.id %>">Öffnen</a></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+        <% var openSum = openItems.reduce(function (a, i) { return a + i.open_qty; }, 0); %>
+        <% if (order.status !== 'storniert' && openSum > 0) { %>
+        <div style="padding:16px;border-top:1px solid var(--a-line)">
+          <form method="post" action="/verwaltung/bestellungen/<%= order.id %>/versand">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <table class="tbl" style="margin-bottom:12px">
+              <thead><tr><th>Position</th><th class="num">Bestellt</th><th class="num">Versandt</th><th class="num">Jetzt versenden</th></tr></thead>
+              <tbody>
+                <% openItems.forEach(function (i) { %>
+                  <tr>
+                    <td><%= i.name %><% if (i.variant_name) { %> – <%= i.variant_name %><% } %></td>
+                    <td class="num"><%= i.qty %></td>
+                    <td class="num"><%= i.shipped_qty %></td>
+                    <td class="num"><input type="number" name="versandmenge_<%= i.id %>" min="0" max="<%= i.open_qty %>" value="<%= i.open_qty %>" style="width:80px"></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+              <label class="field" style="margin:0"><span>Dienstleister</span>
+                <select name="carrier_code">
+                  <% carriers.forEach(function (c) { %><option value="<%= c.code %>"><%= c.name %></option><% }); %>
+                </select>
+              </label>
+              <label class="field" style="margin:0"><span>Packstücke</span><input type="number" name="packages" min="1" max="50" value="1" style="width:90px"></label>
+              <label class="field" style="margin:0"><span>Gewicht (g)</span><input type="number" name="weight_g" min="0" value="0" style="width:110px"></label>
+              <label class="field" style="margin:0;flex:1 1 200px"><span>Sendungsnummer (manuell)</span><input type="text" name="tracking_code" maxlength="60"></label>
+              <button class="btn btn--dark" type="submit">Sendung anlegen</button>
+            </div>
+          </form>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
     <div class="card">
       <div class="card__head"><h2>Verlauf</h2></div>
       <div class="card__body card__body--flush">

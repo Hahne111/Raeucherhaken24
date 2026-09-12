@@ -35,6 +35,14 @@ const defaults = [
   ['shop.tax_rate', '19', 'shop', 'MwSt.-Satz in Prozent', 'number', 7],
   ['shop.free_shipping_from', '7900', 'shop', 'Versandkostenfrei ab (in Cent, 0 = aus)', 'number', 8],
   ['shop.currency', 'EUR', 'shop', 'Währung', 'text', 9],
+  // Pflichtangaben für Belege. Leer, bis der Betreiber sie einträgt – ohne sie
+  // ist kein Beleg rechtssicher.
+  ['shop.company', '', 'shop', 'Firmierung laut Handelsregister', 'text', 10],
+  ['shop.tax_id', '', 'shop', 'Steuernummer', 'text', 11],
+  ['shop.vat_id', '', 'shop', 'USt-IdNr.', 'text', 12],
+  ['shop.register', '', 'shop', 'Registergericht und -nummer', 'text', 13],
+  ['shop.bank', '', 'shop', 'Bankverbindung für Rechnungen', 'text', 14],
+  ['shop.invoice_due_days', '14', 'shop', 'Zahlungsziel für Rechnungen (Tage)', 'number', 15],
 
   ['home.topbar_1', 'Für echten Rauchgenuss', 'startseite', 'Servicezeile 1', 'text', 1],
   ['home.topbar_2', 'Räuchern verbindet', 'startseite', 'Servicezeile 2', 'text', 2],
