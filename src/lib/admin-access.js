@@ -15,7 +15,7 @@ const GRANTS = {
   admin: ['*'],
   kundenservice: [
     'bestellungen.lesen', 'kunden.lesen', 'kunden.bearbeiten', 'kunden.anlegen',
-    'termine', 'termine.alle', 'beratung', 'belege', 'versand', 'nachrichten'
+    'termine', 'termine.alle', 'beratung', 'belege', 'versand', 'produktion', 'prototypen', 'nachrichten'
   ],
   redaktion: ['produkte', 'kategorien', 'medien', 'nachrichten'],
   finanzen: ['uebersicht', 'produkt.analyse', 'bestellungen.lesen', 'belege', 'belege.ausstellen', 'nachrichten'],
@@ -24,7 +24,10 @@ const GRANTS = {
     'haendler', 'gebiete.lesen', 'gebietsbuch',
     'termine', 'beratung', 'provision.eigene', 'nachrichten'
   ],
-  produktion: ['termine', 'nachrichten'],
+  produktion: [
+    'produktion', 'produktion.bearbeiten', 'prototypen', 'prototypen.bearbeiten',
+    'bestellungen.lesen', 'lager.lesen', 'termine', 'nachrichten'
+  ],
   lager: ['lager.lesen', 'lager.buchen', 'bestellungen.lesen', 'versand', 'belege', 'belege.ausstellen', 'einkauf', 'termine', 'nachrichten'],
   kasse: ['nachrichten']
 };

@@ -1,0 +1,52 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/produktion">Zum Leitstand</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="post" action="/verwaltung/produktion/neu">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <div class="cols">
+    <div class="card">
+      <div class="card__head"><h2>Auftrag</h2></div>
+      <div class="card__body">
+        <label class="field"><span>Titel *</span><input type="text" name="title" required maxlength="200" value="<%= row.title %>"></label>
+        <div class="field-row">
+          <label class="field"><span>Menge</span><input type="number" name="qty" min="1" value="<%= row.qty %>"></label>
+          <label class="field"><span>Priorität</span>
+            <select name="priority">
+              <% Object.keys(priorities).forEach(function (k) { %><option value="<%= k %>" <%= row.priority === k ? 'selected' : '' %>><%= priorities[k] %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Fällig am</span><input type="date" name="due_at" value="<%= row.due_at || '' %>"></label>
+        </div>
+        <label class="field"><span>Bestellung</span>
+          <select name="order_id">
+            <option value="">– ohne Bestellung –</option>
+            <% orders.forEach(function (o) { %><option value="<%= o.id %>" <%= String(row.order_id || '') === String(o.id) ? 'selected' : '' %>><%= o.number %></option><% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Variante</span>
+          <select name="variant_id">
+            <option value="">– ohne Variante –</option>
+            <% variants.forEach(function (v) { %><option value="<%= v.id %>"><%= v.product_name %> – <%= v.variant_name %></option><% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Notiz</span><textarea name="note" rows="3"></textarea></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Arbeitsschritte</h2></div>
+      <div class="card__body">
+        <label class="field"><span>Ein Schritt je Zeile</span>
+          <textarea name="steps" rows="8"><%= defaultSteps.join('\n') %></textarea>
+        </label>
+        <label class="field"><span>Zuständig</span>
+          <select name="assigned_to">
+            <option value="">– offen –</option>
+            <% staff.forEach(function (s) { %><option value="<%= s.id %>" <%= String(row.assigned_to || '') === String(s.id) ? 'selected' : '' %>><%= s.name || s.email %></option><% }); %>
+          </select>
+        </label>
+        <button class="btn btn--primary btn--block" type="submit">Fertigungsauftrag anlegen</button>
+      </div>
+    </div>
+  </div>
+</form>
+<%- include('../partials/admin-foot') %>

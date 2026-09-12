@@ -202,3 +202,14 @@ body.is-admin a.btn--danger { color: var(--a-err); }
 .cal-week__add { display: block; text-align: center; color: var(--a-soft); text-decoration: none; font-size: 18px; }
 body.is-print { background: #fff; padding: 20px; }
 @media (max-width: 900px) { .cal-grid, .cal-week { grid-template-columns: 1fr 1fr; } }
+
+/* Produktionsleitstand */
+.kanban { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; align-items: start; }
+.kanban__col { background: #fbfaf7; border: 1px solid var(--a-line); border-radius: 4px; padding: 10px; }
+.kanban__head { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--a-soft); margin-bottom: 10px; display: flex; justify-content: space-between; }
+.kanban__card { display: block; background: #fff; border: 1px solid var(--a-line); border-left: 3px solid var(--a-navy-2); border-radius: 4px; padding: 10px; margin-bottom: 9px; }
+.kanban__card.is-overdue { border-left-color: var(--a-err); }
+.kanban__card strong { display: block; font-size: 13.5px; }
+.kanban__card span { display: block; font-size: 12px; color: var(--a-soft); }
+.kanban__bar { display: block; height: 5px; background: #e8e4da; border-radius: 3px; overflow: hidden; margin: 6px 0 4px; }
+.kanban__bar i { display: block; height: 100%; background: var(--a-ok); }

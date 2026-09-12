@@ -100,6 +100,28 @@
     </div>
     <% } %>
 
+    <% if (adminCan('produktion') && productions.length) { %>
+    <div class="card">
+      <div class="card__head"><h2>Fertigungsstand</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <thead><tr><th>Auftrag</th><th>Titel</th><th class="num">Menge</th><th>Fortschritt</th><th>Zuständig</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <% productions.forEach(function (p) { %>
+              <tr>
+                <td><%= p.number %></td><td><%= p.title %></td><td class="num"><%= p.qty %></td>
+                <td><span class="kanban__bar" style="display:block;width:110px"><i style="width:<%= p.progress %>%"></i></span><span style="font-size:12px;color:var(--a-soft)"><%= p.step_done %>/<%= p.step_count %> Schritte</span></td>
+                <td><%= p.assignee_name || '–' %></td>
+                <td><span class="pill <%= p.status === 'fertig' ? 'pill--ok' : '' %>"><%= productionStates[p.status] || p.status %></span></td>
+                <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/produktion/<%= p.id %>">Öffnen</a></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } %>
+
     <% if (adminCan('versand')) { %>
     <div class="card">
       <div class="card__head"><h2>Sendungen</h2></div>

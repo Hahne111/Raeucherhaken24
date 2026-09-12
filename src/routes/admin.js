@@ -153,6 +153,8 @@ for (const [prefix, permission] of [
   ['/lagerorte', 'lager.lesen'],
   ['/packmittel', 'lager.buchen'],
   ['/inventur', 'lager.lesen'],
+  ['/produktion', 'produktion'],
+  ['/prototypen', 'prototypen'],
   ['/gutscheine', 'gutscheine'],
   ['/versandarten', 'versandarten'],
   ['/einstellungen', 'einstellungen'],
@@ -165,6 +167,7 @@ router.use('/', require('./admin-calendar'));
 router.use('/', require('./admin-consulting'));
 router.use('/', require('./admin-documents'));
 router.use('/', require('./admin-purchasing'));
+router.use('/', require('./admin-production'));
 
 /* ------------------------------ Lager --------------------------------- */
 router.get('/lager', (req, res) => {
@@ -880,6 +883,8 @@ router.get('/bestellungen/:id', (req, res, next) => {
     documents: require('../lib/documents').forOrder(order.id),
     documentTypes: require('../lib/documents').TYPES,
     shipments: require('../lib/shipping').forOrder(order.id),
+    productions: require('../lib/production').forOrder(order.id),
+    productionStates: require('../lib/production').STATES,
     openItems: require('../lib/shipping').openQuantities(order.id),
     carriers: require('../lib/shipping').carriers(),
     shipmentStates: require('../lib/shipping').STATES,

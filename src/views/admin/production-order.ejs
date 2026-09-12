@@ -1,0 +1,106 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/produktion">Zum Leitstand</a>'
+  + (row.order_id ? ' <a class="btn btn--ghost btn--sm" href="/verwaltung/bestellungen/' + row.order_id + '">Zur Bestellung</a>' : ''); %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Arbeitsschritte</h2><span><%= row.step_done %>/<%= row.steps.length %> erledigt</span></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Schritt</th><th>Status</th><th>Person</th><th>Beginn</th><th>Ende</th><th></th></tr></thead>
+          <tbody>
+            <% row.steps.forEach(function (s) { %>
+              <tr>
+                <td><%= s.seq %></td>
+                <td><%= s.name %><% if (s.note) { %><br><span style="font-size:12px;color:var(--a-soft)"><%= s.note %></span><% } %></td>
+                <td><span class="pill <%= s.status === 'fertig' ? 'pill--ok' : (s.status === 'laeuft' ? 'pill--info' : '') %>"><%= stepStates[s.status] || s.status %></span></td>
+                <td><%= s.assignee_name || '–' %></td>
+                <td><%= s.started_at ? formatDate(s.started_at) : '–' %></td>
+                <td><%= s.finished_at ? formatDate(s.finished_at) : '–' %></td>
+                <td class="num">
+                  <% if (canWrite) { %>
+                  <form method="post" action="/verwaltung/produktion/<%= row.id %>/schritt/<%= s.id %>" style="display:flex;gap:6px;justify-content:flex-end">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <select name="status">
+                      <% Object.keys(stepStates).forEach(function (k) { %><option value="<%= k %>" <%= s.status === k ? 'selected' : '' %>><%= stepStates[k] %></option><% }); %>
+                    </select>
+                    <button class="btn btn--dark btn--sm" type="submit">Übernehmen</button>
+                  </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% if (canWrite) { %>
+        <div style="padding:16px;border-top:1px solid var(--a-line)">
+          <form method="post" action="/verwaltung/produktion/<%= row.id %>/schritt" style="display:flex;gap:10px;align-items:flex-end">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <label class="field" style="margin:0;flex:1"><span>Zusätzlicher Arbeitsschritt</span><input type="text" name="name" maxlength="120"></label>
+            <button class="btn btn--ghost" type="submit">Ergänzen</button>
+          </form>
+          <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Beim Übernehmen wird der Schritt deinem Konto mit Zeitstempel zugeordnet.</p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Verlauf</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl"><tbody>
+          <% row.events.forEach(function (e) { %>
+            <tr><td><%= e.event %></td><td><%= e.detail %></td><td style="color:var(--a-soft)"><%= e.actor %> · <%= formatDate(e.created_at) %></td></tr>
+          <% }); %>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card__head"><h2><%= row.number %></h2></div>
+      <div class="card__body">
+        <table class="tbl tbl--plain"><tbody>
+          <tr><th style="text-align:left">Titel</th><td><%= row.title %></td></tr>
+          <tr><th style="text-align:left">Menge</th><td><%= row.qty %></td></tr>
+          <tr><th style="text-align:left">Bestellung</th><td><% if (row.order_id) { %><a class="link" href="/verwaltung/bestellungen/<%= row.order_id %>"><%= row.order_number %></a><% } else { %>–<% } %></td></tr>
+          <tr><th style="text-align:left">Artikel</th><td><%= row.product_name ? row.product_name + ' – ' + row.variant_name : '–' %></td></tr>
+          <tr><th style="text-align:left">Status</th><td><%= states[row.status] || row.status %></td></tr>
+          <tr><th style="text-align:left">Fortschritt</th><td><%= row.progress %> %</td></tr>
+          <tr><th style="text-align:left">Beginn</th><td><%= row.started_at ? formatDate(row.started_at) : '–' %></td></tr>
+          <tr><th style="text-align:left">Ende</th><td><%= row.finished_at ? formatDate(row.finished_at) : '–' %></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <% if (canWrite) { %>
+    <div class="card">
+      <div class="card__head"><h2>Auftrag pflegen</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/produktion/<%= row.id %>">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Status</span>
+            <select name="status">
+              <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= row.status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Priorität</span>
+            <select name="priority">
+              <% Object.keys(priorities).forEach(function (k) { %><option value="<%= k %>" <%= row.priority === k ? 'selected' : '' %>><%= priorities[k] %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Fällig am</span><input type="date" name="due_at" value="<%= row.due_at || '' %>"></label>
+          <label class="field"><span>Zuständig</span>
+            <select name="assigned_to">
+              <option value="">– offen –</option>
+              <% staff.forEach(function (s) { %><option value="<%= s.id %>" <%= String(row.assigned_to || '') === String(s.id) ? 'selected' : '' %>><%= s.name || s.email %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Notiz</span><textarea name="note" rows="3"><%= row.note %></textarea></label>
+          <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+        </form>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

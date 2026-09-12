@@ -754,3 +754,88 @@ CREATE TABLE IF NOT EXISTS inventory_items (
   counted_at   TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_inventory_items ON inventory_items(inventory_id);
+
+/* ======================= Produktion und Prototypen ===================== */
+
+CREATE TABLE IF NOT EXISTS production_orders (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  number       TEXT NOT NULL UNIQUE,
+  order_id     INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  order_item_id INTEGER,
+  variant_id   INTEGER REFERENCES variants(id) ON DELETE SET NULL,
+  title        TEXT NOT NULL,
+  qty          INTEGER NOT NULL DEFAULT 1,
+  status       TEXT NOT NULL DEFAULT 'geplant',
+  priority     TEXT NOT NULL DEFAULT 'normal',
+  due_at       TEXT,
+  assigned_to  INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  note         TEXT NOT NULL DEFAULT '',
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  started_at   TEXT,
+  finished_at  TEXT,
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_production_status ON production_orders(status, due_at);
+CREATE INDEX IF NOT EXISTS idx_production_order ON production_orders(order_id);
+
+CREATE TABLE IF NOT EXISTS production_steps (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  production_id INTEGER NOT NULL REFERENCES production_orders(id) ON DELETE CASCADE,
+  seq           INTEGER NOT NULL DEFAULT 1,
+  name          TEXT NOT NULL,
+  status        TEXT NOT NULL DEFAULT 'offen',
+  assigned_to   INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  started_at    TEXT,
+  finished_at   TEXT,
+  minutes       INTEGER NOT NULL DEFAULT 0,
+  note          TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_production_steps ON production_steps(production_id, seq);
+
+CREATE TABLE IF NOT EXISTS production_events (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  production_id INTEGER NOT NULL REFERENCES production_orders(id) ON DELETE CASCADE,
+  step_id       INTEGER,
+  event         TEXT NOT NULL,
+  detail        TEXT NOT NULL DEFAULT '',
+  actor         TEXT NOT NULL DEFAULT '',
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS prototypes (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  number       TEXT NOT NULL UNIQUE,
+  customer_id  INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  title        TEXT NOT NULL,
+  description  TEXT NOT NULL DEFAULT '',
+  status       TEXT NOT NULL DEFAULT 'anfrage',
+  price_cents  INTEGER NOT NULL DEFAULT 0,
+  paid_cents   INTEGER NOT NULL DEFAULT 0,
+  due_at       TEXT,
+  assigned_to  INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  order_id     INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  production_id INTEGER REFERENCES production_orders(id) ON DELETE SET NULL,
+  note         TEXT NOT NULL DEFAULT '',
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS prototype_events (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  prototype_id INTEGER NOT NULL REFERENCES prototypes(id) ON DELETE CASCADE,
+  event        TEXT NOT NULL,
+  detail       TEXT NOT NULL DEFAULT '',
+  actor        TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS prototype_files (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  prototype_id INTEGER NOT NULL REFERENCES prototypes(id) ON DELETE CASCADE,
+  url          TEXT NOT NULL,
+  title        TEXT NOT NULL DEFAULT '',
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);

@@ -15,6 +15,9 @@
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lager" class="<%= currentPath === '/lager' || currentPath.indexOf('/lager/') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Lager</a><% } %>
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lagerorte" class="<%= currentPath.indexOf('/lagerorte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Lagerorte</a><% } %>
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/inventur" class="<%= currentPath.indexOf('/inventur') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Inventur</a><% } %>
+      <% if (adminCan('produktion') || adminCan('prototypen')) { %><span class="ad-nav__sep">Fertigung</span><% } %>
+      <% if (adminCan('produktion')) { %><a href="/verwaltung/produktion" class="<%= currentPath.indexOf('/produktion') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Produktion</a><% } %>
+      <% if (adminCan('prototypen')) { %><a href="/verwaltung/prototypen" class="<%= currentPath.indexOf('/prototypen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Prototypen</a><% } %>
       <% if (adminCan('einkauf')) { %><span class="ad-nav__sep">Einkauf</span>
       <a href="/verwaltung/lieferanten" class="<%= currentPath.indexOf('/lieferanten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-truck"/></svg>Lieferanten</a>
       <a href="/verwaltung/einkauf" class="<%= currentPath.indexOf('/einkauf') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-cart"/></svg>Einkauf</a><% } %>

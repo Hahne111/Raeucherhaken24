@@ -1,0 +1,77 @@
+<%- include('../partials/admin-head') %>
+<%
+var headActions = (canWrite ? '<a class="btn btn--primary btn--sm" href="/verwaltung/produktion/neu">Fertigungsauftrag anlegen</a>' : '');
+function qs(over) {
+  var p = { ansicht: view, status: status, q: q, person: person || '', meine: mine ? '1' : '', faellig: overdue ? '1' : '' };
+  Object.keys(over || {}).forEach(function (k) { p[k] = over[k]; });
+  return '/verwaltung/produktion?' + Object.keys(p).filter(function (k) { return p[k]; })
+    .map(function (k) { return k + '=' + encodeURIComponent(p[k]); }).join('&');
+}
+%>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="toolbar">
+  <a class="btn btn--sm <%= view === 'tabelle' ? 'btn--dark' : 'btn--ghost' %>" href="<%= qs({ ansicht: 'tabelle' }) %>">Tabelle</a>
+  <a class="btn btn--sm <%= view === 'kanban' ? 'btn--dark' : 'btn--ghost' %>" href="<%= qs({ ansicht: 'kanban' }) %>">Kanban</a>
+  <a class="btn btn--sm <%= mine ? 'btn--dark' : 'btn--ghost' %>" href="<%= qs({ meine: mine ? '' : '1' }) %>">Meine Aufträge</a>
+  <a class="btn btn--sm <%= overdue ? 'btn--dark' : 'btn--ghost' %>" href="<%= qs({ faellig: overdue ? '' : '1' }) %>">Überfällig</a>
+  <form method="get" action="/verwaltung/produktion">
+    <input type="hidden" name="ansicht" value="<%= view %>">
+    <input type="search" name="q" value="<%= q %>" placeholder="Nummer, Titel, Bestellung" aria-label="Suche">
+    <select name="status" aria-label="Status">
+      <option value="">Alle Status</option>
+      <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+    </select>
+    <select name="person" aria-label="Zuständig">
+      <option value="">Alle Personen</option>
+      <% staff.forEach(function (s) { %><option value="<%= s.id %>" <%= person === s.id ? 'selected' : '' %>><%= s.name || s.email %></option><% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Filtern</button>
+  </form>
+</div>
+
+<% if (view === 'kanban') { %>
+  <div class="kanban">
+    <% Object.keys(states).forEach(function (key) { %>
+      <div class="kanban__col">
+        <div class="kanban__head"><%= states[key] %> <span><%= (columns[key] || []).length %></span></div>
+        <% (columns[key] || []).forEach(function (p) { %>
+          <a class="kanban__card <%= p.overdue ? 'is-overdue' : '' %>" href="/verwaltung/produktion/<%= p.id %>">
+            <strong><%= p.title %></strong>
+            <span><%= p.number %><%= p.order_number ? ' · ' + p.order_number : '' %></span>
+            <span><%= p.qty %> Stück · <%= priorities[p.priority] || p.priority %><%= p.due_at ? ' · bis ' + p.due_at : '' %></span>
+            <span class="kanban__bar"><i style="width:<%= p.progress %>%"></i></span>
+            <span><%= p.step_done %>/<%= p.step_count %> Schritte · <%= p.assignee_name || 'offen' %></span>
+          </a>
+        <% }); %>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="card">
+    <div class="card__head"><h2><%= rows.length %> Fertigungsaufträge</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!rows.length) { %><p style="padding:20px;margin:0;color:var(--a-soft)">Kein Fertigungsauftrag.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Nummer</th><th>Titel</th><th>Bestellung</th><th class="num">Menge</th><th>Priorität</th><th>Fällig</th><th>Zuständig</th><th>Fortschritt</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (p) { %>
+            <tr>
+              <td><a class="link" href="/verwaltung/produktion/<%= p.id %>"><%= p.number %></a></td>
+              <td><%= p.title %></td>
+              <td><% if (p.order_id) { %><a class="link" href="/verwaltung/bestellungen/<%= p.order_id %>"><%= p.order_number %></a><% } else { %>–<% } %></td>
+              <td class="num"><%= p.qty %></td>
+              <td><%= priorities[p.priority] || p.priority %></td>
+              <td><%= p.due_at || '–' %><% if (p.overdue) { %> <span class="pill pill--err">überfällig</span><% } %></td>
+              <td><%= p.assignee_name || '–' %></td>
+              <td><span class="kanban__bar" style="display:block;width:110px"><i style="width:<%= p.progress %>%"></i></span><span style="font-size:12px;color:var(--a-soft)"><%= p.step_done %>/<%= p.step_count %></span></td>
+              <td><span class="pill <%= p.status === 'fertig' ? 'pill--ok' : '' %>"><%= states[p.status] || p.status %></span></td>
+              <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/produktion/<%= p.id %>">Öffnen</a></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+<% } %>
+<%- include('../partials/admin-foot') %>

@@ -1,0 +1,108 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/prototypen">Zur Übersicht</a>'
+  + (row.production_id ? ' <a class="btn btn--ghost btn--sm" href="/verwaltung/produktion/' + row.production_id + '">Fertigungsauftrag</a>' : ''); %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div>
+    <% if (canWrite) { %>
+    <div class="card">
+      <div class="card__head"><h2>Projekt</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/prototypen/<%= row.id %>">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Titel</span><input type="text" name="title" value="<%= row.title %>" maxlength="200"></label>
+          <label class="field"><span>Beschreibung</span><textarea name="description" rows="5"><%= row.description %></textarea></label>
+          <div class="field-row">
+            <label class="field"><span>Preis</span><input type="text" name="price" value="<%= row.price_cents ? (row.price_cents/100).toFixed(2).replace('.',',') : '' %>"></label>
+            <label class="field"><span>Bereits bezahlt</span><input type="text" name="paid" value="<%= row.paid_cents ? (row.paid_cents/100).toFixed(2).replace('.',',') : '' %>"></label>
+            <label class="field"><span>Frist</span><input type="date" name="due_at" value="<%= row.due_at || '' %>"></label>
+          </div>
+          <label class="field"><span>Zuständig</span>
+            <select name="assigned_to">
+              <option value="">– offen –</option>
+              <% staff.forEach(function (s) { %><option value="<%= s.id %>" <%= String(row.assigned_to || '') === String(s.id) ? 'selected' : '' %>><%= s.name || s.email %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Notiz</span><textarea name="note" rows="3"><%= row.note %></textarea></label>
+          <button class="btn btn--primary" type="submit">Speichern</button>
+        </form>
+      </div>
+    </div>
+    <% } %>
+    <div class="card">
+      <div class="card__head"><h2>Dateien</h2></div>
+      <div class="card__body">
+        <% if (!row.files.length) { %><p style="margin:0 0 12px;color:var(--a-soft)">Noch keine Datei verknüpft.</p><% } else { %>
+        <ul style="margin:0 0 14px;padding-left:18px">
+          <% row.files.forEach(function (f) { %>
+            <li><a class="link" href="<%= f.url %>" target="_blank" rel="noopener"><%= f.title || f.url %></a> · <%= formatDay(f.created_at) %></li>
+          <% }); %>
+        </ul>
+        <% } %>
+        <% if (canWrite) { %>
+        <form method="post" action="/verwaltung/prototypen/<%= row.id %>/datei" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field" style="margin:0;flex:1 1 240px"><span>Pfad aus der Medienablage</span><input type="text" name="url" placeholder="/uploads/…" maxlength="500"></label>
+          <label class="field" style="margin:0"><span>Titel</span><input type="text" name="title" maxlength="160"></label>
+          <button class="btn btn--dark" type="submit">Verknüpfen</button>
+        </form>
+        <% } %>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Verlauf</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl"><tbody>
+          <% row.events.forEach(function (e) { %>
+            <tr><td><%= e.event %></td><td><%= e.detail %></td><td style="color:var(--a-soft)"><%= e.actor %> · <%= formatDate(e.created_at) %></td></tr>
+          <% }); %>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card__head"><h2><%= row.number %></h2></div>
+      <div class="card__body">
+        <table class="tbl tbl--plain"><tbody>
+          <tr><th style="text-align:left">Status</th><td><%= states[row.status] || row.status %></td></tr>
+          <tr><th style="text-align:left">Kunde</th><td><% if (row.customer_id) { %><a class="link" href="/verwaltung/kunden/<%= row.customer_id %>"><%= row.customer_company || row.customer_email %></a><% } else { %>–<% } %></td></tr>
+          <tr><th style="text-align:left">Preis</th><td><%= fmt(row.price_cents) %></td></tr>
+          <tr><th style="text-align:left">Bezahlt</th><td><%= fmt(row.paid_cents) %></td></tr>
+          <tr><th style="text-align:left">Frist</th><td><%= row.due_at || '–' %></td></tr>
+          <tr><th style="text-align:left">Zuständig</th><td><%= row.assignee_name || '–' %></td></tr>
+          <tr><th style="text-align:left">Fertigung</th><td><% if (row.production_id) { %><a class="link" href="/verwaltung/produktion/<%= row.production_id %>"><%= row.production_number %></a><% } else { %>–<% } %></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <% if (canWrite) { %>
+    <div class="card">
+      <div class="card__head"><h2>Nächster Schritt</h2></div>
+      <div class="card__body">
+        <% if (!flow.length) { %>
+          <p style="margin:0;color:var(--a-soft)">Dieses Projekt ist abgeschlossen.</p>
+        <% } else { %>
+        <form method="post" action="/verwaltung/prototypen/<%= row.id %>/status">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Weiter zu</span>
+            <select name="status">
+              <% flow.forEach(function (k) { %><option value="<%= k %>"><%= states[k] %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Hinweis</span><input type="text" name="detail" maxlength="300"></label>
+          <button class="btn btn--primary btn--block" type="submit">Status setzen</button>
+        </form>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Der Ablauf geht von der Anfrage über Zahlung, Prüfung und Konstruktion bis zur Fertigung. Sprünge sind nicht möglich.</p>
+        <% } %>
+        <% if (!row.production_id && ['konstruktion','fertigung'].indexOf(row.status) >= 0) { %>
+        <form method="post" action="/verwaltung/prototypen/<%= row.id %>/fertigung" style="margin-top:14px">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <button class="btn btn--dark btn--block" type="submit">In Fertigungsauftrag überführen</button>
+        </form>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>
