@@ -1,0 +1,129 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head">
+        <h2>Positionen</h2>
+        <span style="color:var(--a-soft);font-size:13px">Eingegangen am <%= formatDate(order.created_at) %></span>
+      </div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <thead><tr><th>Artikel</th><th>Art.-Nr.</th><th class="num">Einzelpreis</th><th class="num">Menge</th><th class="num">Summe</th></tr></thead>
+          <tbody>
+            <% items.forEach(function (item) { %>
+              <tr>
+                <td><%= item.name %><br><small style="color:var(--a-soft)"><%= item.variant_name %></small></td>
+                <td><%= item.sku %></td>
+                <td class="num"><%= fmt(item.unit_price_cents) %></td>
+                <td class="num"><%= item.qty %></td>
+                <td class="num"><%= fmt(item.total_cents) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="4" class="num">Zwischensumme</td><td class="num"><%= fmt(order.subtotal_cents) %></td></tr>
+            <% if (order.discount_cents > 0) { %>
+              <tr><td colspan="4" class="num">Gutschein <%= order.coupon_code %></td><td class="num">− <%= fmt(order.discount_cents) %></td></tr>
+            <% } %>
+            <tr><td colspan="4" class="num">Versand (<%= order.shipping_name %>)</td><td class="num"><%= fmt(order.shipping_cents) %></td></tr>
+            <tr><td colspan="4" class="num"><strong>Gesamt</strong></td><td class="num"><strong><%= fmt(order.total_cents) %></strong></td></tr>
+            <tr><td colspan="4" class="num" style="color:var(--a-soft)">davon MwSt.</td><td class="num" style="color:var(--a-soft)"><%= fmt(order.tax_cents) %></td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Adressen</h2></div>
+      <div class="card__body" style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+        <div>
+          <h3 style="font-size:13px;font-family:var(--sans);text-transform:uppercase;color:var(--a-soft);margin-bottom:8px">Lieferadresse</h3>
+          <p style="white-space:pre-line;margin:0"><%= addressLib.format(shipping) %></p>
+        </div>
+        <div>
+          <h3 style="font-size:13px;font-family:var(--sans);text-transform:uppercase;color:var(--a-soft);margin-bottom:8px">Rechnungsadresse</h3>
+          <p style="white-space:pre-line;margin:0"><%= addressLib.format(billing) %></p>
+        </div>
+      </div>
+    </div>
+
+    <% if (order.customer_note) { %>
+      <div class="card">
+        <div class="card__head"><h2>Anmerkung des Kunden</h2></div>
+        <div class="card__body" style="white-space:pre-line"><%= order.customer_note %></div>
+      </div>
+    <% } %>
+
+    <div class="card">
+      <div class="card__head"><h2>Verlauf</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <tbody>
+            <% log.forEach(function (l) { %>
+              <tr><td><%= l.action %></td><td><%= l.detail %></td><td style="color:var(--a-soft)"><%= l.actor %> · <%= formatDate(l.created_at) %></td></tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Status pflegen</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/bestellungen/<%= order.id %>">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Bestellstatus</span>
+            <select name="status">
+              <% statuses.forEach(function (s) { %><option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Zahlungsstatus</span>
+            <select name="payment_status">
+              <% paymentStatuses.forEach(function (s) { %><option value="<%= s %>" <%= order.payment_status === s ? 'selected' : '' %>><%= s %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Versandstatus</span>
+            <select name="shipping_status">
+              <% shippingStatuses.forEach(function (s) { %><option value="<%= s %>" <%= order.shipping_status === s ? 'selected' : '' %>><%= s %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Sendungsnummer</span><input type="text" name="tracking_code" value="<%= order.tracking_code %>"></label>
+          <label class="field"><span>Interne Notiz</span><textarea name="internal_note" rows="4"><%= order.internal_note %></textarea></label>
+          <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Kunde</h2></div>
+      <div class="card__body" style="font-size:14px">
+        <p style="margin:0 0 6px"><strong><%= order.email %></strong></p>
+        <% if (customer) { %>
+          <p style="margin:0 0 10px;color:var(--a-soft)"><%= customer.first_name %> <%= customer.last_name %> · Kunde seit <%= formatDay(customer.created_at) %></p>
+          <a class="btn btn--ghost btn--sm" href="/verwaltung/kunden/<%= customer.id %>">Kundenakte öffnen</a>
+        <% } else { %>
+          <p style="margin:0;color:var(--a-soft)">Bestellung als Gast – kein Kundenkonto verknüpft.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Stornieren</h2></div>
+      <div class="card__body">
+        <p style="color:var(--a-soft);font-size:13px;margin:0 0 12px">
+          Beim Stornieren wird der Bestand aller Positionen automatisch zurückgebucht und eine Gutscheinnutzung zurückgesetzt.
+        </p>
+        <form method="post" action="/verwaltung/bestellungen/<%= order.id %>/stornieren" data-confirm="Bestellung wirklich stornieren und Bestand zurückbuchen?">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <button class="btn btn--danger btn--block" type="submit" <%= order.status === 'storniert' ? 'disabled' : '' %>>
+            <%= order.status === 'storniert' ? 'Bereits storniert' : 'Bestellung stornieren' %>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

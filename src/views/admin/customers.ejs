@@ -1,0 +1,39 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/kunden">
+    <label class="visually-hidden" for="q">Suche</label>
+    <input id="q" type="search" name="q" value="<%= q %>" placeholder="E-Mail oder Name">
+    <button class="btn btn--dark btn--sm" type="submit">Suchen</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/kunden">Zurücksetzen</a>
+  </form>
+</div>
+<div class="card">
+  <div class="card__head"><h2><%= rows.length %> Kunden</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Kunden gefunden.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Name</th><th>E-Mail</th><th>Seit</th><th class="num">Bestellungen</th><th class="num">Umsatz</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (c) { %>
+          <tr>
+            <td><a class="link" href="/verwaltung/kunden/<%= c.id %>"><%= c.first_name %> <%= c.last_name %></a></td>
+            <td><%= c.email %></td>
+            <td><%= formatDay(c.created_at) %></td>
+            <td class="num"><%= c.order_count %></td>
+            <td class="num"><%= fmt(c.revenue) %></td>
+            <td>
+              <span class="pill <%= c.active ? 'pill--ok' : 'pill--err' %>"><%= c.active ? 'aktiv' : 'gesperrt' %></span>
+              <% if (c.newsletter) { %><span class="pill pill--info">Newsletter</span><% } %>
+            </td>
+            <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/kunden/<%= c.id %>">Öffnen</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

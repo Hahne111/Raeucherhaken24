@@ -1,0 +1,38 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><a href="/konto">Mein Konto</a><span>/</span><span>Bestellungen</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1>Meine Bestellungen</h1></div>
+      <div class="account-layout">
+        <%- include('../partials/account-nav') %>
+        <div>
+          <% if (!orders.length) { %>
+            <div class="empty"><h2>Noch keine Bestellung</h2><p>Sobald du bestellst, findest du hier alle Details.</p>
+              <a class="btn btn--primary" href="/produkte" style="margin-top:14px">Sortiment ansehen</a></div>
+          <% } else { %>
+            <div class="panel">
+              <table class="table table--stack">
+                <thead><tr><th>Nummer</th><th>Datum</th><th>Status</th><th>Versand</th><th class="num">Summe</th><th></th></tr></thead>
+                <tbody>
+                  <% orders.forEach(function (o) { %>
+                    <tr>
+                      <td data-label="Nummer"><strong><%= o.number %></strong></td>
+                      <td data-label="Datum"><%= formatDay(o.created_at) %></td>
+                      <td data-label="Status"><span class="order-status order-status--<%= o.status.split(' ').pop().toLowerCase() %>"><%= o.status %></span></td>
+                      <td data-label="Versand"><%= o.shipping_status %></td>
+                      <td class="num" data-label="Summe"><%= fmt(o.total_cents) %></td>
+                      <td class="num"><a class="btn btn--ghost btn--sm" href="/konto/bestellungen/<%= o.number %>">Details</a></td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

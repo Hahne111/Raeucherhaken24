@@ -1,0 +1,217 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = product.id ? '<a class="btn btn--ghost btn--sm" href="/produkt/' + product.slug + '" target="_blank" rel="noopener">Im Shop ansehen</a>' : ''; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+
+<form method="post" action="<%= product.id ? '/verwaltung/produkte/' + product.id : '/verwaltung/produkte/neu' %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <div class="cols">
+    <div>
+      <div class="card">
+        <div class="card__head"><h2>Grunddaten</h2></div>
+        <div class="card__body">
+          <label class="field <%= errors.name ? 'field--error' : '' %>"><span>Produktname</span>
+            <input type="text" name="name" value="<%= product.name || '' %>" required data-slug-source>
+            <% if (errors.name) { %><span class="field__err"><%= errors.name %></span><% } %>
+          </label>
+          <label class="field <%= errors.slug ? 'field--error' : '' %>"><span>URL-Kennung</span>
+            <input type="text" name="slug" value="<%= product.slug || '' %>" data-slug-target>
+            <span class="field__hint">Ergibt die Adresse /produkt/<em><%= product.slug || 'kennung' %></em></span>
+            <% if (errors.slug) { %><span class="field__err"><%= errors.slug %></span><% } %>
+          </label>
+          <label class="field"><span>Kurzbeschreibung</span>
+            <input type="text" name="subtitle" value="<%= product.subtitle || '' %>" maxlength="200">
+          </label>
+          <label class="field"><span>Beschreibung</span>
+            <textarea name="description" rows="7"><%= product.description || '' %></textarea>
+            <span class="field__hint">Leerzeile trennt Absätze.</span>
+          </label>
+          <label class="field"><span>Technische Details</span>
+            <textarea name="details" rows="3"><%= product.details || '' %></textarea>
+          </label>
+          <label class="field"><span>Merkmale für Filter</span>
+            <textarea name="facets" rows="4" placeholder="Material: Edelstahl&#10;Einsatz: Fisch"><%= facets.map(function (f) { return f.key + ': ' + f.value; }).join('\n') %></textarea>
+            <span class="field__hint">Je Zeile ein Eintrag im Format „Schlüssel: Wert“. Diese Werte erscheinen als Filter in der Kategorie.</span>
+          </label>
+        </div>
+      </div>
+
+      <% if (product.id) { %>
+        <div class="card">
+          <div class="card__head"><h2>Varianten, Preise und Bestand</h2></div>
+          <div class="card__body">
+            <p style="color:var(--a-soft);font-size:13px;margin:0 0 10px">
+              Der Bestand wird bei jeder Bestellung automatisch gebucht. Eine Bestellung unter den vorhandenen Bestand ist nicht möglich.
+            </p>
+            <table class="tbl">
+              <thead><tr><th>Bezeichnung</th><th>Art.-Nr.</th><th class="num">Preis</th><th class="num">Bestand</th><th>Aktiv</th><th></th></tr></thead>
+              <tbody>
+                <% variants.forEach(function (v) { %>
+                  <tr>
+                    <td><input class="inp" form="variant-form" type="text" name="variant_name" value="<%= v.name %>"><input form="variant-form" type="hidden" name="variant_id" value="<%= v.id %>"></td>
+                    <td><input class="inp" form="variant-form" type="text" name="variant_sku" value="<%= v.sku %>"></td>
+                    <td class="num"><input class="inp" form="variant-form" type="text" name="variant_price" value="<%= (v.price_cents/100).toFixed(2).replace('.', ',') %>" style="text-align:right"></td>
+                    <td class="num"><input class="inp" form="variant-form" type="number" name="variant_stock" value="<%= v.stock %>" min="0" style="text-align:right"></td>
+                    <td>
+                      <select class="inp" form="variant-form" name="variant_active">
+                        <option value="1" <%= v.active ? 'selected' : '' %>>ja</option>
+                        <option value="0" <%= v.active ? '' : 'selected' %>>nein</option>
+                      </select>
+                    </td>
+                    <td class="num">
+                      <button class="btn btn--danger btn--sm" type="submit"
+                              form="variant-delete-<%= v.id %>">Entfernen</button>
+                    </td>
+                  </tr>
+                <% }); %>
+                <tr>
+                  <td><input class="inp" form="variant-form" type="text" name="new_variant_name" placeholder="Neue Variante"></td>
+                  <td><input class="inp" form="variant-form" type="text" name="new_variant_sku" placeholder="Art.-Nr."></td>
+                  <td class="num"><input class="inp" form="variant-form" type="text" name="new_variant_price" placeholder="0,00" style="text-align:right"></td>
+                  <td class="num"><input class="inp" form="variant-form" type="number" name="new_variant_stock" value="0" min="0" style="text-align:right"></td>
+                  <td colspan="2"></td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="btn btn--dark btn--sm" type="submit" form="variant-form" style="margin-top:14px">Varianten speichern</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head"><h2>Bilder</h2></div>
+          <div class="card__body">
+            <% if (images.length) { %>
+              <div class="imggrid" style="margin-bottom:18px">
+                <% images.forEach(function (img, i) { %>
+                  <div class="imgcard">
+                    <div class="imgcard__media"><img src="<%= img.url %>" alt="<%= img.alt %>"></div>
+                    <div class="imgcard__foot">
+                      <code><%= img.url.split('/').pop() %></code>
+                      <span style="display:flex;gap:4px">
+                        <% if (i > 0) { %>
+                          <button class="btn btn--ghost btn--sm" type="submit" form="img-up-<%= img.id %>" title="Nach vorne">↑</button>
+                        <% } %>
+                        <button class="btn btn--danger btn--sm" type="submit" form="img-del-<%= img.id %>" title="Entfernen">×</button>
+                      </span>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <p style="color:var(--a-soft);margin:0 0 14px">Noch kein Bild hinterlegt – im Shop erscheint dann ein Platzhalter.</p>
+            <% } %>
+            <p style="color:var(--a-soft);font-size:13px;margin:0">Bilder werden über das Formular unterhalb der Seite hochgeladen.</p>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card__head"><h2>Sichtbarkeit</h2></div>
+        <div class="card__body">
+          <label class="check"><input type="checkbox" name="active" value="1" <%= product.active ? 'checked' : '' %>><span>Im Shop sichtbar</span></label>
+          <label class="check"><input type="checkbox" name="featured" value="1" <%= product.featured ? 'checked' : '' %>><span>Auf der Startseite unter „Unsere Favoriten“</span></label>
+          <label class="field"><span>Reihenfolge Startseite</span><input type="number" name="home_sort" value="<%= product.home_sort || 0 %>"></label>
+          <label class="field"><span>Reihenfolge Kategorie</span><input type="number" name="sort" value="<%= product.sort || 0 %>"></label>
+          <label class="field"><span>Kategorie</span>
+            <select name="category_id">
+              <option value="">ohne Kategorie</option>
+              <% categories.forEach(function (c) { %>
+                <option value="<%= c.id %>" <%= product.category_id === c.id ? 'selected' : '' %>><%= c.name %><%= c.active ? '' : ' (inaktiv)' %></option>
+              <% }); %>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__head"><h2>Preis und Artikeldaten</h2></div>
+        <div class="card__body">
+          <label class="field <%= errors.price ? 'field--error' : '' %>"><span>Grundpreis</span>
+            <input type="text" name="price" value="<%= product.price_cents ? (product.price_cents/100).toFixed(2).replace('.', ',') : '' %>" required>
+            <span class="field__hint">Wird für neue Varianten und als Anzeigepreis ohne Varianten genutzt.</span>
+            <% if (errors.price) { %><span class="field__err"><%= errors.price %></span><% } %>
+          </label>
+          <label class="field"><span>Streichpreis (optional)</span>
+            <input type="text" name="compare" value="<%= product.compare_cents ? (product.compare_cents/100).toFixed(2).replace('.', ',') : '' %>">
+            <span class="field__hint">Höher als der Preis gesetzt: Das Produkt erscheint unter „Angebote“.</span>
+          </label>
+          <label class="field"><span>Artikelnummer</span><input type="text" name="sku" value="<%= product.sku || '' %>"></label>
+          <label class="field"><span>Material</span><input type="text" name="material" value="<%= product.material || '' %>"></label>
+          <div class="grid2">
+            <label class="field"><span>Gewicht (g)</span><input type="number" name="weight_g" value="<%= product.weight_g || 0 %>" min="0"></label>
+            <label class="field"><span>MwSt. (%)</span><input type="number" name="tax_rate" value="<%= product.tax_rate || 19 %>" min="0" max="30"></label>
+          </div>
+          <label class="field"><span>Marke</span><input type="text" name="brand" value="<%= product.brand || '' %>"></label>
+          <% if (!product.id) { %>
+            <label class="field"><span>Anfangsbestand</span>
+              <input type="number" name="start_stock" value="0" min="0">
+              <span class="field__hint">Es wird automatisch eine Variante „Standard“ angelegt.</span>
+            </label>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__body" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn--primary" type="submit">Speichern</button>
+          <a class="btn btn--ghost" href="/verwaltung/produkte">Zurück zur Liste</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<% if (product.id) { %>
+  <div class="card">
+    <div class="card__head"><h2>Bild hochladen oder auswählen</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/produkte/<%= product.id %>/bilder" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <div class="grid2">
+          <label class="field"><span>Datei(en) hochladen</span>
+            <input type="file" name="bilder" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" multiple>
+            <span class="field__hint">PNG, JPG, WEBP, SVG oder GIF bis 4 MB.</span>
+          </label>
+          <label class="field"><span>oder vorhandenen Pfad verwenden</span>
+            <input type="text" name="media_url" placeholder="/img/products/beispiel.svg">
+          </label>
+        </div>
+        <label class="field"><span>Bildbeschreibung (Alt-Text)</span><input type="text" name="alt" value="<%= product.name %>"></label>
+        <button class="btn btn--dark" type="submit">Bild hinzufügen</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card__head"><h2>Produkt entfernen</h2></div>
+    <div class="card__body">
+      <p style="color:var(--a-soft);margin:0 0 12px">
+        Produkte, die in Bestellungen vorkommen, werden aus Nachvollziehbarkeitsgründen nur deaktiviert statt gelöscht.
+      </p>
+      <form method="post" action="/verwaltung/produkte/<%= product.id %>/loeschen" data-confirm="Produkt wirklich entfernen?">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn btn--danger" type="submit">Produkt entfernen</button>
+      </form>
+    </div>
+  </div>
+
+  <form id="variant-form" method="post" action="/verwaltung/produkte/<%= product.id %>/varianten">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  </form>
+  <% variants.forEach(function (v) { %>
+    <form id="variant-delete-<%= v.id %>" method="post" action="/verwaltung/produkte/<%= product.id %>/varianten/<%= v.id %>/loeschen" data-confirm="Variante entfernen?">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    </form>
+  <% }); %>
+  <% images.forEach(function (img) { %>
+    <form id="img-del-<%= img.id %>" method="post" action="/verwaltung/produkte/<%= product.id %>/bilder/<%= img.id %>/loeschen" data-confirm="Bild entfernen?">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    </form>
+    <form id="img-up-<%= img.id %>" method="post" action="/verwaltung/produkte/<%= product.id %>/bilder/<%= img.id %>/hoch">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    </form>
+  <% }); %>
+<% } %>
+
+<%- include('../partials/admin-foot') %>

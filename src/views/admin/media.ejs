@@ -1,0 +1,57 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="card">
+  <div class="card__head"><h2>Bilder hochladen</h2></div>
+  <div class="card__body">
+    <form method="post" action="/verwaltung/medien" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <label class="field"><span>Dateien</span>
+        <input type="file" name="bilder" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" multiple>
+        <span class="field__hint">PNG, JPG, WEBP, SVG oder GIF, je bis 4 MB, maximal 6 Dateien.</span>
+      </label>
+      <button class="btn btn--primary" type="submit">Hochladen</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Hochgeladene Dateien (<%= rows.length %>)</h2></div>
+  <div class="card__body">
+    <% if (!rows.length) { %>
+      <p style="margin:0;color:var(--a-soft)">Noch keine eigenen Dateien hochgeladen.</p>
+    <% } else { %>
+      <div class="imggrid">
+        <% rows.forEach(function (m) { %>
+          <div class="imgcard">
+            <div class="imgcard__media"><img src="<%= m.url %>" alt="<%= m.title %>"></div>
+            <div class="imgcard__foot">
+              <code><%= m.url %></code>
+              <form method="post" action="/verwaltung/medien/<%= m.id %>/loeschen" data-confirm="Datei löschen?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <button class="btn btn--danger btn--sm" type="submit">×</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Mitgelieferte Motive (<%= builtIn.length %>)</h2></div>
+  <div class="card__body">
+    <p style="color:var(--a-soft);font-size:13px;margin:0 0 14px">
+      Diese Pfade können direkt bei Produkten und Kategorien eingetragen werden.
+    </p>
+    <div class="imggrid">
+      <% builtIn.forEach(function (m) { %>
+        <div class="imgcard">
+          <div class="imgcard__media"><img src="<%= m.url %>" alt="<%= m.title %>"></div>
+          <div class="imgcard__foot"><code><%= m.url %></code></div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

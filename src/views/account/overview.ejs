@@ -1,0 +1,55 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><span>Mein Konto</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1>Hallo <%= customer.first_name %></h1><p>Hier laufen deine Bestellungen, Adressen und Daten zusammen.</p></div>
+      <div class="account-layout">
+        <%- include('../partials/account-nav') %>
+        <div>
+          <div class="grid-products" style="grid-template-columns:repeat(3,1fr);margin-bottom:26px">
+            <div class="panel"><div class="panel__body">
+              <p style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:0 0 6px">Bestellungen</p>
+              <p style="font-family:var(--serif);font-size:32px;margin:0;color:var(--navy-800)"><%= orderCount %></p>
+              <a class="linkbtn" href="/konto/bestellungen">Alle ansehen</a>
+            </div></div>
+            <div class="panel"><div class="panel__body">
+              <p style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:0 0 6px">Adressen</p>
+              <p style="font-family:var(--serif);font-size:32px;margin:0;color:var(--navy-800)"><%= addressCount %></p>
+              <a class="linkbtn" href="/konto/adressen">Verwalten</a>
+            </div></div>
+            <div class="panel"><div class="panel__body">
+              <p style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:0 0 6px">E-Mail</p>
+              <p style="font-size:15px;margin:0;color:var(--navy-800);word-break:break-all"><%= customer.email %></p>
+              <a class="linkbtn" href="/konto/daten">Daten ändern</a>
+            </div></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Letzte Bestellungen</h2><a class="linkbtn" href="/konto/bestellungen">Alle</a></div>
+            <% if (!orders.length) { %>
+              <div class="panel__body" style="color:var(--ink-soft)">Noch keine Bestellung vorhanden. <a href="/produkte" style="text-decoration:underline">Sortiment ansehen</a></div>
+            <% } else { %>
+              <table class="table table--stack">
+                <thead><tr><th>Nummer</th><th>Datum</th><th>Status</th><th class="num">Summe</th><th></th></tr></thead>
+                <tbody>
+                  <% orders.forEach(function (o) { %>
+                    <tr>
+                      <td data-label="Nummer"><%= o.number %></td>
+                      <td data-label="Datum"><%= formatDay(o.created_at) %></td>
+                      <td data-label="Status"><span class="order-status order-status--<%= o.status.split(' ').pop().toLowerCase() %>"><%= o.status %></span></td>
+                      <td class="num" data-label="Summe"><%= fmt(o.total_cents) %></td>
+                      <td class="num"><a class="linkbtn" href="/konto/bestellungen/<%= o.number %>">Details</a></td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

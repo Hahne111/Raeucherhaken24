@@ -64,6 +64,18 @@
     input.dispatchEvent(new Event('change', { bubbles: true }));
   });
 
+  /* Checkbox blendet einen Bereich ein (data-toggle="id-des-bereichs") */
+  document.querySelectorAll('[data-toggle]').forEach(function (box) {
+    var target = document.getElementById(box.getAttribute('data-toggle'));
+    if (!target) return;
+    box.addEventListener('change', function () { target.hidden = !box.checked; });
+  });
+
+  /* Auswahl sendet das Formular sofort ab */
+  document.addEventListener('change', function (event) {
+    if (event.target.matches('[data-submit-on-change]') && event.target.form) event.target.form.submit();
+  });
+
   /* Filterformular automatisch absenden */
   var filterForm = document.querySelector('[data-autosubmit]');
   if (filterForm) {

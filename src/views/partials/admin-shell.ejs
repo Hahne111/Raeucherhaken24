@@ -1,0 +1,43 @@
+<div class="ad-shell">
+  <aside class="ad-side">
+    <div class="ad-brand">
+      <strong>Räucherhaken24</strong>
+      <span>Verwaltung</span>
+    </div>
+    <nav class="ad-nav" aria-label="Verwaltungsnavigation">
+      <a href="/verwaltung/uebersicht" class="<%= currentPath === '/uebersicht' ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Übersicht</a>
+      <span class="ad-nav__sep">Katalog</span>
+      <a href="/verwaltung/produkte" class="<%= currentPath.indexOf('/produkte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Produkte</a>
+      <a href="/verwaltung/kategorien" class="<%= currentPath.indexOf('/kategorien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-leaf"/></svg>Kategorien</a>
+      <a href="/verwaltung/medien" class="<%= currentPath.indexOf('/medien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Medien</a>
+      <span class="ad-nav__sep">Verkauf</span>
+      <a href="/verwaltung/bestellungen" class="<%= currentPath.indexOf('/bestellungen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-cart"/></svg>Bestellungen</a>
+      <a href="/verwaltung/kunden" class="<%= currentPath.indexOf('/kunden') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-user"/></svg>Kunden</a>
+      <a href="/verwaltung/gutscheine" class="<%= currentPath.indexOf('/gutscheine') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Gutscheine</a>
+      <a href="/verwaltung/versandarten" class="<%= currentPath.indexOf('/versandarten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-truck"/></svg>Versandarten</a>
+      <span class="ad-nav__sep">Shop</span>
+      <a href="/verwaltung/einstellungen" class="<%= currentPath.indexOf('/einstellungen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Einstellungen</a>
+      <a href="/verwaltung/team" class="<%= currentPath.indexOf('/team') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-lock"/></svg>Zugänge</a>
+      <a href="/verwaltung/protokoll" class="<%= currentPath.indexOf('/protokoll') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Protokoll</a>
+    </nav>
+    <div class="ad-side__foot">
+      Angemeldet als<br><strong style="color:#fff"><%= admin.name || admin.email %></strong><br>
+      <a href="/" target="_blank" rel="noopener">Shop ansehen</a>
+      <form method="post" action="/verwaltung/abmelden" style="margin-top:12px">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn btn--ghost btn--sm btn--block" type="submit">Abmelden</button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="ad-main">
+    <header class="ad-top">
+      <h1><%= title %></h1>
+      <div class="ad-top__meta">
+        <% if (typeof headActions !== 'undefined') { %><%- headActions %><% } %>
+      </div>
+    </header>
+    <div class="ad-body">
+      <% (flashes || []).forEach(function (f) { %>
+        <div class="ad-alert ad-alert--<%= f.type %>"><%= f.message %></div>
+      <% }); %>

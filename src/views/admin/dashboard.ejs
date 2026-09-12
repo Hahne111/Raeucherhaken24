@@ -1,0 +1,96 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+
+<div class="kpis">
+  <div class="kpi"><span>Bestellungen heute</span><strong><%= stats.ordersToday %></strong><small><%= fmt(stats.revenueToday) %> Umsatz</small></div>
+  <div class="kpi"><span>Letzte 30 Tage</span><strong><%= stats.ordersMonth %></strong><small><%= fmt(stats.revenueMonth) %> Umsatz</small></div>
+  <div class="kpi"><span>Offene Bestellungen</span><strong><%= stats.openOrders %></strong><small><%= stats.toShip %> noch zu versenden</small></div>
+  <div class="kpi"><span>Produkte</span><strong><%= stats.activeProducts %></strong><small>von <%= stats.products %> insgesamt</small></div>
+  <div class="kpi"><span>Kunden</span><strong><%= stats.customers %></strong><small><%= stats.coupons %> aktive Gutscheine</small></div>
+</div>
+
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Umsatz der letzten 14 Tage</h2></div>
+      <div class="card__body bars-wrap">
+        <% var max = 1; revenueSeries.forEach(function (d) { if (d.summe > max) max = d.summe; }); %>
+        <% if (!revenueSeries.length) { %>
+          <p style="color:var(--a-soft);margin:0">Noch keine Bestellungen im Zeitraum.</p>
+        <% } else { %>
+          <div class="bars">
+            <% revenueSeries.forEach(function (d) { %>
+              <div style="height:<%= Math.max(3, Math.round(d.summe / max * 110)) %>px" title="<%= d.tag %>: <%= fmt(d.summe) %> (<%= d.anzahl %>)">
+                <span><%= d.tag.slice(8) %>.<%= d.tag.slice(5,7) %></span>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Neueste Bestellungen</h2><a class="btn btn--ghost btn--sm" href="/verwaltung/bestellungen">Alle Bestellungen</a></div>
+      <div class="card__body card__body--flush">
+        <% if (!recentOrders.length) { %>
+          <p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Bestellungen vorhanden.</p>
+        <% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Nummer</th><th>Kunde</th><th>Status</th><th>Versand</th><th class="num">Summe</th></tr></thead>
+          <tbody>
+            <% recentOrders.forEach(function (o) { %>
+              <tr>
+                <td><a class="link" href="/verwaltung/bestellungen/<%= o.id %>"><%= o.number %></a><br><small style="color:var(--a-soft)"><%= formatDate(o.created_at) %></small></td>
+                <td><%= o.email %></td>
+                <td><span class="pill <%= o.status === 'offen' ? 'pill--warn' : (o.status === 'abgeschlossen' ? 'pill--ok' : (o.status === 'storniert' ? 'pill--err' : 'pill--info')) %>"><%= o.status %></span></td>
+                <td><%= o.shipping_status %></td>
+                <td class="num"><%= fmt(o.total_cents) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Bestand wird knapp</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!lowStock.length) { %>
+          <p style="padding:18px;margin:0;color:var(--a-soft)">Alle Varianten haben mehr als 10 Stück auf Lager.</p>
+        <% } else { %>
+        <table class="tbl">
+          <tbody>
+            <% lowStock.forEach(function (v) { %>
+              <tr>
+                <td><%= v.product %><br><small style="color:var(--a-soft)"><%= v.name %></small></td>
+                <td class="num"><span class="pill <%= v.stock === 0 ? 'pill--err' : 'pill--warn' %>"><%= v.stock %> Stk.</span></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Letzte Änderungen</h2><a class="btn btn--ghost btn--sm" href="/verwaltung/protokoll">Protokoll</a></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <tbody>
+            <% recentLog.forEach(function (l) { %>
+              <tr>
+                <td><%= l.action %><br><small style="color:var(--a-soft)"><%= l.actor %> · <%= formatDate(l.created_at) %></small></td>
+                <td style="font-size:12.5px;color:var(--a-soft)"><%= l.detail %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/admin-foot') %>

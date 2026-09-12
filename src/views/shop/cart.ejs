@@ -86,7 +86,7 @@
                 <input type="hidden" name="redirect" value="/warenkorb">
                 <% totals.methods.forEach(function (m) { %>
                   <label class="shipping-option <%= totals.method && totals.method.code === m.code ? 'is-active' : '' %>">
-                    <input type="radio" name="shipping_code" value="<%= m.code %>" <%= totals.method && totals.method.code === m.code ? 'checked' : '' %> onchange="this.form.submit()">
+                    <input type="radio" name="shipping_code" value="<%= m.code %>" <%= totals.method && totals.method.code === m.code ? 'checked' : '' %> data-submit-on-change>
                     <span><strong><%= m.name %></strong><span><%= m.description %></span></span>
                     <span class="p"><%= m.price_cents === 0 ? 'kostenlos' : fmt(m.price_cents) %></span>
                   </label>

@@ -1,0 +1,79 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="card">
+  <div class="card__head"><h2>Neuer Gutschein</h2></div>
+  <div class="card__body">
+    <form method="post" action="/verwaltung/gutscheine">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="id" value="0">
+      <div class="grid3">
+        <label class="field"><span>Code</span><input type="text" name="code" placeholder="RAUCHZEICHEN10" required></label>
+        <label class="field"><span>Art</span>
+          <select name="kind">
+            <option value="percent">Prozent-Rabatt</option>
+            <option value="fixed">Fester Betrag</option>
+            <option value="shipping">Versandkostenfrei</option>
+          </select>
+        </label>
+        <label class="field"><span>Wert</span>
+          <input type="text" name="value" placeholder="10">
+          <span class="field__hint">Prozent als Zahl, fester Betrag in Euro.</span>
+        </label>
+      </div>
+      <div class="grid3">
+        <label class="field"><span>Mindestbestellwert</span><input type="text" name="min_subtotal" placeholder="29,00"></label>
+        <label class="field"><span>Maximale Einlösungen</span><input type="number" name="usage_limit" placeholder="leer = unbegrenzt" min="0"></label>
+        <label class="field"><span>Aktiv</span>
+          <select name="active"><option value="1">ja</option><option value="0">nein</option></select>
+        </label>
+      </div>
+      <div class="grid2">
+        <label class="field"><span>Gültig ab (optional)</span><input type="date" name="starts_at"></label>
+        <label class="field"><span>Gültig bis (optional)</span><input type="date" name="ends_at"></label>
+      </div>
+      <button class="btn btn--primary" type="submit">Gutschein anlegen</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2><%= rows.length %> Gutscheine</h2></div>
+  <div class="card__body card__body--flush">
+    <table class="tbl">
+      <thead><tr><th>Code</th><th>Art</th><th class="num">Wert</th><th class="num">ab Warenwert</th><th class="num">Eingelöst</th><th>Zeitraum</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (c) { %>
+          <tr>
+            <td><strong><%= c.code %></strong></td>
+            <td><%= c.kind === 'percent' ? 'Prozent' : (c.kind === 'fixed' ? 'Betrag' : 'Versandfrei') %></td>
+            <td class="num"><%= c.kind === 'percent' ? c.value + ' %' : (c.kind === 'fixed' ? fmt(c.value) : '–') %></td>
+            <td class="num"><%= c.min_subtotal_cents ? fmt(c.min_subtotal_cents) : '–' %></td>
+            <td class="num"><%= c.used_count %><%= c.usage_limit != null ? ' / ' + c.usage_limit : '' %></td>
+            <td style="font-size:12.5px;color:var(--a-soft)"><%= c.starts_at || '–' %> bis <%= c.ends_at || '–' %></td>
+            <td><span class="pill <%= c.active ? 'pill--ok' : '' %>"><%= c.active ? 'aktiv' : 'inaktiv' %></span></td>
+            <td class="num">
+              <form method="post" action="/verwaltung/gutscheine" style="display:inline">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <input type="hidden" name="id" value="<%= c.id %>">
+                <input type="hidden" name="code" value="<%= c.code %>">
+                <input type="hidden" name="kind" value="<%= c.kind %>">
+                <input type="hidden" name="value" value="<%= c.kind === 'percent' ? c.value : (c.value/100).toFixed(2).replace('.', ',') %>">
+                <input type="hidden" name="min_subtotal" value="<%= (c.min_subtotal_cents/100).toFixed(2).replace('.', ',') %>">
+                <input type="hidden" name="usage_limit" value="<%= c.usage_limit == null ? '' : c.usage_limit %>">
+                <input type="hidden" name="starts_at" value="<%= c.starts_at || '' %>">
+                <input type="hidden" name="ends_at" value="<%= c.ends_at || '' %>">
+                <input type="hidden" name="active" value="<%= c.active ? '0' : '1' %>">
+                <button class="btn btn--ghost btn--sm" type="submit"><%= c.active ? 'Deaktivieren' : 'Aktivieren' %></button>
+              </form>
+              <form method="post" action="/verwaltung/gutscheine/<%= c.id %>/loeschen" style="display:inline" data-confirm="Gutschein löschen?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <button class="btn btn--danger btn--sm" type="submit">Löschen</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

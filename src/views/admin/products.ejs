@@ -1,0 +1,72 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/produkte/neu">Neues Produkt</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+
+<div class="toolbar">
+  <form method="get" action="/verwaltung/produkte">
+    <label class="visually-hidden" for="q">Suche</label>
+    <input id="q" type="search" name="q" value="<%= q %>" placeholder="Name, Artikelnummer oder URL">
+    <label class="visually-hidden" for="kategorie">Kategorie</label>
+    <select id="kategorie" name="kategorie">
+      <option value="">Alle Kategorien</option>
+      <% categories.forEach(function (c) { %>
+        <option value="<%= c.id %>" <%= categoryId === c.id ? 'selected' : '' %>><%= c.name %></option>
+      <% }); %>
+    </select>
+    <label class="visually-hidden" for="status">Status</label>
+    <select id="status" name="status">
+      <option value="">Alle</option>
+      <option value="aktiv" <%= status === 'aktiv' ? 'selected' : '' %>>Nur aktive</option>
+      <option value="inaktiv" <%= status === 'inaktiv' ? 'selected' : '' %>>Nur inaktive</option>
+      <option value="ausverkauft" <%= status === 'ausverkauft' ? 'selected' : '' %>>Ausverkauft</option>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Filtern</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/produkte">Zurücksetzen</a>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2><%= total %> Produkte</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Produkte gefunden.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Bild</th><th>Produkt</th><th>Kategorie</th><th class="num">Preis</th><th class="num">Bestand</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (p) { %>
+          <tr>
+            <td><% if (p.image) { %><img class="thumb" src="<%= p.image %>" alt=""><% } %></td>
+            <td>
+              <a class="link" href="/verwaltung/produkte/<%= p.id %>"><%= p.name %></a><br>
+              <small style="color:var(--a-soft)"><%= p.sku || 'ohne Art.-Nr.' %> · <%= p.variant_count %> Variante(n)</small>
+            </td>
+            <td><%= p.category_name || '–' %></td>
+            <td class="num"><%= fmt(p.min_price != null ? p.min_price : p.price_cents) %></td>
+            <td class="num"><span class="pill <%= p.stock_total === 0 ? 'pill--err' : (p.stock_total < 10 ? 'pill--warn' : 'pill--ok') %>"><%= p.stock_total %></span></td>
+            <td>
+              <span class="pill <%= p.active ? 'pill--ok' : '' %>"><%= p.active ? 'aktiv' : 'inaktiv' %></span>
+              <% if (p.featured) { %><span class="pill pill--info">Startseite</span><% } %>
+            </td>
+            <td class="num">
+              <a class="btn btn--ghost btn--sm" href="/verwaltung/produkte/<%= p.id %>">Bearbeiten</a>
+              <a class="btn btn--ghost btn--sm" href="/produkt/<%= p.slug %>" target="_blank" rel="noopener">Ansehen</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+
+<% if (pages > 1) { %>
+  <nav class="pager" aria-label="Seiten">
+    <% for (var i = 1; i <= pages; i++) { %>
+      <% if (i === page) { %><span class="is-current"><%= i %></span>
+      <% } else { %><a href="/verwaltung/produkte?seite=<%= i %>&q=<%= encodeURIComponent(q) %>&kategorie=<%= categoryId || '' %>&status=<%= status %>"><%= i %></a><% } %>
+    <% } %>
+  </nav>
+<% } %>
+
+<%- include('../partials/admin-foot') %>

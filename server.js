@@ -49,6 +49,9 @@ app.use('/verwaltung', require('./src/routes/admin'));
 
 app.use((req, res) => {
   res.status(404);
+  if (req.path.startsWith('/verwaltung')) {
+    return res.render('admin/error', { title: 'Seite nicht gefunden', status: 404, message: 'Diesen Verwaltungsbereich gibt es nicht.' });
+  }
   res.render('error', { title: 'Seite nicht gefunden', status: 404, message: 'Diese Seite gibt es nicht (mehr). Vielleicht hilft die Suche oder eine unserer Kategorien weiter.' });
 });
 
@@ -56,12 +59,20 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   const status = err.status || 500;
   if (status >= 500) console.error('[fehler]', err);
   res.status(status);
+  const message = status >= 500 && config.isProd
+    ? 'Unerwarteter Fehler. Bitte später erneut versuchen.'
+    : err.message;
   const wantsJson = req.get('accept') && req.get('accept').includes('application/json');
-  if (wantsJson) return res.json({ ok: false, message: err.message || 'Unerwarteter Fehler' });
+  if (wantsJson) return res.json({ ok: false, message });
+  if (req.path.startsWith('/verwaltung')) {
+    return res.render('admin/error', {
+      title: status === 403 ? 'Anmeldung erforderlich' : 'Es ist ein Fehler aufgetreten',
+      status, message
+    });
+  }
   res.render('error', {
     title: status === 403 ? 'Zugriff verweigert' : 'Es ist ein Fehler aufgetreten',
-    status,
-    message: status >= 500 && config.isProd ? 'Unerwarteter Fehler. Bitte später erneut versuchen.' : err.message
+    status, message
   });
 });
 

@@ -1,0 +1,54 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad"><a href="/">Start</a><span>/</span><a href="/konto">Mein Konto</a><span>/</span><span>Adressen</span></nav>
+    <div class="section">
+      <div class="pagehead"><h1>Meine Adressen</h1></div>
+      <div class="account-layout">
+        <%- include('../partials/account-nav') %>
+        <div>
+          <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+            <a class="btn btn--primary btn--sm" href="/konto/adressen/neu">Adresse hinzufügen</a>
+          </div>
+          <% if (!addresses.length) { %>
+            <div class="empty"><h2>Noch keine Adresse</h2><p>Lege eine Adresse an, dann geht die Kasse künftig schneller.</p>
+              <a class="btn btn--primary" href="/konto/adressen/neu" style="margin-top:14px">Adresse hinzufügen</a></div>
+          <% } else { %>
+            <div class="addressgrid">
+              <% addresses.forEach(function (a) { %>
+                <div class="addresscard">
+                  <h3><%= a.first_name %> <%= a.last_name %></h3>
+                  <div style="color:var(--ink-soft)">
+                    <% if (a.company) { %><%= a.company %><br><% } %>
+                    <%= a.street %><br><%= a.zip %> <%= a.city %><br><%= a.country %>
+                    <% if (a.phone) { %><br><%= a.phone %><% } %>
+                  </div>
+                  <div class="addresscard__tags">
+                    <% if (a.is_default_shipping) { %><span class="tag">Standard Lieferung</span><% } %>
+                    <% if (a.is_default_billing) { %><span class="tag">Standard Rechnung</span><% } %>
+                  </div>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
+                    <a class="btn btn--ghost btn--sm" href="/konto/adressen/<%= a.id %>">Bearbeiten</a>
+                    <% if (!a.is_default_shipping) { %>
+                      <form method="post" action="/konto/adressen/<%= a.id %>/standard">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                        <input type="hidden" name="kind" value="shipping">
+                        <button class="linkbtn" type="submit">Als Standard</button>
+                      </form>
+                    <% } %>
+                    <form method="post" action="/konto/adressen/<%= a.id %>/loeschen">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                      <button class="linkbtn" type="submit">Löschen</button>
+                    </form>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

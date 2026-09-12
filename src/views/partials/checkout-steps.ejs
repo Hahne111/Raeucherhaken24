@@ -1,0 +1,7 @@
+<ol class="steps" aria-label="Bestellschritte" style="list-style:none;padding:0;margin:0 0 26px">
+  <% steps.forEach(function (s) { %>
+    <li class="step <%= s.state === 'active' ? 'is-active' : (s.state === 'done' ? 'is-done' : '') %>">
+      <b><%= s.state === 'done' ? '✓' : s.num %></b><%= s.label %>
+    </li>
+  <% }); %>
+</ol>
