@@ -12,6 +12,7 @@ const auth = require('../lib/auth');
 const catalog = require('../lib/catalog');
 const orders = require('../lib/orders');
 const stock = require('../lib/stock');
+const productCalculation = require('../lib/product-calculation');
 const settings = require('../lib/settings');
 const audit = require('../lib/audit');
 const util = require('../lib/util');
@@ -399,6 +400,74 @@ router.post('/produkte/neu', (req, res) => {
   res.redirect('/verwaltung/produkte/' + id);
 });
 
+router.get('/produkte/:id/kalkulation', (req, res, next) => {
+  const product = db.get('SELECT * FROM products WHERE id = ?', [util.toInt(req.params.id, 0)]);
+  if (!product) return next();
+  res.render('admin/product-calculator', {
+    title: 'Kalkulation · ' + product.name, product, error: '', input: {},
+    history: db.all('SELECT * FROM product_calculations WHERE product_id = ? ORDER BY id DESC LIMIT 30', [product.id])
+  });
+});
+
+router.post('/produkte/:id/kalkulation', (req, res, next) => {
+  const product = db.get('SELECT * FROM products WHERE id = ?', [util.toInt(req.params.id, 0)]);
+  if (!product) return next();
+  const result = productCalculation.calculate(req.body, product.tax_rate);
+  if (!result.ok) return res.status(400).render('admin/product-calculator', {
+    title: 'Kalkulation · ' + product.name, product, error: result.message, input: req.body,
+    history: db.all('SELECT * FROM product_calculations WHERE product_id = ? ORDER BY id DESC LIMIT 30', [product.id])
+  });
+  const v = result.values;
+  const id = Number(db.run(`INSERT INTO product_calculations
+    (product_id,material_cents,labor_minutes,hourly_cents,labor_cents,other_cents,fee_bps,margin_bps,
+     tax_rate,cost_cents,net_price_cents,gross_price_cents,base_price_cents,created_by)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+  [product.id, v.material_cents, v.labor_minutes, v.hourly_cents, v.labor_cents, v.other_cents,
+    v.fee_bps, v.margin_bps, v.tax_rate, v.cost_cents, v.net_price_cents, v.gross_price_cents,
+    product.price_cents, req.admin.email]).lastInsertRowid);
+  audit.log(req.admin.email, 'produkt.kalkuliert', 'product', String(product.id),
+    `Kalkulation ${id}: ${util.formatPrice(v.gross_price_cents)} als Vorschlag; Shoppreis unverändert`, req.ip);
+  req.flash('success', 'Vorschlag gespeichert. Der Shoppreis wurde nicht verändert.');
+  res.redirect(`/verwaltung/produkte/${product.id}/kalkulation/${id}`);
+});
+
+router.get('/produkte/:id/kalkulation/:calculationId', (req, res, next) => {
+  const product = db.get('SELECT * FROM products WHERE id = ?', [util.toInt(req.params.id, 0)]);
+  const calculation = product && db.get('SELECT * FROM product_calculations WHERE id = ? AND product_id = ?',
+    [util.toInt(req.params.calculationId, 0), product.id]);
+  if (!calculation) return next();
+  const variants = catalog.variantsFor(product.id, { activeOnly: false });
+  res.render('admin/product-calculation', {
+    title: 'Preisvorschlag · ' + product.name, product, calculation,
+    canApply: !calculation.applied_at && calculation.base_price_cents === product.price_cents &&
+      calculation.tax_rate === product.tax_rate && variants.length === 1 &&
+      variants[0].price_cents === product.price_cents
+  });
+});
+
+router.post('/produkte/:id/kalkulation/:calculationId/uebernehmen', (req, res, next) => {
+  const productId = util.toInt(req.params.id, 0);
+  const calcId = util.toInt(req.params.calculationId, 0);
+  if (!db.get('SELECT id FROM product_calculations WHERE id = ? AND product_id = ?', [calcId, productId])) return next();
+  const result = db.transaction(() => {
+    const product = db.get('SELECT * FROM products WHERE id = ?', [productId]);
+    const calc = db.get('SELECT * FROM product_calculations WHERE id = ? AND product_id = ?', [calcId, productId]);
+    const variants = catalog.variantsFor(productId, { activeOnly: false });
+    if (!product || calc.applied_at || product.price_cents !== calc.base_price_cents ||
+        product.tax_rate !== calc.tax_rate || variants.length !== 1 || variants[0].price_cents !== product.price_cents) {
+      return { ok: false, message: 'Der Artikel, die Steuer oder die Varianten haben sich geändert. Bitte neu kalkulieren.' };
+    }
+    db.run("UPDATE products SET price_cents=?, updated_at=datetime('now') WHERE id=?", [calc.gross_price_cents, productId]);
+    db.run('UPDATE variants SET price_cents=? WHERE id=? AND product_id=?', [calc.gross_price_cents, variants[0].id, productId]);
+    db.run("UPDATE product_calculations SET applied_at=datetime('now') WHERE id=?", [calcId]);
+    audit.log(req.admin.email, 'produkt.kalkulation.uebernommen', 'product', String(productId),
+      `Kalkulation ${calcId}: ${util.formatPrice(product.price_cents)} → ${util.formatPrice(calc.gross_price_cents)}`, req.ip);
+    return { ok: true };
+  });
+  req.flash(result.ok ? 'success' : 'error', result.ok ? 'Kalkulierter Preis im Shop gespeichert.' : result.message);
+  res.redirect(`/verwaltung/produkte/${productId}/kalkulation/${calcId}`);
+});
+
 router.get('/produkte/:id', (req, res, next) => {
   const id = util.toInt(req.params.id, 0);
   const product = db.get('SELECT * FROM products WHERE id = ?', [id]);
@@ -474,10 +543,11 @@ router.post('/produkte/:id/loeschen', (req, res, next) => {
   const product = db.get('SELECT * FROM products WHERE id = ?', [id]);
   if (!product) return next();
   const used = db.get('SELECT COUNT(*) AS c FROM order_items WHERE product_id = ?', [id]).c;
-  if (used > 0) {
+  const calculated = db.get('SELECT COUNT(*) AS c FROM product_calculations WHERE product_id = ?', [id]).c;
+  if (used > 0 || calculated > 0) {
     db.run("UPDATE products SET active = 0, updated_at = datetime('now') WHERE id = ?", [id]);
-    audit.log(req.admin.email, 'produkt.deaktiviert', 'product', String(id), `${product.name} (in ${used} Bestellungen)`, req.ip);
-    req.flash('warn', 'Das Produkt kommt in Bestellungen vor und wurde deshalb nur deaktiviert.');
+    audit.log(req.admin.email, 'produkt.deaktiviert', 'product', String(id), `${product.name} (${used} Bestellungen, ${calculated} Kalkulationen)`, req.ip);
+    req.flash('warn', 'Das Produkt hat Bestellungen oder Kalkulationen und wurde zur Erhaltung der Historie nur deaktiviert.');
     return res.redirect('/verwaltung/produkte/' + id);
   }
   db.transaction(() => {

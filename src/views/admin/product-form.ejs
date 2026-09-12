@@ -1,6 +1,7 @@
 <%- include('../partials/admin-head') %>
 <% var headActions = product.id ? '<a class="btn btn--ghost btn--sm" href="/produkt/' + product.slug + '" target="_blank" rel="noopener">Im Shop ansehen</a>' : ''; %>
 <%- include('../partials/admin-shell', { headActions: headActions }) %>
+<% if (product.id) { %><p><a class="btn btn--ghost btn--sm" href="/verwaltung/produkte/<%= product.id %>/kalkulation">Preis kalkulieren</a></p><% } %>
 
 <form id="product-main-form" method="post" action="<%= product.id ? '/verwaltung/produkte/' + product.id : '/verwaltung/produkte/neu' %>">
   <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
@@ -198,7 +199,7 @@
     <div class="card__head"><h2>Produkt entfernen</h2></div>
     <div class="card__body">
       <p style="color:var(--a-soft);margin:0 0 12px">
-        Produkte, die in Bestellungen vorkommen, werden aus Nachvollziehbarkeitsgründen nur deaktiviert statt gelöscht.
+        Produkte mit Bestellungen oder Kalkulationen werden aus Nachvollziehbarkeitsgründen nur deaktiviert statt gelöscht.
       </p>
       <form method="post" action="/verwaltung/produkte/<%= product.id %>/loeschen" data-confirm="Produkt wirklich entfernen?">
         <input type="hidden" name="_csrf" value="<%= csrfToken() %>">

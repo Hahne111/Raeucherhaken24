@@ -1,0 +1,36 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+
+<p><a class="btn btn--ghost btn--sm" href="/verwaltung/produkte/<%= product.id %>">Zurück zum Produkt</a></p>
+<div class="card">
+  <div class="card__head"><h2>Neuen Preisvorschlag berechnen</h2></div>
+  <div class="card__body">
+    <p>Aktueller Shoppreis: <strong><%= fmt(product.price_cents) %></strong> · MwSt.: <%= product.tax_rate %> %. Die Berechnung ändert den Shoppreis nicht.</p>
+    <% if (error) { %><p class="field__err"><%= error %></p><% } %>
+    <form method="post" action="/verwaltung/produkte/<%= product.id %>/kalkulation">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <div class="grid2">
+        <label class="field"><span>Materialkosten (€)</span><input name="material" inputmode="decimal" value="<%= input.material || '0,00' %>" required></label>
+        <label class="field"><span>Arbeitszeit (Minuten)</span><input name="minutes" type="number" min="0" max="99999" value="<%= input.minutes || '0' %>" required></label>
+        <label class="field"><span>Stundenlohn (€)</span><input name="hourly" inputmode="decimal" value="<%= input.hourly || '0,00' %>" required></label>
+        <label class="field"><span>Weitere Kosten (€)</span><input name="other" inputmode="decimal" value="<%= input.other || '0,00' %>" required></label>
+        <label class="field"><span>Gebühren vom Nettoverkauf (%)</span><input name="fee" inputmode="decimal" value="<%= input.fee || '0' %>" required></label>
+        <label class="field"><span>Gewünschte Marge vom Nettoverkauf (%)</span><input name="margin" inputmode="decimal" value="<%= input.margin || '20' %>" required></label>
+      </div>
+      <button class="btn btn--primary" type="submit">Vorschlag berechnen und speichern</button>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="card__head"><h2>Frühere Kalkulationen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!history.length) { %><p style="padding:20px;margin:0">Noch keine Kalkulation gespeichert.</p><% } else { %>
+      <table class="tbl"><thead><tr><th>Erstellt</th><th>Von</th><th class="num">Vorschlag</th><th>Status</th><th></th></tr></thead><tbody>
+        <% history.forEach(function (item) { %>
+          <tr><td><%= formatDate(item.created_at) %></td><td><%= item.created_by %></td><td class="num"><%= fmt(item.gross_price_cents) %></td><td><%= item.applied_at ? 'übernommen' : 'Vorschlag' %></td><td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/produkte/<%= product.id %>/kalkulation/<%= item.id %>">Details</a></td></tr>
+        <% }); %>
+      </tbody></table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

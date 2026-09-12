@@ -208,6 +208,36 @@ function csrf(html) {
   assert.equal(db.get('SELECT stock FROM variants WHERE id = ?', [draftVariant.id]).stock, 5);
   assert.equal(db.get('SELECT delta FROM stock_movements WHERE variant_id = ? ORDER BY id DESC LIMIT 1', [draftVariant.id]).delta, 5);
 
+  const calcUrl = `/verwaltung/produkte/${draft.id}/kalkulation`;
+  const calcForm = await editor.get(calcUrl);
+  assert.equal(calcForm.status, 200);
+  assert.equal((await finance.get(calcUrl)).status, 403);
+  const calcFields = { _csrf: csrf(calcForm.body), material: '4,00', minutes: '60', hourly: '10,00',
+    other: '1,00', fee: '5', margin: '20' };
+  assert.equal((await editor.post(calcUrl, { ...calcFields, material: '-1' })).status, 400);
+  assert.equal(db.get('SELECT COUNT(*) AS c FROM product_calculations').c, 0);
+  const proposal = await editor.post(calcUrl, calcFields);
+  assert.equal(proposal.status, 302);
+  const proposalId = Number(proposal.location.split('/').pop());
+  assert.equal(db.get('SELECT gross_price_cents FROM product_calculations WHERE id=?', [proposalId]).gross_price_cents, 2380);
+  assert.equal(db.get('SELECT price_cents FROM products WHERE id=?', [draft.id]).price_cents, 640);
+  assert.equal(db.get('SELECT price_cents FROM variants WHERE id=?', [draftVariant.id]).price_cents, 640);
+  const proposalPage = await editor.get(proposal.location);
+  assert.equal(proposalPage.status, 200);
+  assert.ok(proposalPage.body.includes('23,80'));
+  const applyUrl = proposal.location + '/uebernehmen';
+  assert.equal((await editor.post(applyUrl, { _csrf: csrf(proposalPage.body) })).status, 302);
+  assert.equal(db.get('SELECT price_cents FROM products WHERE id=?', [draft.id]).price_cents, 2380);
+  assert.equal(db.get('SELECT price_cents FROM variants WHERE id=?', [draftVariant.id]).price_cents, 2380);
+  assert.equal((await editor.post(applyUrl, { _csrf: csrf(proposalPage.body) })).status, 302);
+  assert.equal(db.get('SELECT price_cents FROM products WHERE id=?', [draft.id]).price_cents, 2380);
+  const stale = await editor.post(calcUrl, calcFields);
+  assert.equal(stale.status, 302);
+  db.run('UPDATE products SET tax_rate=7 WHERE id=?', [draft.id]);
+  assert.equal((await editor.post(stale.location + '/uebernehmen', { _csrf: csrf(calcForm.body) })).status, 302);
+  assert.equal(db.get('SELECT applied_at FROM product_calculations WHERE id=?', [Number(stale.location.split('/').pop())]).applied_at, null);
+  db.run('UPDATE products SET tax_rate=19 WHERE id=?', [draft.id]);
+
   const incomplete = db.get("SELECT * FROM products WHERE sku = 'NG-13002'");
   db.run('DELETE FROM variants WHERE product_id = ?', [incomplete.id]);
   const invalid = await admin.post('/verwaltung/produkte/' + incomplete.id, {
@@ -263,6 +293,12 @@ function csrf(html) {
   const removed = db.all('SELECT delta FROM stock_movements WHERE sku = ? ORDER BY id', ['TEST-LAGER']);
   assert.equal(removed.length, 2);
   assert.equal(removed[1].delta, -3);
-  console.log('Rollen, Produktfreigabe und Lagerbuchung: Zugriffe, Entwurf → Shop, Journal und Sperren geprüft.');
+  const finalDraftPage = await admin.get(`/verwaltung/produkte/${draft.id}`);
+  assert.equal((await admin.post(`/verwaltung/produkte/${draft.id}/loeschen`, {
+    _csrf: csrf(finalDraftPage.body)
+  })).status, 302);
+  assert.equal(db.get('SELECT active FROM products WHERE id=?', [draft.id]).active, 0);
+  assert.ok(db.get('SELECT id FROM product_calculations WHERE id=?', [proposalId]), 'Kalkulation bleibt erhalten');
+  console.log('Rollen, Produktfreigabe, Lagerjournal, Naturgewürze, Analyse und Kalkulation geprüft.');
   process.exit(0);
 })().catch((error) => { console.error(error); process.exit(1); });

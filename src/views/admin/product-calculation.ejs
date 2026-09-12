@@ -1,0 +1,32 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+
+<p><a class="btn btn--ghost btn--sm" href="/verwaltung/produkte/<%= product.id %>/kalkulation">Alle Kalkulationen</a></p>
+<div class="card">
+  <div class="card__head"><h2>Preisvorschlag vom <%= formatDate(calculation.created_at) %></h2></div>
+  <div class="card__body">
+    <p>Artikel: <a class="link" href="/verwaltung/produkte/<%= product.id %>"><%= product.name %></a> · erstellt von <%= calculation.created_by %></p>
+    <table class="tbl"><tbody>
+      <tr><th>Material</th><td class="num"><%= fmt(calculation.material_cents) %></td></tr>
+      <tr><th>Arbeitszeit</th><td class="num"><%= calculation.labor_minutes %> min × <%= fmt(calculation.hourly_cents) %>/h = <%= fmt(calculation.labor_cents) %></td></tr>
+      <tr><th>Weitere Kosten</th><td class="num"><%= fmt(calculation.other_cents) %></td></tr>
+      <tr><th>Gesamtkosten</th><td class="num"><%= fmt(calculation.cost_cents) %></td></tr>
+      <tr><th>Gebühren / Marge vom Nettoverkauf</th><td class="num"><%= (calculation.fee_bps / 100).toFixed(2).replace('.', ',') %> % / <%= (calculation.margin_bps / 100).toFixed(2).replace('.', ',') %> %</td></tr>
+      <tr><th>Nettoverkaufspreis</th><td class="num"><%= fmt(calculation.net_price_cents) %></td></tr>
+      <tr><th>MwSt. / Bruttovorschlag</th><td class="num"><%= calculation.tax_rate %> % / <strong><%= fmt(calculation.gross_price_cents) %></strong></td></tr>
+    </tbody></table>
+    <p>Rechenweg: (Material + gerundete Arbeitszeit + weitere Kosten) ÷ (1 − Gebührenanteil − Margenanteil) = Nettoverkaufspreis, auf Cent aufgerundet. Danach wird <%= calculation.tax_rate %> % MwSt. addiert und auf Cent gerundet.</p>
+    <p>Shoppreis bei Berechnung: <%= fmt(calculation.base_price_cents) %> · aktuell: <%= fmt(product.price_cents) %>.</p>
+    <% if (calculation.applied_at) { %>
+      <p class="pill pill--ok">Übernommen am <%= formatDate(calculation.applied_at) %></p>
+    <% } else if (canApply) { %>
+      <form method="post" action="/verwaltung/produkte/<%= product.id %>/kalkulation/<%= calculation.id %>/uebernehmen">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn btn--primary" type="submit">Preis jetzt in den Shop übernehmen</button>
+      </form>
+    <% } else { %>
+      <p>Dieser Vorschlag kann nicht mehr übernommen werden. Shoppreis, Steuer oder Varianten haben sich geändert, oder es gibt nicht genau eine preisgleiche Variante. Bitte neu kalkulieren.</p>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

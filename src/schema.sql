@@ -51,6 +51,27 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_active ON products(active);
 
+CREATE TABLE IF NOT EXISTS product_calculations (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id        INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  material_cents    INTEGER NOT NULL,
+  labor_minutes     INTEGER NOT NULL,
+  hourly_cents      INTEGER NOT NULL,
+  labor_cents       INTEGER NOT NULL,
+  other_cents       INTEGER NOT NULL,
+  fee_bps           INTEGER NOT NULL,
+  margin_bps        INTEGER NOT NULL,
+  tax_rate          INTEGER NOT NULL,
+  cost_cents        INTEGER NOT NULL,
+  net_price_cents   INTEGER NOT NULL,
+  gross_price_cents INTEGER NOT NULL,
+  base_price_cents  INTEGER NOT NULL,
+  created_by        TEXT NOT NULL,
+  created_at        TEXT NOT NULL DEFAULT (datetime('now')),
+  applied_at        TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_calculations_product ON product_calculations(product_id, id);
+
 CREATE TABLE IF NOT EXISTS product_images (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
