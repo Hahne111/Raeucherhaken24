@@ -226,6 +226,28 @@ function csrf(html) {
   });
   assert.equal(newSpice.status, 302);
   assert.equal(db.get('SELECT product_group FROM products WHERE slug = ?', ['neues-naturgewuerz']).product_group, 'naturgewuerze');
+  for (const [number, orderStatus, paymentStatus, shippingStatus, qty] of [
+    ['ANALYSE-OK', 'offen', 'offen', 'nicht versandt', 3],
+    ['ANALYSE-STORNO', 'storniert', 'offen', 'nicht versandt', 5],
+    ['ANALYSE-ERSTATTET', 'offen', 'erstattet', 'nicht versandt', 7],
+    ['ANALYSE-RETOURE', 'offen', 'offen', 'retoure', 9]
+  ]) {
+    const saleId = Number(db.run(
+      'INSERT INTO orders (number,email,status,payment_status,shipping_status) VALUES (?,?,?,?,?)',
+      [number, 'test@example.test', orderStatus, paymentStatus, shippingStatus]
+    ).lastInsertRowid);
+    db.run('INSERT INTO order_items (order_id,product_id,name,sku,qty,unit_price_cents,total_cents) VALUES (?,?,?,?,?,?,?)',
+      [saleId, draft.id, draft.name, fields.sku, qty, 640, qty * 640]);
+  }
+  const reportUrl = '/verwaltung/auswertung/produkte?q=' + encodeURIComponent(fields.sku);
+  const report = await finance.get(reportUrl);
+  assert.equal(report.status, 200);
+  assert.ok(report.body.includes('3 bestellte Stück'));
+  assert.ok(report.body.includes('19,20'));
+  assert.equal((await finance.get(reportUrl + '&filter=ohne')).body.includes('0 Artikel'), true);
+  assert.equal((await finance.get(reportUrl + '&von=2026-13-99')).status, 400);
+  assert.equal((await finance.get('/verwaltung/auswertung/produkte/druck?q=' + encodeURIComponent(fields.sku))).status, 200);
+  assert.equal((await service.get('/verwaltung/auswertung/produkte')).status, 403);
   const created = await admin.post('/verwaltung/produkte/neu', {
     _csrf: csrf(createForm.body), name: 'Testartikel Lagerjournal', slug: 'testartikel-lagerjournal',
     category_id: String(draft.category_id), price: '10,00', sku: 'TEST-LAGER', start_stock: '3'

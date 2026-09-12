@@ -6,9 +6,10 @@
     </div>
     <nav class="ad-nav" aria-label="Verwaltungsnavigation">
       <% if (adminCan('uebersicht')) { %><a href="/verwaltung/uebersicht" class="<%= currentPath === '/uebersicht' ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Übersicht</a><% } %>
-      <% if (adminCan('produkte') || adminCan('kategorien') || adminCan('medien') || adminCan('lager.lesen')) { %><span class="ad-nav__sep">Katalog</span><% } %>
+      <% if (adminCan('produkte') || adminCan('kategorien') || adminCan('medien') || adminCan('lager.lesen') || adminCan('produkt.analyse')) { %><span class="ad-nav__sep">Katalog</span><% } %>
       <% if (adminCan('produkte')) { %><a href="/verwaltung/produkte" class="<%= currentPath.indexOf('/produkte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Produkte</a><% } %>
       <% if (adminCan('produkte')) { %><a href="/verwaltung/produkte/naturgewuerze" class="<%= currentPath === '/produkte/naturgewuerze' ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-leaf"/></svg>Naturgewürze</a><% } %>
+      <% if (adminCan('produkt.analyse')) { %><a href="/verwaltung/auswertung/produkte" class="<%= currentPath.indexOf('/auswertung/produkte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Produktanalyse</a><% } %>
       <% if (adminCan('kategorien')) { %><a href="/verwaltung/kategorien" class="<%= currentPath.indexOf('/kategorien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-leaf"/></svg>Kategorien</a><% } %>
       <% if (adminCan('medien')) { %><a href="/verwaltung/medien" class="<%= currentPath.indexOf('/medien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Medien</a><% } %>
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lager" class="<%= currentPath.indexOf('/lager') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Lager</a><% } %>

@@ -132,6 +132,7 @@ router.use(requireAdmin);
 for (const [prefix, permission] of [
   ['/uebersicht', 'uebersicht'],
   ['/produkte', 'produkte'],
+  ['/auswertung', 'produkt.analyse'],
   ['/lager', 'lager.lesen'],
   ['/kategorien', 'kategorien'],
   ['/medien', 'medien'],
@@ -231,6 +232,39 @@ router.get('/uebersicht', (req, res) => {
 });
 
 /* ------------------------------- Produkte ------------------------------ */
+function productAnalysis(req, res, print = false) {
+  const today = new Date().toISOString().slice(0, 10);
+  const from = String(req.query.von || '2000-01-01');
+  const to = String(req.query.bis || today);
+  const valid = (date) => /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+    !Number.isNaN(Date.parse(date)) && new Date(date).toISOString().slice(0, 10) === date;
+  if (!valid(from) || !valid(to) || from > to) return res.status(400).send('Bitte einen gültigen Zeitraum angeben.');
+  const q = String(req.query.q || '').trim().slice(0, 80);
+  const filter = ['alle', 'bestseller', 'schwach', 'ohne'].includes(req.query.filter) ? req.query.filter : 'alle';
+  const where = q ? 'WHERE (p.name LIKE ? OR p.sku LIKE ?)' : '';
+  const params = [from, to, ...(q ? [`%${q}%`, `%${q}%`] : [])];
+  const having = { alle: '', bestseller: 'WHERE qty > 0', schwach: 'WHERE qty BETWEEN 1 AND 5', ohne: 'WHERE qty = 0' }[filter];
+  const rows = db.all(`WITH sales AS (
+      SELECT oi.product_id, SUM(oi.qty) AS qty, SUM(oi.total_cents) AS amount, COUNT(DISTINCT oi.order_id) AS orders
+      FROM order_items oi JOIN orders o ON o.id = oi.order_id
+      WHERE date(o.created_at) BETWEEN ? AND ? AND o.status != 'storniert'
+        AND o.payment_status NOT IN ('erstattet','fehlgeschlagen') AND o.shipping_status != 'retoure'
+      GROUP BY oi.product_id
+    ), products_with_sales AS (
+      SELECT p.id, p.slug, p.name, p.sku,
+        COALESCE(s.qty,0) AS qty, COALESCE(s.amount,0) AS amount, COALESCE(s.orders,0) AS orders
+      FROM products p LEFT JOIN sales s ON s.product_id = p.id ${where}
+    ) SELECT * FROM products_with_sales ${having}
+    ORDER BY qty DESC, amount DESC, name COLLATE NOCASE`, params);
+  res.render(print ? 'admin/product-analysis-print' : 'admin/product-analysis', {
+    title: print ? 'Produktanalyse · Druckansicht' : 'Produktanalyse', rows, from, to, q, filter, print,
+    totals: rows.reduce((sum, row) => ({ qty: sum.qty + row.qty, amount: sum.amount + row.amount }), { qty: 0, amount: 0 })
+  });
+}
+
+router.get('/auswertung/produkte', (req, res) => productAnalysis(req, res));
+router.get('/auswertung/produkte/druck', (req, res) => productAnalysis(req, res, true));
+
 router.get('/produkte', (req, res) => {
   const q = String(req.query.q || '').trim();
   const categoryId = util.toInt(req.query.kategorie, 0);

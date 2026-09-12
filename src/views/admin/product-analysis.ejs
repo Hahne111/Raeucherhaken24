@@ -1,0 +1,39 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+
+<div class="toolbar">
+  <form method="get" action="/verwaltung/auswertung/produkte">
+    <label for="von">Von</label><input id="von" type="date" name="von" value="<%= from %>" required>
+    <label for="bis">Bis</label><input id="bis" type="date" name="bis" value="<%= to %>" required>
+    <label class="visually-hidden" for="q">Suche</label><input id="q" type="search" name="q" value="<%= q %>" placeholder="Produkt oder Artikelnummer">
+    <label class="visually-hidden" for="filter">Auswertung</label>
+    <select id="filter" name="filter">
+      <option value="alle" <%= filter === 'alle' ? 'selected' : '' %>>Alle Artikel</option>
+      <option value="bestseller" <%= filter === 'bestseller' ? 'selected' : '' %>>Mit Verkäufen</option>
+      <option value="schwach" <%= filter === 'schwach' ? 'selected' : '' %>>1–5 Stück</option>
+      <option value="ohne" <%= filter === 'ohne' ? 'selected' : '' %>>Ohne Verkauf</option>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Auswerten</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/auswertung/produkte">Zurücksetzen</a>
+  </form>
+</div>
+<p><a class="btn btn--ghost btn--sm" href="/verwaltung/auswertung/produkte/druck?von=<%= from %>&bis=<%= to %>&q=<%= encodeURIComponent(q) %>&filter=<%= filter %>">Druckansicht / als PDF speichern</a></p>
+
+<div class="card">
+  <div class="card__head"><h2><%= rows.length %> Artikel · <%= totals.qty %> bestellte Stück · <%= fmt(totals.amount) %> Artikelwert</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %><p style="padding:20px;margin:0">Keine Artikel gefunden.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Produkt</th><th>Artikelnummer</th><th class="num">Bestellungen</th><th class="num">Stück</th><th class="num">Artikelwert</th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (row) { %>
+            <tr><td><a class="link" href="/verwaltung/produkte/<%= row.id %>"><%= row.name %></a></td><td><%= row.sku || '–' %></td><td class="num"><%= row.orders %></td><td class="num"><%= row.qty %></td><td class="num"><%= fmt(row.amount) %></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+<p style="color:var(--a-soft)">Zeitraum nach Bestelldatum. Stornierte, fehlgeschlagene, vollständig erstattete und als Retoure markierte Aufträge sind ausgeschlossen. Artikelwert ist die Summe der Bestellpositionen vor Versand und auftragsweiten Rabatten; er ist kein Zahlungseingang. Teilretouren werden noch nicht erfasst.</p>
+
+<%- include('../partials/admin-foot') %>

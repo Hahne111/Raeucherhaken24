@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Produktanalyse · <%= from %>–<%= to %></title>
+  <style>
+    body { font: 14px Arial, sans-serif; max-width: 1050px; margin: 30px auto; color: #152c3a; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 7px 5px; border-bottom: 1px solid #ccc; text-align: left; }
+    .num { text-align: right; }
+    .actions { margin-bottom: 22px; }
+    @media print { .actions { display: none; } body { margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="actions">
+    <a href="/verwaltung/auswertung/produkte?von=<%= from %>&bis=<%= to %>&q=<%= encodeURIComponent(q) %>&filter=<%= filter %>">Zur Auswertung</a>
+    <button type="button" onclick="window.print()">Drucken / als PDF speichern</button>
+  </div>
+  <h1>Produktanalyse</h1>
+  <p><%= from %> bis <%= to %> · Filter: <%= filter %><% if (q) { %> · Suche: <%= q %><% } %></p>
+  <p><%= rows.length %> Artikel · <%= totals.qty %> bestellte Stück · <%= fmt(totals.amount) %> Artikelwert</p>
+  <table>
+    <thead><tr><th>Produkt</th><th>Artikelnummer</th><th class="num">Bestellungen</th><th class="num">Stück</th><th class="num">Artikelwert</th></tr></thead>
+    <tbody><% rows.forEach(function (row) { %>
+      <tr><td><%= row.name %></td><td><%= row.sku || '–' %></td><td class="num"><%= row.orders %></td><td class="num"><%= row.qty %></td><td class="num"><%= fmt(row.amount) %></td></tr>
+    <% }); %></tbody>
+  </table>
+  <p>Stornos, fehlgeschlagene Zahlungen, vollständig erstattete und als Retoure markierte Aufträge ausgeschlossen. Positionen vor Versand und auftragsweiten Rabatten; keine Zahlungseingänge. Teilretouren noch nicht erfasst.</p>
+</body>
+</html>

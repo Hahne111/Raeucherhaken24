@@ -15,7 +15,7 @@ const GRANTS = {
   admin: ['*'],
   kundenservice: ['bestellungen.lesen', 'kunden.lesen', 'kunden.bearbeiten'],
   redaktion: ['produkte', 'kategorien', 'medien'],
-  finanzen: ['uebersicht'],
+  finanzen: ['uebersicht', 'produkt.analyse'],
   vertrieb: [],
   produktion: [],
   lager: ['lager.lesen', 'lager.buchen'],
