@@ -1,0 +1,93 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/termine">Zum Kalender</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="post" action="<%= action %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <div class="cols">
+    <div class="card">
+      <div class="card__head"><h2>Termin</h2></div>
+      <div class="card__body">
+        <label class="field"><span>Titel *</span>
+          <input type="text" name="title" required maxlength="200" value="<%= row.title %>">
+          <% if (errors.title) { %><small class="field__err"><%= errors.title %></small><% } %>
+        </label>
+        <div class="field-row">
+          <label class="field"><span>Art</span>
+            <select name="kind">
+              <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>" <%= row.kind === k ? 'selected' : '' %>><%= kinds[k] %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Priorität</span>
+            <select name="priority">
+              <% Object.keys(priorities).forEach(function (k) { %><option value="<%= k %>" <%= row.priority === k ? 'selected' : '' %>><%= priorities[k] %></option><% }); %>
+            </select>
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field"><span>Beginn *</span>
+            <input type="datetime-local" name="starts_at" required value="<%= row.starts_at %>">
+            <% if (errors.starts_at) { %><small class="field__err"><%= errors.starts_at %></small><% } %>
+          </label>
+          <label class="field"><span>Dauer (Minuten)</span><input type="number" name="duration_minutes" min="0" max="1440" value="<%= row.duration_minutes %>"></label>
+        </div>
+        <label class="field"><span>Ort</span><input type="text" name="location" maxlength="200" value="<%= row.location %>"></label>
+        <label class="check"><input type="checkbox" name="all_day" value="1" <%= row.all_day ? 'checked' : '' %>><span>Ganztägig</span></label>
+        <label class="field"><span>Notiz</span><textarea name="note" rows="4"><%= row.note %></textarea></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Zuordnung und Erinnerung</h2></div>
+      <div class="card__body">
+        <label class="field"><span>Zuständig</span>
+          <select name="owner_id" <%= canAll ? '' : 'disabled' %>>
+            <% staff.forEach(function (s) { %>
+              <option value="<%= s.id %>" <%= String(row.owner_id || '') === String(s.id) ? 'selected' : '' %>><%= s.name || s.email %> (<%= s.role %>)</option>
+            <% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Teilnehmer</span>
+          <select name="participant_ids" multiple size="6">
+            <% staff.forEach(function (s) { %>
+              <option value="<%= s.id %>" <%= selected.indexOf(s.id) >= 0 ? 'selected' : '' %>><%= s.name || s.email %></option>
+            <% }); %>
+          </select>
+          <% if (errors.participant_ids) { %><small class="field__err"><%= errors.participant_ids %></small><% } %>
+        </label>
+        <label class="field"><span>Kunde</span>
+          <select name="customer_id">
+            <option value="">– kein Kunde –</option>
+            <% customers.forEach(function (c) { %>
+              <option value="<%= c.id %>" <%= String(row.customer_id || '') === String(c.id) ? 'selected' : '' %>><%= c.company || ((c.first_name + ' ' + c.last_name).trim() || c.email) %></option>
+            <% }); %>
+          </select>
+          <% if (errors.customer_id) { %><small class="field__err"><%= errors.customer_id %></small><% } %>
+        </label>
+        <label class="field"><span>Händler</span>
+          <select name="dealer_id">
+            <option value="">– kein Händler –</option>
+            <% dealers.forEach(function (d) { %>
+              <option value="<%= d.id %>" <%= String(row.dealer_id || '') === String(d.id) ? 'selected' : '' %>><%= d.name %><%= d.city ? ', ' + d.city : '' %></option>
+            <% }); %>
+          </select>
+          <% if (errors.dealer_id) { %><small class="field__err"><%= errors.dealer_id %></small><% } %>
+        </label>
+        <% if (!row.id) { %>
+        <div class="field-row">
+          <label class="field"><span>Serie</span>
+            <select name="series_rule">
+              <% Object.keys(series).forEach(function (k) { %><option value="<%= k %>" <%= row.series_rule === k ? 'selected' : '' %>><%= series[k] %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Anzahl Termine</span><input type="number" name="series_count" min="1" max="52" value="<%= row.series_count %>"></label>
+        </div>
+        <% } %>
+        <label class="field"><span>Erinnerung (Minuten vorher, 0 = keine)</span>
+          <input type="number" name="remind_minutes" min="0" max="20160" value="<%= row.remind_minutes %>">
+        </label>
+        <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+        <% if (row.id) { %><p style="margin:12px 0 0"><a class="link" href="/verwaltung/termine/<%= row.id %>">Abbrechen</a></p><% } %>
+      </div>
+    </div>
+  </div>
+</form>
+<%- include('../partials/admin-foot') %>

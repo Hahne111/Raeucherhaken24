@@ -1,0 +1,151 @@
+<%- include('../partials/admin-head') %>
+<%
+var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/termine/druck?ansicht=' + view + '&datum=' + anchor + '" target="_blank" rel="noopener">Drucken</a>'
+  + ' <a class="btn btn--primary btn--sm" href="/verwaltung/termine/neu?datum=' + anchor + '">Termin anlegen</a>';
+function shift(days) {
+  var d = new Date(anchor + 'T00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+var step = view === 'tag' ? 1 : (view === 'woche' ? 7 : (view === 'agenda' ? 28 : 30));
+function qs(over) {
+  var p = { ansicht: view, datum: anchor, art: filterKind, status: filterStatus, alle: showAll ? '1' : '' };
+  Object.keys(over || {}).forEach(function (k) { p[k] = over[k]; });
+  return '/verwaltung/termine?' + Object.keys(p).filter(function (k) { return p[k]; })
+    .map(function (k) { return k + '=' + encodeURIComponent(p[k]); }).join('&');
+}
+%>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<% if (mailStatus.configured === false && mailStatus.blocked) { %>
+  <div class="ad-alert ad-alert--warn">
+    <%= mailStatus.blocked %> Erinnerung(en) liegen im Ausgangskorb, der Versand ist gesperrt.
+    Es fehlt: <strong><%= mailStatus.missing.join(', ') %></strong>.
+  </div>
+<% } %>
+<div class="toolbar">
+  <div class="cal-nav">
+    <a class="btn btn--ghost btn--sm" href="<%= qs({ datum: shift(-step) }) %>">◀</a>
+    <strong style="padding:0 10px"><%= range.title %></strong>
+    <a class="btn btn--ghost btn--sm" href="<%= qs({ datum: shift(step) }) %>">▶</a>
+    <a class="btn btn--ghost btn--sm" href="<%= qs({ datum: new Date().toISOString().slice(0,10) }) %>">Heute</a>
+  </div>
+  <div class="cal-views">
+    <% ['monat','woche','tag','agenda'].forEach(function (v) { %>
+      <a class="btn btn--sm <%= view === v ? 'btn--dark' : 'btn--ghost' %>" href="<%= qs({ ansicht: v }) %>"><%= v.charAt(0).toUpperCase() + v.slice(1) %></a>
+    <% }); %>
+  </div>
+  <form method="get" action="/verwaltung/termine">
+    <input type="hidden" name="ansicht" value="<%= view %>">
+    <input type="hidden" name="datum" value="<%= anchor %>">
+    <select name="art" aria-label="Art">
+      <option value="">Alle Arten</option>
+      <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>" <%= filterKind === k ? 'selected' : '' %>><%= kinds[k] %></option><% }); %>
+    </select>
+    <select name="status" aria-label="Status">
+      <option value="">Alle Status</option>
+      <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= filterStatus === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+    </select>
+    <% if (canAll) { %>
+      <label class="check" style="margin:0"><input type="checkbox" name="alle" value="1" <%= showAll ? 'checked' : '' %>><span>alle Mitarbeiter</span></label>
+    <% } %>
+    <button class="btn btn--dark btn--sm" type="submit">Filtern</button>
+  </form>
+</div>
+
+<% if (view === 'monat') { %>
+  <div class="card"><div class="card__body">
+    <div class="cal-grid">
+      <% ['Mo','Di','Mi','Do','Fr','Sa','So'].forEach(function (d) { %><div class="cal-grid__head"><%= d %></div><% }); %>
+      <% for (var i = 0; i < 42; i++) {
+           var day = new Date(range.gridStart); day.setDate(day.getDate() + i);
+           var key = day.getFullYear() + '-' + String(day.getMonth()+1).padStart(2,'0') + '-' + String(day.getDate()).padStart(2,'0');
+           var items = byDay.get(key) || [];
+           var other = day.getMonth() !== range.month; %>
+        <div class="cal-cell <%= other ? 'is-other' : '' %>">
+          <a class="cal-cell__day" href="/verwaltung/termine/neu?datum=<%= key %>"><%= day.getDate() %></a>
+          <% items.forEach(function (it) { %>
+            <a class="cal-item cal-item--<%= it.priority %> <%= it.status !== 'geplant' ? 'is-done' : '' %>" href="/verwaltung/termine/<%= it.id %>">
+              <span><%= String(it.starts_at).slice(11,16) %></span> <%= it.title %>
+            </a>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div></div>
+<% } else if (view === 'woche') { %>
+  <div class="card"><div class="card__body">
+    <div class="cal-week">
+      <% for (var w = 0; w < 7; w++) {
+           var day = new Date(range.from); day.setDate(day.getDate() + w);
+           var key = day.getFullYear() + '-' + String(day.getMonth()+1).padStart(2,'0') + '-' + String(day.getDate()).padStart(2,'0');
+           var items = byDay.get(key) || []; %>
+        <div class="cal-week__col">
+          <div class="cal-week__head"><%= day.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }) %></div>
+          <% items.forEach(function (it) { %>
+            <a class="cal-item cal-item--<%= it.priority %> <%= it.status !== 'geplant' ? 'is-done' : '' %>" href="/verwaltung/termine/<%= it.id %>">
+              <span><%= String(it.starts_at).slice(11,16) %></span> <%= it.title %>
+            </a>
+          <% }); %>
+          <a class="cal-week__add" href="/verwaltung/termine/neu?datum=<%= key %>">+</a>
+        </div>
+      <% } %>
+    </div>
+  </div></div>
+<% } else { %>
+  <div class="card">
+    <div class="card__head"><h2><%= rows.length %> Termine</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!rows.length) { %><p style="padding:20px;margin:0;color:var(--a-soft)">Keine Termine in diesem Zeitraum.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Zeit</th><th>Titel</th><th>Art</th><th>Kunde / Händler</th><th>Zuständig</th><th>Priorität</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (it) { %>
+            <tr>
+              <td><%= String(it.starts_at).replace('T',' ') %></td>
+              <td><a class="link" href="/verwaltung/termine/<%= it.id %>"><%= it.title %></a></td>
+              <td><%= kinds[it.kind] || it.kind %></td>
+              <td><%= it.customer_company || it.customer_last_name || it.customer_email || it.dealer_name || '–' %></td>
+              <td><%= it.owner_name || '–' %></td>
+              <td><%= priorities[it.priority] || it.priority %></td>
+              <td><span class="pill <%= it.status === 'erledigt' ? 'pill--ok' : (it.status === 'abgesagt' ? 'pill--err' : '') %>"><%= states[it.status] || it.status %></span></td>
+              <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/termine/<%= it.id %>">Öffnen</a></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+<% } %>
+
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Fällige Händlerbesuche</h2></div>
+    <div class="card__body">
+      <% if (!dueDealers.length) { %><p style="margin:0;color:var(--a-soft)">Kein Besuch fällig.</p><% } else { %>
+      <ul style="margin:0;padding-left:18px">
+        <% dueDealers.forEach(function (d) { %>
+          <li><a class="link" href="/verwaltung/haendler/<%= d.id %>"><%= d.name %></a>, <%= d.city %> – fällig <%= d.next_visit_at || 'sofort' %>
+            · <a class="link" href="/verwaltung/termine/neu?haendler=<%= d.id %>">Termin anlegen</a></li>
+        <% }); %>
+      </ul>
+      <% } %>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Erinnerungen</h2></div>
+    <div class="card__body">
+      <p style="margin:0 0 12px;font-size:13.5px">
+        Systemmail: <strong><%= mailStatus.configured ? 'eingerichtet (' + mailStatus.host + ')' : 'nicht eingerichtet' %></strong><br>
+        <% if (!mailStatus.configured) { %><span style="color:var(--a-soft)">Es fehlt: <%= mailStatus.missing.join(', ') %></span><br><% } %>
+        Ausgangskorb: <%= mailStatus.pending %> offen, <%= mailStatus.blocked %> gesperrt, <%= mailStatus.sent %> versendet.
+      </p>
+      <form method="post" action="/verwaltung/termine/erinnerungen">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn btn--dark btn--sm" type="submit">Fällige Erinnerungen einstellen</button>
+      </form>
+      <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Jede Erinnerung wird je Empfänger genau einmal eingestellt – ein zweiter Lauf erzeugt keine zweite Mail.</p>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

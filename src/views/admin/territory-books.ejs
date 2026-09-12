@@ -1,0 +1,51 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2><%= books.length %> Gebietsbücher</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!books.length) { %><p style="padding:20px;margin:0;color:var(--a-soft)">Noch kein Gebietsbuch angelegt.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Name</th><th>Gebiet</th><th>Zuständig</th><th class="num">Einträge</th><th></th></tr></thead>
+        <tbody>
+          <% books.forEach(function (b) { %>
+            <tr>
+              <td><a class="link" href="/verwaltung/gebietsbuch/<%= b.id %>"><%= b.name %></a></td>
+              <td><%= b.territory_name || '–' %></td>
+              <td><%= b.owner_name || 'alle' %></td>
+              <td class="num"><%= b.entry_count %></td>
+              <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/gebietsbuch/<%= b.id %>">Öffnen</a></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+  <% if (canManage) { %>
+  <div class="card">
+    <div class="card__head"><h2>Neues Buch</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/gebietsbuch">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="field"><span>Name *</span><input type="text" name="name" required maxlength="120"></label>
+        <label class="field"><span>Gebiet</span>
+          <select name="territory_code">
+            <option value="">– ohne Gebiet –</option>
+            <% territories.forEach(function (t) { %><option value="<%= t.code %>"><%= t.name %></option><% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Zuständig</span>
+          <select name="owner_id">
+            <option value="">– alle Berater –</option>
+            <% advisors.forEach(function (a) { %><option value="<%= a.id %>"><%= a.name || a.email %></option><% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Notiz</span><input type="text" name="note" maxlength="500"></label>
+        <button class="btn btn--primary btn--block" type="submit">Anlegen</button>
+      </form>
+    </div>
+  </div>
+  <% } %>
+</div>
+<%- include('../partials/admin-foot') %>

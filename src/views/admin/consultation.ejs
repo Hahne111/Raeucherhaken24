@@ -1,0 +1,123 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/beratung">Zur Übersicht</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Positionen</h2><strong><%= fmt(total) %></strong></div>
+      <div class="card__body card__body--flush">
+        <% if (!items.length) { %>
+          <p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Position übernommen.</p>
+        <% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Artikel</th><th class="num">Menge</th><th class="num">Einzel</th><th class="num">Summe</th><th>Hinweis</th><th></th></tr></thead>
+          <tbody>
+            <% items.forEach(function (i) { %>
+              <tr>
+                <td><a class="link" href="/verwaltung/produkte/<%= i.product_id %>"><%= i.product_name %></a><br><span style="font-size:12px;color:var(--a-soft)"><%= i.variant_name %> · <%= i.sku %></span></td>
+                <td class="num"><%= i.qty %></td>
+                <td class="num"><%= fmt(i.price_cents) %></td>
+                <td class="num"><%= fmt(i.line_total) %></td>
+                <td>
+                  <% if (!i.available) { %><span class="pill pill--err">nicht im Verkauf</span><% } %>
+                  <% if (i.stock_problem) { %><span class="pill pill--warn">Bestand <%= i.stock %></span><% } %>
+                  <%= i.note %>
+                </td>
+                <td class="num">
+                  <form method="post" action="/verwaltung/beratung/<%= row.id %>/position/<%= i.id %>/entfernen">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <button class="btn btn--danger btn--sm" type="submit">Entfernen</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Vorschläge aus dem Sortiment</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!suggestions.length) { %>
+          <p style="padding:18px;margin:0;color:var(--a-soft)">Zu diesem Bedarf gibt es derzeit keinen passenden Artikel mit Bestand. Einsatzbereich, Wünsche oder Budget anpassen.</p>
+        <% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Artikel</th><th>Kategorie</th><th class="num">Bestand</th><th class="num">Preis</th><th class="num">Menge</th><th></th></tr></thead>
+          <tbody>
+            <% suggestions.forEach(function (s) { %>
+              <tr>
+                <td><strong><%= s.product_name %></strong><br><span style="font-size:12px;color:var(--a-soft)"><%= s.variant_name %> · <%= s.subtitle || '' %></span></td>
+                <td><%= s.category_name || '–' %></td>
+                <td class="num"><%= s.stock %></td>
+                <td class="num"><%= fmt(s.price_cents) %></td>
+                <td class="num" colspan="2">
+                  <form method="post" action="/verwaltung/beratung/<%= row.id %>/position" style="display:flex;gap:8px;justify-content:flex-end">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <input type="hidden" name="variant_id" value="<%= s.variant_id %>">
+                    <input type="number" name="qty" value="1" min="1" max="999" style="width:70px" aria-label="Menge">
+                    <button class="btn btn--dark btn--sm" type="submit">Übernehmen</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Beratung</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/beratung/<%= row.id %>">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Titel</span><input type="text" name="title" value="<%= row.title %>" maxlength="200"></label>
+          <label class="field"><span>Kunde</span>
+            <input type="number" name="customer_id" value="<%= row.customer_id || '' %>" placeholder="Kundennummer">
+            <% if (row.customer_id) { %><small class="field__hint"><a class="link" href="/verwaltung/kunden/<%= row.customer_id %>"><%= row.customer_company || row.customer_email %></a><%= row.customer_discount ? ' · ' + row.customer_discount + ' % Rabatt' : '' %></small><% } %>
+          </label>
+          <label class="field"><span>Einsatzbereich</span>
+            <select name="usage_area">
+              <% Object.keys(areas).forEach(function (k) { %><option value="<%= k %>" <%= row.usage_area === k ? 'selected' : '' %>><%= areas[k].label %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Bedarf</span><textarea name="demand" rows="3"><%= row.demand %></textarea></label>
+          <label class="field"><span>Wünsche</span><textarea name="wishes" rows="2"><%= row.wishes %></textarea></label>
+          <label class="field"><span>Budget je Artikel</span><input type="text" name="budget" value="<%= row.budget_cents ? (row.budget_cents/100).toFixed(2).replace('.',',') : '' %>"></label>
+          <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Weiter</h2></div>
+      <div class="card__body">
+        <p style="margin:0 0 12px;font-size:13.5px">Status: <strong><%= states[row.status] || row.status %></strong>
+          <% if (row.order_id) { %><br><a class="link" href="/verwaltung/bestellungen/<%= row.order_id %>">Zum erzeugten Auftrag</a><% } %>
+        </p>
+        <form method="post" action="/verwaltung/beratung/<%= row.id %>/status" style="margin-bottom:14px">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Status setzen</span>
+            <select name="status">
+              <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= row.status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+            </select>
+          </label>
+          <button class="btn btn--dark btn--block" type="submit">Status speichern</button>
+        </form>
+        <% if (row.status !== 'uebernommen') { %>
+        <form method="post" action="/verwaltung/beratung/<%= row.id %>/auftrag">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <button class="btn btn--primary btn--block" type="submit" <%= items.length && row.customer_id ? '' : 'disabled' %>>In Auftrag übernehmen</button>
+        </form>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">
+          <% if (!row.customer_id) { %>Für einen Auftrag wird eine Kundenakte benötigt.<% } else if (!items.length) { %>Erst Positionen übernehmen.<% } else { %>Der Kundenrabatt wird angerechnet, der Bestand beim Anlegen gebucht.<% } %>
+        </p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

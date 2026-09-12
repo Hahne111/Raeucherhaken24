@@ -1,0 +1,38 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/beratung/neu">Beratung starten</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/beratung">
+    <input type="search" name="q" value="<%= q %>" placeholder="Titel, Bedarf, Kunde" aria-label="Suche">
+    <select name="status" aria-label="Status">
+      <option value="">Alle Status</option>
+      <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Suchen</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/beratung">Zurücksetzen</a>
+  </form>
+</div>
+<div class="card">
+  <div class="card__head"><h2><%= rows.length %> Beratungen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %><p style="padding:20px;margin:0;color:var(--a-soft)">Noch keine Beratung erfasst.</p><% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Titel</th><th>Kunde</th><th>Berater</th><th class="num">Positionen</th><th>Status</th><th>Angelegt</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (c) { %>
+          <tr>
+            <td><a class="link" href="/verwaltung/beratung/<%= c.id %>"><%= c.title || ('Beratung #' + c.id) %></a></td>
+            <td><% if (c.customer_id) { %><a class="link" href="/verwaltung/kunden/<%= c.customer_id %>"><%= c.customer_company || c.customer_last_name || c.customer_email %></a><% } else { %>–<% } %></td>
+            <td><%= c.advisor_name || '–' %></td>
+            <td class="num"><%= c.item_count %></td>
+            <td><span class="pill <%= c.status === 'uebernommen' ? 'pill--ok' : '' %>"><%= states[c.status] || c.status %></span></td>
+            <td><%= formatDay(c.created_at) %></td>
+            <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/beratung/<%= c.id %>">Fortsetzen</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

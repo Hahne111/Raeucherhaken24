@@ -143,6 +143,9 @@ for (const [prefix, permission] of [
   ['/haendler', 'haendler'],
   ['/gebiete', 'gebiete.lesen'],
   ['/berater', 'crm.berater'],
+  ['/termine', 'termine'],
+  ['/beratung', 'beratung'],
+  ['/gebietsbuch', 'gebietsbuch'],
   ['/gutscheine', 'gutscheine'],
   ['/versandarten', 'versandarten'],
   ['/einstellungen', 'einstellungen'],
@@ -151,6 +154,8 @@ for (const [prefix, permission] of [
 
 router.use('/nachrichten', require('./admin-messages'));
 router.use('/', require('./admin-crm'));
+router.use('/', require('./admin-calendar'));
+router.use('/', require('./admin-consulting'));
 
 /* ------------------------------ Lager --------------------------------- */
 router.get('/lager', (req, res) => {

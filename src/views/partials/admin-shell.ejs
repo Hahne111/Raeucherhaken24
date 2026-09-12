@@ -19,10 +19,14 @@
       <% if (adminCan('gutscheine')) { %><a href="/verwaltung/gutscheine" class="<%= currentPath.indexOf('/gutscheine') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Gutscheine</a><% } %>
       <% if (adminCan('versandarten')) { %><a href="/verwaltung/versandarten" class="<%= currentPath.indexOf('/versandarten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-truck"/></svg>Versandarten</a><% } %>
       <% if (adminCan('haendler') || adminCan('gebiete.lesen') || adminCan('crm.berater')) { %><span class="ad-nav__sep">Vertrieb</span><% } %>
+      <% if (adminCan('beratung')) { %><a href="/verwaltung/beratung" class="<%= currentPath.indexOf('/beratung') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-leaf"/></svg>Produktberatung</a><% } %>
+      <% if (adminCan('gebietsbuch')) { %><a href="/verwaltung/gebietsbuch" class="<%= currentPath.indexOf('/gebietsbuch') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Gebietsbücher</a><% } %>
       <% if (adminCan('haendler')) { %><a href="/verwaltung/haendler" class="<%= currentPath.indexOf('/haendler') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-user"/></svg>Händler</a><% } %>
       <% if (adminCan('gebiete.lesen')) { %><a href="/verwaltung/gebiete" class="<%= currentPath.indexOf('/gebiete') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Festgebiete</a><% } %>
       <% if (adminCan('crm.berater')) { %><a href="/verwaltung/berater" class="<%= currentPath.indexOf('/berater') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Kundenberater</a><% } %>
-      <% if (adminCan('nachrichten')) { %><span class="ad-nav__sep">Zusammenarbeit</span><a href="/verwaltung/nachrichten" class="<%= currentPath.indexOf('/nachrichten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-user"/></svg>Nachrichten</a><% } %>
+      <% if (adminCan('termine') || adminCan('nachrichten')) { %><span class="ad-nav__sep">Zusammenarbeit</span><% } %>
+      <% if (adminCan('termine')) { %><a href="/verwaltung/termine" class="<%= currentPath.indexOf('/termine') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Termine</a><% } %>
+      <% if (adminCan('nachrichten')) { %><a href="/verwaltung/nachrichten" class="<%= currentPath.indexOf('/nachrichten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-user"/></svg>Nachrichten</a><% } %>
       <span class="ad-nav__sep">Konto</span>
       <% if (adminCan('einstellungen')) { %><a href="/verwaltung/einstellungen" class="<%= currentPath.indexOf('/einstellungen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Einstellungen</a><% } %>
       <a href="/verwaltung/team" class="<%= currentPath.indexOf('/team') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-lock"/></svg><%= adminCan('team') ? 'Zugänge' : 'Mein Konto' %></a>

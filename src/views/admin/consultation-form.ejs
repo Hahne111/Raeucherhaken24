@@ -1,0 +1,38 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/beratung">Zur Übersicht</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="post" action="<%= action %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <div class="card" style="max-width:720px">
+    <div class="card__head"><h2>Bedarf aufnehmen</h2></div>
+    <div class="card__body">
+      <label class="field"><span>Titel *</span>
+        <input type="text" name="title" required maxlength="200" value="<%= row.title %>" placeholder="z. B. Ausstattung Hofladen">
+        <% if (errors.title) { %><small class="field__err"><%= errors.title %></small><% } %>
+      </label>
+      <label class="field"><span>Kunde</span>
+        <select name="customer_id">
+          <option value="">– ohne Kundenakte –</option>
+          <% customers.forEach(function (c) { %>
+            <option value="<%= c.id %>" <%= String(row.customer_id || '') === String(c.id) ? 'selected' : '' %>><%= c.company || ((c.first_name + ' ' + c.last_name).trim() || c.email) %></option>
+          <% }); %>
+        </select>
+        <% if (errors.customer_id) { %><small class="field__err"><%= errors.customer_id %></small><% } %>
+      </label>
+      <label class="field"><span>Einsatzbereich *</span>
+        <select name="usage_area" required>
+          <option value="">– bitte wählen –</option>
+          <% Object.keys(areas).forEach(function (k) { %>
+            <option value="<%= k %>" <%= row.usage_area === k ? 'selected' : '' %>><%= areas[k].label %></option>
+          <% }); %>
+        </select>
+        <% if (errors.usage_area) { %><small class="field__err"><%= errors.usage_area %></small><% } %>
+      </label>
+      <label class="field"><span>Bedarf</span><textarea name="demand" rows="4" placeholder="Was soll geräuchert werden, welche Menge, welche Bedingungen?"><%= row.demand %></textarea></label>
+      <label class="field"><span>Besondere Wünsche</span><textarea name="wishes" rows="3"><%= row.wishes %></textarea></label>
+      <label class="field"><span>Budget je Artikel (optional)</span><input type="text" name="budget" value="<%= row.budget_cents ? (row.budget_cents/100).toFixed(2).replace('.',',') : '' %>" placeholder="z. B. 120,00"></label>
+      <button class="btn btn--primary" type="submit">Speichern und Vorschläge anzeigen</button>
+    </div>
+  </div>
+</form>
+<%- include('../partials/admin-foot') %>

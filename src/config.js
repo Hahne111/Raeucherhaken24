@@ -57,5 +57,19 @@ module.exports = {
   secureCookies: process.env.SECURE_COOKIES === '1',
   uploadDir: path.join(rootDir, 'public', 'uploads'),
   sessionTtlMs: 1000 * 60 * 60 * 24 * 30,
-  adminSessionTtlMs: 1000 * 60 * 60 * 8
+  adminSessionTtlMs: 1000 * 60 * 60 * 8,
+  // Systemmail. Ohne Zugangsdaten bleibt der Versand gesperrt; nichts davon
+  // liegt im Code oder in der Datenbank.
+  mail: {
+    host: process.env.SMTP_HOST || '',
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: process.env.SMTP_SECURE === '1',
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || '',
+    from: process.env.MAIL_FROM || '',
+    replyTo: process.env.MAIL_REPLY_TO || '',
+    // Erlaubt den Testbetrieb gegen einen lokalen Auffang-Server.
+    allowInsecure: process.env.SMTP_ALLOW_INSECURE === '1'
+  },
+  publicUrl: (process.env.PUBLIC_URL || '').replace(/\/$/, '')
 };

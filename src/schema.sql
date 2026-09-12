@@ -489,3 +489,24 @@ CREATE TABLE IF NOT EXISTS territory_entries (
 );
 CREATE INDEX IF NOT EXISTS idx_territory_entries_book ON territory_entries(book_id);
 CREATE INDEX IF NOT EXISTS idx_territory_entries_owner ON territory_entries(owner_id);
+
+/* ============================ Systemmail =============================== */
+
+CREATE TABLE IF NOT EXISTS mail_outbox (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  dedupe_key  TEXT UNIQUE,
+  to_email    TEXT NOT NULL,
+  to_name     TEXT NOT NULL DEFAULT '',
+  subject     TEXT NOT NULL,
+  body_text   TEXT NOT NULL DEFAULT '',
+  kind        TEXT NOT NULL DEFAULT 'system',
+  ref_type    TEXT NOT NULL DEFAULT '',
+  ref_id      TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'geplant',
+  attempts    INTEGER NOT NULL DEFAULT 0,
+  last_error  TEXT NOT NULL DEFAULT '',
+  due_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  sent_at     TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_mail_outbox_status ON mail_outbox(status, due_at);

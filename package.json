@@ -13,7 +13,9 @@
     "create-admin": "node scripts/create-admin.js",
     "test": "node scripts/smoke-test.js",
     "test:rollen": "node scripts/role-test.js",
-    "test:crm": "node scripts/crm-test.js"
+    "test:crm": "node scripts/crm-test.js",
+    "test:kalender": "node scripts/calendar-test.js",
+    "test:alle": "node scripts/smoke-test.js && node scripts/role-test.js && node scripts/crm-test.js && node scripts/calendar-test.js"
   },
   "dependencies": {
     "ejs": "^3.1.10",
