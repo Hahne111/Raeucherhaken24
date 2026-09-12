@@ -1,0 +1,79 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2><%= locations.length %> Lagerorte</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!locations.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch kein Lagerort angelegt.</p><% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Kürzel</th><th>Name</th><th>Zone</th><th>Art</th><th class="num">Varianten</th></tr></thead>
+          <tbody>
+            <% locations.forEach(function (l) { %>
+              <tr><td><strong><%= l.code %></strong></td><td><%= l.name %></td><td><%= l.zone || '–' %></td><td><%= l.kind %></td><td class="num"><%= l.variant_count %></td></tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+        <% if (canWrite) { %>
+        <div style="padding:16px;border-top:1px solid var(--a-line)">
+          <form method="post" action="/verwaltung/lagerorte">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <div class="field-row">
+              <label class="field"><span>Kürzel *</span><input type="text" name="code" required maxlength="20" placeholder="z. B. A-01"></label>
+              <label class="field"><span>Name *</span><input type="text" name="name" required maxlength="120"></label>
+              <label class="field"><span>Zone</span><input type="text" name="zone" maxlength="60"></label>
+              <label class="field"><span>Art</span>
+                <select name="kind"><option value="lager">Lager</option><option value="kommission">Kommissionierung</option><option value="retoure">Retoure</option><option value="sperrlager">Sperrlager</option></select>
+              </label>
+            </div>
+            <button class="btn btn--dark" type="submit">Lagerort anlegen</button>
+          </form>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Packmittel</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!packaging.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch kein Packmittel angelegt.</p><% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Name</th><th>Maße (mm)</th><th class="num">Bestand</th><th class="num">Mindest</th></tr></thead>
+          <tbody>
+            <% packaging.forEach(function (p) { %>
+              <tr><td><%= p.name %><% if (p.code) { %><br><span style="font-size:12px;color:var(--a-soft)"><%= p.code %></span><% } %></td>
+                <td><%= p.length_mm %> × <%= p.width_mm %> × <%= p.height_mm %></td>
+                <td class="num"><%= p.stock %><% if (p.min_stock && p.stock <= p.min_stock) { %> <span class="pill pill--warn">knapp</span><% } %></td>
+                <td class="num"><%= p.min_stock %></td></tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+        <% if (canWrite) { %>
+        <div style="padding:16px;border-top:1px solid var(--a-line)">
+          <form method="post" action="/verwaltung/packmittel">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <div class="field-row">
+              <label class="field"><span>Name *</span><input type="text" name="name" required maxlength="120"></label>
+              <label class="field"><span>Kürzel</span><input type="text" name="code" maxlength="40"></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span>Länge (mm)</span><input type="number" name="length_mm" min="0" value="0"></label>
+              <label class="field"><span>Breite</span><input type="number" name="width_mm" min="0" value="0"></label>
+              <label class="field"><span>Höhe</span><input type="number" name="height_mm" min="0" value="0"></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span>Bestand</span><input type="number" name="stock" min="0" value="0"></label>
+              <label class="field"><span>Mindestbestand</span><input type="number" name="min_stock" min="0" value="0"></label>
+            </div>
+            <button class="btn btn--dark" type="submit">Packmittel speichern</button>
+          </form>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

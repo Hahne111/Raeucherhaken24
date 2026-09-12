@@ -1,0 +1,66 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/inventur">Zur Übersicht</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<% if (row.status === 'abgeschlossen') { %>
+  <div class="ad-alert ad-alert--info">Diese Inventur ist abgeschlossen. Die Differenzen sind als Lagerbewegung gebucht und im Journal nachvollziehbar.</div>
+<% } %>
+<div class="cols">
+  <div>
+    <form method="post" action="/verwaltung/inventur/<%= row.id %>/zaehlen">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <div class="card">
+        <div class="card__head"><h2><%= items.length %> Positionen</h2>
+          <% if (canWrite && row.status !== 'abgeschlossen') { %><button class="btn btn--dark btn--sm" type="submit">Zählungen speichern</button><% } %>
+        </div>
+        <div class="card__body card__body--flush">
+          <table class="tbl">
+            <thead><tr><th>Artikel</th><th>Art.-Nr.</th><th class="num">Erwartet</th><th class="num">Bestand jetzt</th><th class="num">Gezählt</th><th class="num">Differenz</th></tr></thead>
+            <tbody>
+              <% items.forEach(function (i) { %>
+                <tr>
+                  <td><%= i.product_name %> – <%= i.variant_name %></td>
+                  <td><%= i.sku %></td>
+                  <td class="num"><%= i.expected_qty %></td>
+                  <td class="num"><%= i.current_stock %></td>
+                  <td class="num">
+                    <% if (canWrite && row.status !== 'abgeschlossen') { %>
+                      <input type="number" name="zaehlung_<%= i.id %>" min="0" value="<%= i.counted_qty === null ? '' : i.counted_qty %>" style="width:90px">
+                    <% } else { %><%= i.counted_qty === null ? '–' : i.counted_qty %><% } %>
+                  </td>
+                  <td class="num"><% if (i.diff === null) { %>–<% } else { %><span class="<%= i.diff === 0 ? '' : 'pill pill--warn' %>"><%= i.diff > 0 ? '+' : '' %><%= i.diff %></span><% } %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Inventur</h2></div>
+      <div class="card__body">
+        <table class="tbl tbl--plain"><tbody>
+          <tr><th style="text-align:left">Status</th><td><%= states[row.status] || row.status %></td></tr>
+          <tr><th style="text-align:left">Lagerort</th><td><%= row.location_name || 'alle' %></td></tr>
+          <tr><th style="text-align:left">Gestartet</th><td><%= formatDate(row.started_at) %></td></tr>
+          <tr><th style="text-align:left">Abgeschlossen</th><td><%= row.closed_at ? formatDate(row.closed_at) : '–' %></td></tr>
+          <tr><th style="text-align:left">Differenzen</th><td><strong><%= diffs.length %></strong></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <% if (canWrite && row.status !== 'abgeschlossen') { %>
+    <div class="card">
+      <div class="card__head"><h2>Abschließen</h2></div>
+      <div class="card__body">
+        <p style="margin:0 0 12px;font-size:13.5px">Beim Abschluss werden <strong><%= diffs.length %></strong> Differenz(en) als Lagerbewegung gebucht. Positionen ohne Zählung bleiben unverändert.</p>
+        <form method="post" action="/verwaltung/inventur/<%= row.id %>/abschliessen" data-confirm="Inventur abschließen und Differenzen buchen?">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <button class="btn btn--primary btn--block" type="submit">Inventur abschließen</button>
+        </form>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

@@ -616,3 +616,141 @@ CREATE TABLE IF NOT EXISTS shipment_events (
   actor       TEXT NOT NULL DEFAULT '',
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+/* ==================== Lieferanten und Einkauf ========================= */
+
+CREATE TABLE IF NOT EXISTS suppliers (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  name         TEXT NOT NULL,
+  customer_no  TEXT NOT NULL DEFAULT '',
+  contact_name TEXT NOT NULL DEFAULT '',
+  email        TEXT NOT NULL DEFAULT '',
+  phone        TEXT NOT NULL DEFAULT '',
+  street       TEXT NOT NULL DEFAULT '',
+  zip          TEXT NOT NULL DEFAULT '',
+  city         TEXT NOT NULL DEFAULT '',
+  country      TEXT NOT NULL DEFAULT 'DE',
+  vat_id       TEXT NOT NULL DEFAULT '',
+  payment_terms_days INTEGER NOT NULL DEFAULT 14,
+  lead_days    INTEGER NOT NULL DEFAULT 7,
+  min_order_cents INTEGER NOT NULL DEFAULT 0,
+  active       INTEGER NOT NULL DEFAULT 1,
+  note         TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/* Einkaufsartikel: was dieser Lieferant zu welchem Preis liefert. */
+CREATE TABLE IF NOT EXISTS supplier_items (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  supplier_id  INTEGER NOT NULL REFERENCES suppliers(id) ON DELETE CASCADE,
+  variant_id   INTEGER REFERENCES variants(id) ON DELETE SET NULL,
+  supplier_sku TEXT NOT NULL DEFAULT '',
+  name         TEXT NOT NULL DEFAULT '',
+  purchase_price_cents INTEGER NOT NULL DEFAULT 0,
+  pack_size    INTEGER NOT NULL DEFAULT 1,
+  min_qty      INTEGER NOT NULL DEFAULT 1,
+  active       INTEGER NOT NULL DEFAULT 1,
+  note         TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_supplier_items ON supplier_items(supplier_id);
+CREATE INDEX IF NOT EXISTS idx_supplier_items_variant ON supplier_items(variant_id);
+
+CREATE TABLE IF NOT EXISTS purchase_orders (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  number       TEXT NOT NULL UNIQUE,
+  supplier_id  INTEGER NOT NULL REFERENCES suppliers(id) ON DELETE RESTRICT,
+  status       TEXT NOT NULL DEFAULT 'entwurf',
+  ordered_at   TEXT,
+  expected_at  TEXT,
+  total_cents  INTEGER NOT NULL DEFAULT 0,
+  note         TEXT NOT NULL DEFAULT '',
+  invoice_media_id INTEGER REFERENCES media(id) ON DELETE SET NULL,
+  delivery_media_id INTEGER REFERENCES media(id) ON DELETE SET NULL,
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_orders_supplier ON purchase_orders(supplier_id, status);
+
+CREATE TABLE IF NOT EXISTS purchase_items (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  purchase_id  INTEGER NOT NULL REFERENCES purchase_orders(id) ON DELETE CASCADE,
+  variant_id   INTEGER REFERENCES variants(id) ON DELETE SET NULL,
+  supplier_sku TEXT NOT NULL DEFAULT '',
+  name         TEXT NOT NULL DEFAULT '',
+  qty          INTEGER NOT NULL DEFAULT 1,
+  received_qty INTEGER NOT NULL DEFAULT 0,
+  unit_price_cents INTEGER NOT NULL DEFAULT 0,
+  total_cents  INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_purchase_items ON purchase_items(purchase_id);
+
+CREATE TABLE IF NOT EXISTS goods_receipts (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  purchase_id  INTEGER NOT NULL REFERENCES purchase_orders(id) ON DELETE CASCADE,
+  received_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  delivery_note TEXT NOT NULL DEFAULT '',
+  note         TEXT NOT NULL DEFAULT '',
+  actor        TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS goods_receipt_items (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  receipt_id    INTEGER NOT NULL REFERENCES goods_receipts(id) ON DELETE CASCADE,
+  purchase_item_id INTEGER NOT NULL,
+  variant_id    INTEGER,
+  qty           INTEGER NOT NULL DEFAULT 0,
+  location_id   INTEGER
+);
+
+/* ================= Lagerorte, Packmittel, Inventur ==================== */
+
+CREATE TABLE IF NOT EXISTS stock_locations (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  code       TEXT NOT NULL UNIQUE,
+  name       TEXT NOT NULL,
+  zone       TEXT NOT NULL DEFAULT '',
+  kind       TEXT NOT NULL DEFAULT 'lager',
+  active     INTEGER NOT NULL DEFAULT 1,
+  note       TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS packaging (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  name       TEXT NOT NULL,
+  code       TEXT NOT NULL DEFAULT '',
+  length_mm  INTEGER NOT NULL DEFAULT 0,
+  width_mm   INTEGER NOT NULL DEFAULT 0,
+  height_mm  INTEGER NOT NULL DEFAULT 0,
+  weight_g   INTEGER NOT NULL DEFAULT 0,
+  stock      INTEGER NOT NULL DEFAULT 0,
+  min_stock  INTEGER NOT NULL DEFAULT 0,
+  active     INTEGER NOT NULL DEFAULT 1,
+  note       TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS inventories (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'offen',
+  location_id INTEGER REFERENCES stock_locations(id) ON DELETE SET NULL,
+  started_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  closed_at   TEXT,
+  note        TEXT NOT NULL DEFAULT '',
+  created_by  TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS inventory_items (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  inventory_id INTEGER NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
+  variant_id   INTEGER NOT NULL,
+  expected_qty INTEGER NOT NULL DEFAULT 0,
+  counted_qty  INTEGER,
+  note         TEXT NOT NULL DEFAULT '',
+  counted_by   TEXT NOT NULL DEFAULT '',
+  counted_at   TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_items ON inventory_items(inventory_id);

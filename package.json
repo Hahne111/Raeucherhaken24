@@ -15,8 +15,9 @@
     "test:rollen": "node scripts/role-test.js",
     "test:crm": "node scripts/crm-test.js",
     "test:kalender": "node scripts/calendar-test.js",
-    "test:belege": "node scripts/document-test.js",
-    "test:alle": "node scripts/smoke-test.js && node scripts/role-test.js && node scripts/crm-test.js && node scripts/calendar-test.js && node scripts/document-test.js"
+    "test:belege": "node scripts/document-test.js && node scripts/purchasing-test.js",
+    "test:einkauf": "node scripts/purchasing-test.js",
+    "test:alle": "node scripts/smoke-test.js && node scripts/role-test.js && node scripts/crm-test.js && node scripts/calendar-test.js && node scripts/document-test.js && node scripts/purchasing-test.js"
   },
   "dependencies": {
     "ejs": "^3.1.10",

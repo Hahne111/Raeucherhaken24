@@ -148,6 +148,11 @@ for (const [prefix, permission] of [
   ['/gebietsbuch', 'gebietsbuch'],
   ['/belege', 'belege'],
   ['/versand', 'versand'],
+  ['/lieferanten', 'einkauf'],
+  ['/einkauf', 'einkauf'],
+  ['/lagerorte', 'lager.lesen'],
+  ['/packmittel', 'lager.buchen'],
+  ['/inventur', 'lager.lesen'],
   ['/gutscheine', 'gutscheine'],
   ['/versandarten', 'versandarten'],
   ['/einstellungen', 'einstellungen'],
@@ -159,6 +164,7 @@ router.use('/', require('./admin-crm'));
 router.use('/', require('./admin-calendar'));
 router.use('/', require('./admin-consulting'));
 router.use('/', require('./admin-documents'));
+router.use('/', require('./admin-purchasing'));
 
 /* ------------------------------ Lager --------------------------------- */
 router.get('/lager', (req, res) => {

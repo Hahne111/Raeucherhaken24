@@ -1,0 +1,94 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/lieferanten">Zur Liste</a> <a class="btn btn--primary btn--sm" href="/verwaltung/lieferanten/' + row.id + '/bearbeiten">Bearbeiten</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Einkaufsartikel</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!items.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch kein Einkaufsartikel hinterlegt.</p><% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Bezeichnung</th><th>Lief.-Nr.</th><th>Verknüpfte Variante</th><th class="num">EK-Preis</th><th class="num">Gebinde</th><th class="num">Bestand</th><th></th></tr></thead>
+          <tbody>
+            <% items.forEach(function (i) { %>
+              <tr>
+                <td><%= i.name %></td>
+                <td><%= i.supplier_sku || '–' %></td>
+                <td><% if (i.variant_id) { %><a class="link" href="/verwaltung/produkte/<%= i.product_id %>"><%= i.product_name %> – <%= i.variant_name %></a><% } else { %><span style="color:var(--a-soft)">nicht verknüpft</span><% } %></td>
+                <td class="num"><%= fmt(i.purchase_price_cents) %></td>
+                <td class="num"><%= i.pack_size %></td>
+                <td class="num"><%= i.variant_id ? i.stock : '–' %></td>
+                <td class="num">
+                  <form method="post" action="/verwaltung/lieferanten/<%= row.id %>/artikel/<%= i.id %>/entfernen">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <button class="btn btn--danger btn--sm" type="submit">Entfernen</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+        <div style="padding:16px;border-top:1px solid var(--a-line)">
+          <form method="post" action="/verwaltung/lieferanten/<%= row.id %>/artikel">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <div class="field-row">
+              <label class="field"><span>Variante aus dem Sortiment</span>
+                <select name="variant_id">
+                  <option value="">– freier Artikel –</option>
+                  <% variants.forEach(function (v) { %><option value="<%= v.id %>"><%= v.product_name %> – <%= v.variant_name %></option><% }); %>
+                </select>
+              </label>
+              <label class="field"><span>Bezeichnung (bei freiem Artikel)</span><input type="text" name="name" maxlength="200"></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span>Lieferanten-Artikelnr.</span><input type="text" name="supplier_sku" maxlength="60"></label>
+              <label class="field"><span>EK-Preis</span><input type="text" name="purchase_price" placeholder="z. B. 8,40"></label>
+              <label class="field"><span>Gebindegröße</span><input type="number" name="pack_size" min="1" value="1"></label>
+              <label class="field"><span>Mindestmenge</span><input type="number" name="min_qty" min="1" value="1"></label>
+            </div>
+            <button class="btn btn--dark" type="submit">Einkaufsartikel hinzufügen</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Bestellungen</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!orders.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Bestellung.</p><% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Nummer</th><th>Status</th><th>Bestellt</th><th>Erwartet</th><th class="num">Summe</th><th class="num">Offen</th><th></th></tr></thead>
+          <tbody>
+            <% orders.forEach(function (o) { %>
+              <tr><td><a class="link" href="/verwaltung/einkauf/<%= o.id %>"><%= o.number %></a></td>
+                <td><span class="pill"><%= o.status %></span></td>
+                <td><%= o.ordered_at ? formatDay(o.ordered_at) : '–' %></td>
+                <td><%= o.expected_at || '–' %></td>
+                <td class="num"><%= fmt(o.total_cents) %></td>
+                <td class="num"><%= o.open_qty %></td>
+                <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/einkauf/<%= o.id %>">Öffnen</a></td></tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2><%= row.name %></h2></div>
+    <div class="card__body">
+      <table class="tbl tbl--plain"><tbody>
+        <tr><th style="text-align:left">Kontakt</th><td><%= row.contact_name || '–' %></td></tr>
+        <tr><th style="text-align:left">E-Mail</th><td><%= row.email || '–' %></td></tr>
+        <tr><th style="text-align:left">Telefon</th><td><%= row.phone || '–' %></td></tr>
+        <tr><th style="text-align:left">Anschrift</th><td><%= row.street %><br><%= row.zip %> <%= row.city %></td></tr>
+        <tr><th style="text-align:left">USt-IdNr.</th><td><%= row.vat_id || '–' %></td></tr>
+        <tr><th style="text-align:left">Zahlungsziel</th><td><%= row.payment_terms_days %> Tage</td></tr>
+        <tr><th style="text-align:left">Lieferzeit</th><td><%= row.lead_days %> Tage</td></tr>
+        <tr><th style="text-align:left">Mindestbestellwert</th><td><%= row.min_order_cents ? fmt(row.min_order_cents) : '–' %></td></tr>
+      </tbody></table>
+      <% if (row.note) { %><p style="margin:14px 0 0;white-space:pre-line;font-size:13.5px"><%= row.note %></p><% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

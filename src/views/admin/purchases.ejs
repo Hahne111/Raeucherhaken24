@@ -1,0 +1,71 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/einkauf">
+    <input type="search" name="q" value="<%= q %>" placeholder="Nummer oder Lieferant" aria-label="Suche">
+    <select name="status" aria-label="Status">
+      <option value="">Alle Status</option>
+      <% Object.keys(states).forEach(function (k) { %><option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option><% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Suchen</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/einkauf">Zurücksetzen</a>
+  </form>
+  <form method="post" action="/verwaltung/einkauf/neu">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <select name="supplier_id" required aria-label="Lieferant">
+      <option value="">Lieferant wählen …</option>
+      <% suppliers.forEach(function (s) { %><option value="<%= s.id %>"><%= s.name %></option><% }); %>
+    </select>
+    <button class="btn btn--primary btn--sm" type="submit">Bestellung anlegen</button>
+  </form>
+</div>
+<div class="card">
+  <div class="card__head"><h2><%= rows.length %> Bestellungen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %><p style="padding:20px;margin:0;color:var(--a-soft)">Noch keine Einkaufsbestellung.</p><% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Nummer</th><th>Lieferant</th><th>Status</th><th>Bestellt</th><th>Erwartet</th><th class="num">Positionen</th><th class="num">Offen</th><th class="num">Summe</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (p) { %>
+          <tr>
+            <td><a class="link" href="/verwaltung/einkauf/<%= p.id %>"><%= p.number %></a></td>
+            <td><a class="link" href="/verwaltung/lieferanten/<%= p.supplier_id %>"><%= p.supplier_name %></a></td>
+            <td><span class="pill <%= p.status === 'geliefert' ? 'pill--ok' : (p.status === 'storniert' ? 'pill--err' : '') %>"><%= states[p.status] || p.status %></span></td>
+            <td><%= p.ordered_at ? formatDay(p.ordered_at) : '–' %></td>
+            <td><%= p.expected_at || '–' %><% if (p.overdue) { %> <span class="pill pill--warn">überfällig</span><% } %></td>
+            <td class="num"><%= p.item_count %></td>
+            <td class="num"><%= p.open_qty %></td>
+            <td class="num"><%= fmt(p.total_cents) %></td>
+            <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/einkauf/<%= p.id %>">Öffnen</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<div class="card">
+  <div class="card__head"><h2>Beschaffungsvorschlag</h2><span style="font-size:13px;color:var(--a-soft)">Varianten auf oder unter der Mindestmenge</span></div>
+  <div class="card__body card__body--flush">
+    <% if (!suggestions.length) { %>
+      <p style="padding:18px;margin:0;color:var(--a-soft)">Kein Artikel unter der Mindestmenge. Mindestmengen werden je Variante im Produkt gepflegt.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Artikel</th><th>Art.-Nr.</th><th class="num">Bestand</th><th class="num">Mindestmenge</th><th>Lieferant</th><th class="num">EK-Preis</th></tr></thead>
+      <tbody>
+        <% suggestions.forEach(function (s) { %>
+          <tr>
+            <td><%= s.product_name %> – <%= s.variant_name %></td>
+            <td><%= s.sku %></td>
+            <td class="num"><%= s.stock %></td>
+            <td class="num"><%= s.min_stock %></td>
+            <td><% if (s.supplier_id) { %><a class="link" href="/verwaltung/lieferanten/<%= s.supplier_id %>"><%= s.supplier_name %></a><% } else { %><span style="color:var(--a-soft)">kein Lieferant hinterlegt</span><% } %></td>
+            <td class="num"><%= s.purchase_price_cents ? fmt(s.purchase_price_cents) : '–' %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

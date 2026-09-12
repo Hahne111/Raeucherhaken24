@@ -25,7 +25,7 @@ const GRANTS = {
     'termine', 'beratung', 'provision.eigene', 'nachrichten'
   ],
   produktion: ['termine', 'nachrichten'],
-  lager: ['lager.lesen', 'lager.buchen', 'bestellungen.lesen', 'versand', 'belege', 'belege.ausstellen', 'termine', 'nachrichten'],
+  lager: ['lager.lesen', 'lager.buchen', 'bestellungen.lesen', 'versand', 'belege', 'belege.ausstellen', 'einkauf', 'termine', 'nachrichten'],
   kasse: ['nachrichten']
 };
 

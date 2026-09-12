@@ -1,0 +1,45 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2><%= rows.length %> Inventuren</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!rows.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Inventur.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Name</th><th>Lagerort</th><th>Status</th><th class="num">Positionen</th><th class="num">Gezählt</th><th>Start</th><th></th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (i) { %>
+            <tr><td><a class="link" href="/verwaltung/inventur/<%= i.id %>"><%= i.name %></a></td>
+              <td><%= i.location_name || 'alle' %></td>
+              <td><span class="pill <%= i.status === 'abgeschlossen' ? 'pill--ok' : '' %>"><%= states[i.status] || i.status %></span></td>
+              <td class="num"><%= i.item_count %></td><td class="num"><%= i.counted %></td>
+              <td><%= formatDay(i.started_at) %></td>
+              <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/inventur/<%= i.id %>">Öffnen</a></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+  <% if (canWrite) { %>
+  <div class="card">
+    <div class="card__head"><h2>Neue Inventur</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/inventur">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="field"><span>Name *</span><input type="text" name="name" required maxlength="120" placeholder="z. B. Jahresinventur 2026"></label>
+        <label class="field"><span>Lagerort</span>
+          <select name="location_id">
+            <option value="">– alle –</option>
+            <% locations.forEach(function (l) { %><option value="<%= l.id %>"><%= l.code %> · <%= l.name %></option><% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Nur Artikel mit …</span><input type="text" name="filter" maxlength="60" placeholder="Name oder Artikelnummer, leer = alle"></label>
+        <button class="btn btn--primary btn--block" type="submit">Inventur starten</button>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Beim Start wird der erwartete Bestand je Variante festgehalten. Gebucht wird beim Abschluss nur die Differenz.</p>
+      </form>
+    </div>
+  </div>
+  <% } %>
+</div>
+<%- include('../partials/admin-foot') %>

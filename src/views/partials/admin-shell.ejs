@@ -12,7 +12,12 @@
       <% if (adminCan('produkt.analyse')) { %><a href="/verwaltung/auswertung/produkte" class="<%= currentPath.indexOf('/auswertung/produkte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Produktanalyse</a><% } %>
       <% if (adminCan('kategorien')) { %><a href="/verwaltung/kategorien" class="<%= currentPath.indexOf('/kategorien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-leaf"/></svg>Kategorien</a><% } %>
       <% if (adminCan('medien')) { %><a href="/verwaltung/medien" class="<%= currentPath.indexOf('/medien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Medien</a><% } %>
-      <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lager" class="<%= currentPath.indexOf('/lager') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Lager</a><% } %>
+      <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lager" class="<%= currentPath === '/lager' || currentPath.indexOf('/lager/') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Lager</a><% } %>
+      <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lagerorte" class="<%= currentPath.indexOf('/lagerorte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Lagerorte</a><% } %>
+      <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/inventur" class="<%= currentPath.indexOf('/inventur') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Inventur</a><% } %>
+      <% if (adminCan('einkauf')) { %><span class="ad-nav__sep">Einkauf</span>
+      <a href="/verwaltung/lieferanten" class="<%= currentPath.indexOf('/lieferanten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-truck"/></svg>Lieferanten</a>
+      <a href="/verwaltung/einkauf" class="<%= currentPath.indexOf('/einkauf') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-cart"/></svg>Einkauf</a><% } %>
       <% if (adminCan('bestellungen.lesen') || adminCan('kunden.lesen') || adminCan('gutscheine') || adminCan('versandarten')) { %><span class="ad-nav__sep">Verkauf</span><% } %>
       <% if (adminCan('bestellungen.lesen')) { %><a href="/verwaltung/bestellungen" class="<%= currentPath.indexOf('/bestellungen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-cart"/></svg>Bestellungen</a><% } %>
       <% if (adminCan('kunden.lesen')) { %><a href="/verwaltung/kunden" class="<%= currentPath.indexOf('/kunden') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-user"/></svg>Kunden</a><% } %>

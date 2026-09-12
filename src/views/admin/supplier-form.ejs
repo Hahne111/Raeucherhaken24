@@ -1,0 +1,47 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/lieferanten">Zur Liste</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="post" action="<%= action %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <div class="cols">
+    <div class="card">
+      <div class="card__head"><h2>Stammdaten</h2></div>
+      <div class="card__body">
+        <label class="field"><span>Name *</span>
+          <input type="text" name="name" required maxlength="160" value="<%= row.name %>">
+          <% if (errors.name) { %><small class="field__err"><%= errors.name %></small><% } %>
+        </label>
+        <div class="field-row">
+          <label class="field"><span>Unsere Kundennummer</span><input type="text" name="customer_no" maxlength="60" value="<%= row.customer_no %>"></label>
+          <label class="field"><span>USt-IdNr.</span><input type="text" name="vat_id" maxlength="40" value="<%= row.vat_id %>"></label>
+        </div>
+        <label class="field"><span>Ansprechpartner</span><input type="text" name="contact_name" maxlength="120" value="<%= row.contact_name %>"></label>
+        <div class="field-row">
+          <label class="field"><span>E-Mail für Bestellungen</span>
+            <input type="email" name="email" maxlength="160" value="<%= row.email %>">
+            <% if (errors.email) { %><small class="field__err"><%= errors.email %></small><% } %>
+          </label>
+          <label class="field"><span>Telefon</span><input type="text" name="phone" maxlength="60" value="<%= row.phone %>"></label>
+        </div>
+        <label class="field"><span>Straße</span><input type="text" name="street" maxlength="120" value="<%= row.street %>"></label>
+        <div class="field-row">
+          <label class="field"><span>PLZ</span><input type="text" name="zip" maxlength="12" value="<%= row.zip %>"></label>
+          <label class="field"><span>Ort</span><input type="text" name="city" maxlength="80" value="<%= row.city %>"></label>
+          <label class="field"><span>Land</span><input type="text" name="country" maxlength="2" value="<%= row.country %>"></label>
+        </div>
+        <label class="field"><span>Notiz</span><textarea name="note" rows="3"><%= row.note %></textarea></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Konditionen</h2></div>
+      <div class="card__body">
+        <label class="field"><span>Zahlungsziel (Tage)</span><input type="number" name="payment_terms_days" min="0" max="180" value="<%= row.payment_terms_days %>"></label>
+        <label class="field"><span>Lieferzeit (Tage)</span><input type="number" name="lead_days" min="0" max="365" value="<%= row.lead_days %>"></label>
+        <label class="field"><span>Mindestbestellwert</span><input type="text" name="min_order" value="<%= row.min_order_cents ? (row.min_order_cents/100).toFixed(2).replace('.',',') : '' %>"></label>
+        <label class="check"><input type="checkbox" name="active" value="1" <%= row.active ? 'checked' : '' %>><span>Lieferant aktiv</span></label>
+        <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+      </div>
+    </div>
+  </div>
+</form>
+<%- include('../partials/admin-foot') %>

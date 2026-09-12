@@ -1,0 +1,144 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/einkauf">Zur Einkaufsliste</a> <a class="btn btn--ghost btn--sm" href="/verwaltung/lieferanten/' + row.supplier_id + '">Lieferant</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Positionen</h2><strong><%= fmt(row.total_cents) %></strong></div>
+      <div class="card__body card__body--flush">
+        <% if (!items.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Position.</p><% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Artikel</th><th>Lief.-Nr.</th><th class="num">Bestellt</th><th class="num">Geliefert</th><th class="num">Offen</th><th class="num">EK</th><th class="num">Summe</th><th></th></tr></thead>
+          <tbody>
+            <% items.forEach(function (i) { %>
+              <tr>
+                <td><%= i.name %><% if (i.variant_id) { %><br><span style="font-size:12px;color:var(--a-soft)">Bestand jetzt: <%= i.stock %></span><% } else { %><br><span style="font-size:12px;color:var(--a-soft)">ohne Bestandsbuchung</span><% } %></td>
+                <td><%= i.supplier_sku || '–' %></td>
+                <td class="num"><%= i.qty %></td>
+                <td class="num"><%= i.received_qty %></td>
+                <td class="num"><%= i.open_qty %></td>
+                <td class="num"><%= fmt(i.unit_price_cents) %></td>
+                <td class="num"><%= fmt(i.total_cents) %></td>
+                <td class="num">
+                  <% if (row.status === 'entwurf') { %>
+                  <form method="post" action="/verwaltung/einkauf/<%= row.id %>/position/<%= i.id %>/entfernen">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <button class="btn btn--danger btn--sm" type="submit">Entfernen</button>
+                  </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+        <% if (row.status === 'entwurf') { %>
+        <div style="padding:16px;border-top:1px solid var(--a-line)">
+          <form method="post" action="/verwaltung/einkauf/<%= row.id %>/position">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <div class="field-row">
+              <label class="field"><span>Variante</span>
+                <select name="variant_id">
+                  <option value="">– freier Artikel –</option>
+                  <% variants.forEach(function (v) { %><option value="<%= v.id %>"><%= v.product_name %> – <%= v.variant_name %></option><% }); %>
+                </select>
+              </label>
+              <label class="field"><span>Bezeichnung</span><input type="text" name="name" maxlength="200"></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span>Lief.-Nr.</span><input type="text" name="supplier_sku" maxlength="60"></label>
+              <label class="field"><span>Menge</span><input type="number" name="qty" min="1" value="1"></label>
+              <label class="field"><span>EK-Preis</span><input type="text" name="unit_price" placeholder="z. B. 8,40"></label>
+            </div>
+            <button class="btn btn--dark" type="submit">Position hinzufügen</button>
+          </form>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (['bestellt','teilweise'].indexOf(row.status) >= 0) { %>
+    <div class="card">
+      <div class="card__head"><h2>Wareneingang buchen</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/einkauf/<%= row.id %>/wareneingang">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <table class="tbl" style="margin-bottom:12px">
+            <thead><tr><th>Artikel</th><th class="num">Offen</th><th class="num">Jetzt eingegangen</th></tr></thead>
+            <tbody>
+              <% items.filter(function (i) { return i.open_qty > 0; }).forEach(function (i) { %>
+                <tr><td><%= i.name %></td><td class="num"><%= i.open_qty %></td>
+                  <td class="num"><input type="number" name="menge_<%= i.id %>" min="0" max="<%= i.open_qty %>" value="<%= i.open_qty %>" style="width:90px"></td></tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <div class="field-row">
+            <label class="field"><span>Lieferscheinnummer</span><input type="text" name="delivery_note" maxlength="120"></label>
+            <label class="field"><span>Lagerort</span>
+              <select name="location_id">
+                <option value="">– ohne Ort –</option>
+                <% locations.forEach(function (l) { %><option value="<%= l.id %>"><%= l.code %> · <%= l.name %></option><% }); %>
+              </select>
+            </label>
+          </div>
+          <label class="field"><span>Notiz</span><input type="text" name="note" maxlength="500"></label>
+          <button class="btn btn--primary" type="submit">Wareneingang buchen</button>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--a-soft)">Der Bestand wird sofort gebucht und im Lagerjournal protokolliert.</span>
+        </form>
+      </div>
+    </div>
+    <% } %>
+
+    <% if (receipts.length) { %>
+    <div class="card">
+      <div class="card__head"><h2>Wareneingänge</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <thead><tr><th>Datum</th><th>Lieferschein</th><th>Positionen</th><th>Erfasst von</th></tr></thead>
+          <tbody>
+            <% receipts.forEach(function (r) { %>
+              <tr><td><%= formatDate(r.received_at) %></td><td><%= r.delivery_note || '–' %></td>
+                <td><% r.items.forEach(function (i, idx) { %><%= idx ? ', ' : '' %><%= i.qty %> × <%= i.name %><% }); %></td>
+                <td><%= r.actor %></td></tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card__head"><h2><%= row.number %></h2></div>
+      <div class="card__body">
+        <table class="tbl tbl--plain"><tbody>
+          <tr><th style="text-align:left">Lieferant</th><td><a class="link" href="/verwaltung/lieferanten/<%= row.supplier_id %>"><%= row.supplier_name %></a></td></tr>
+          <tr><th style="text-align:left">Status</th><td><%= states[row.status] || row.status %></td></tr>
+          <tr><th style="text-align:left">Bestellt am</th><td><%= row.ordered_at ? formatDate(row.ordered_at) : '–' %></td></tr>
+          <tr><th style="text-align:left">Erwartet</th><td><%= row.expected_at || '–' %></td></tr>
+          <tr><th style="text-align:left">Summe</th><td><strong><%= fmt(row.total_cents) %></strong></td></tr>
+          <tr><th style="text-align:left">Zahlungsziel</th><td><%= row.payment_terms_days %> Tage</td></tr>
+        </tbody></table>
+        <% if (row.note) { %><p style="margin:14px 0 0;white-space:pre-line;font-size:13.5px"><%= row.note %></p><% } %>
+      </div>
+    </div>
+    <% if (row.status === 'entwurf') { %>
+    <div class="card">
+      <div class="card__head"><h2>Absenden</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/einkauf/<%= row.id %>/senden">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Gewünschter Liefertermin</span><input type="date" name="expected_at"></label>
+          <button class="btn btn--primary btn--block" type="submit" <%= items.length ? '' : 'disabled' %>>Bestellung absenden</button>
+        </form>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">
+          Systemmail: <strong><%= mailStatus.configured ? 'eingerichtet' : 'nicht eingerichtet' %></strong><% if (!mailStatus.configured) { %> – es fehlt <%= mailStatus.missing.join(', ') %>. Die Bestellung wird vermerkt, die Mail bleibt im Ausgangskorb gesperrt.<% } %>
+          <% if (!row.supplier_email) { %><br>Für diesen Lieferanten ist keine E-Mail-Adresse hinterlegt.<% } %>
+        </p>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>
