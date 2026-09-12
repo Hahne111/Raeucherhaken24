@@ -918,9 +918,10 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
 /* Parallax-Ebenen (per JS über --sy gesteuert) */
 .stage__scene .par { transform: translate3d(0, calc(var(--sy, 0) * var(--par, 0px)), 0); }
 
-/* Einblenden der Bühneninhalte */
-.reveal { opacity: 0; transform: translateY(14px); }
-.reveal.is-in { opacity: 1; transform: none; transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
+/* Einblenden der Bühneninhalte – nur bei aktivem JavaScript, sonst ist
+   alles von Anfang an sichtbar. */
+.js .reveal { opacity: 0; transform: translateY(14px); }
+.js .reveal.is-in { opacity: 1; transform: none; transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
 .reveal--d1 { transition-delay: .08s; }
 .reveal--d2 { transition-delay: .16s; }
 .reveal--d3 { transition-delay: .24s; }
@@ -945,7 +946,7 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
   .smoke-puff--e { opacity: .16; transform: translate3d(-78px,-196px,0) scale(1.9); }
   .smoke-puff--f { opacity: .34; transform: translate3d(-8px,-44px,0) scale(.72); }
   .spray { opacity: .5; transform: none; }
-  .reveal { opacity: 1; transform: none; }
+  .js .reveal { opacity: 1; transform: none; }
   .stage__scene .par { transform: none; }
 }
 
@@ -990,7 +991,19 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
   .mobilenav[hidden] { display: none; }
   .mobilenav a { display: block; padding: 12px var(--pad-wide); font-family: var(--serif); font-size: 17px; border-bottom: 1px solid var(--cream-200); }
   .mobilenav a.is-sub { font-family: var(--sans); font-size: 14.5px; padding-left: calc(var(--pad-wide) + 18px); color: var(--ink-soft); }
-  .stage { min-height: 0; }
+  /* Auf schmalen Geräten bleibt die Szene der Kopfbereich; darunter trägt ein
+     ruhiger Verlauf die Kacheln, damit das Bild nicht extrem beschnitten wird. */
+  .stage {
+    min-height: 0;
+    background: linear-gradient(180deg, #06131d 0%, #0a2132 42%, #071824 100%);
+  }
+  .stage__scene { height: 460px; bottom: auto; }
+  .stage__scene::after {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: 0; height: 190px;
+    background: linear-gradient(180deg, rgba(7,20,30,0) 0%, rgba(7,22,33,.72) 55%, #08202f 100%);
+    pointer-events: none;
+  }
   .stage__inner { min-height: 0; padding-bottom: 34px; }
   .hero { height: auto; padding: 54px var(--pad-wide) 40px; }
   .hero__title { font-size: 48px; }
@@ -1016,7 +1029,7 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
 }
 
 @media (max-width: 860px) {
-  :root { --pad-main: 24px; --pad-wide: 20px; --topbar-h: auto; }
+  :root { --pad-main: 28px; --pad-wide: 26px; --topbar-h: auto; }
   .topbar__inner { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; padding: 6px 20px; }
   .topbar__inner::-webkit-scrollbar { display: none; }
   .topbar__item { font-size: 10.5px; }
@@ -1042,6 +1055,7 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
 }
 
 @media (max-width: 620px) {
+  :root { --pad-main: 20px; --pad-wide: 18px; }
   .searchform { display: none; }
   .searchform--mobile { display: flex; padding: 12px var(--pad-wide) 4px; }
   .searchform--mobile input { width: 100%; }

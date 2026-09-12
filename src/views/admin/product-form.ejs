@@ -2,7 +2,7 @@
 <% var headActions = product.id ? '<a class="btn btn--ghost btn--sm" href="/produkt/' + product.slug + '" target="_blank" rel="noopener">Im Shop ansehen</a>' : ''; %>
 <%- include('../partials/admin-shell', { headActions: headActions }) %>
 
-<form method="post" action="<%= product.id ? '/verwaltung/produkte/' + product.id : '/verwaltung/produkte/neu' %>">
+<form id="product-main-form" method="post" action="<%= product.id ? '/verwaltung/produkte/' + product.id : '/verwaltung/produkte/neu' %>">
   <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
   <div class="cols">
     <div>
@@ -154,7 +154,7 @@
 
       <div class="card">
         <div class="card__body" style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn--primary" type="submit">Speichern</button>
+          <button class="btn btn--primary" type="submit" form="product-main-form" data-save-product>Speichern</button>
           <a class="btn btn--ghost" href="/verwaltung/produkte">Zurück zur Liste</a>
         </div>
       </div>

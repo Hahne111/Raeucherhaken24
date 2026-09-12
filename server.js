@@ -38,8 +38,10 @@ app.use(express.urlencoded({ extended: false, limit: '256kb' }));
 app.use(express.json({ limit: '256kb' }));
 app.use(session.middleware());
 app.use(flash.middleware());
-app.use(csrf.middleware());
+// Der Kontext muss vor der CSRF-Prüfung stehen: sonst fehlen der Fehlerseite
+// die Grunddaten (Shopname, Navigation), wenn die Prüfung fehlschlägt.
 app.use(context.middleware());
+app.use(csrf.middleware());
 
 app.use('/', require('./src/routes/shop'));
 app.use('/warenkorb', require('./src/routes/cart'));
@@ -64,15 +66,19 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     : err.message;
   const wantsJson = req.get('accept') && req.get('accept').includes('application/json');
   if (wantsJson) return res.json({ ok: false, message });
-  if (req.path.startsWith('/verwaltung')) {
-    return res.render('admin/error', {
-      title: status === 403 ? 'Anmeldung erforderlich' : 'Es ist ein Fehler aufgetreten',
-      status, message
-    });
-  }
-  res.render('error', {
-    title: status === 403 ? 'Zugriff verweigert' : 'Es ist ein Fehler aufgetreten',
-    status, message
+  const view = req.path.startsWith('/verwaltung') ? 'admin/error' : 'error';
+  const title = status === 403
+    ? (view === 'admin/error' ? 'Anmeldung erforderlich' : 'Zugriff verweigert')
+    : 'Es ist ein Fehler aufgetreten';
+  res.render(view, { title, status, message }, (renderErr, html) => {
+    if (!renderErr) return res.send(html);
+    // Letzte Rückfallebene, falls selbst die Fehlerseite nicht gerendert werden kann.
+    console.error('[fehler] Fehlerseite nicht darstellbar:', renderErr.message);
+    res.type('html').send(
+      '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>' + status + '</title></head>' +
+      '<body style="font-family:system-ui;padding:40px"><h1>' + status + '</h1><p>' +
+      String(message).replace(/[<>&]/g, '') + '</p><p><a href="/">Zur Startseite</a></p></body></html>'
+    );
   });
 });
 

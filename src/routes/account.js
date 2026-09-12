@@ -22,6 +22,24 @@ function safeNext(value, fallback = '/konto') {
   return /^\/(?!\/)/.test(target) ? target : fallback;
 }
 
+/**
+ * Beim Anmelden wird die Session-ID gewechselt (Schutz vor Session-Fixation).
+ * Der Warenkorb des Gastes soll dabei erhalten bleiben und dem Konto zugeordnet
+ * werden – sonst verliert der Kunde mitten im Kauf seine Artikel.
+ */
+function keepCartAcrossLogin(req, customerId) {
+  const cartToken = req.session.peek('cart_token');
+  const checkout = req.session.peek('checkout');
+  req.session.regenerate();
+  req.session.data.customer_id = customerId;
+  if (cartToken) {
+    req.session.data.cart_token = cartToken;
+    db.run('UPDATE carts SET customer_id = ? WHERE token = ?', [customerId, cartToken]);
+  }
+  if (checkout) req.session.data.checkout = checkout;
+  req.session.save();
+}
+
 /* ------------------------------ Anmeldung ----------------------------- */
 router.get('/anmelden', (req, res) => {
   if (req.customer) return res.redirect('/konto');
@@ -40,9 +58,7 @@ router.post('/anmelden', (req, res) => {
       error: 'E-Mail-Adresse oder Passwort stimmen nicht.'
     });
   }
-  req.session.regenerate();
-  req.session.data.customer_id = customer.id;
-  req.session.save();
+  keepCartAcrossLogin(req, customer.id);
   db.run("UPDATE customers SET last_login_at = datetime('now') WHERE id = ?", [customer.id]);
   audit.log(customer.email, 'kunde.angemeldet', 'customer', String(customer.id), '', req.ip);
   req.flash('success', `Willkommen zurück, ${customer.first_name || customer.email}!`);
@@ -91,9 +107,7 @@ router.post('/registrieren', (req, res) => {
     'INSERT INTO customers (email, password_hash, first_name, last_name, newsletter) VALUES (?,?,?,?,?)',
     [values.email, auth.hashPassword(password), values.first_name, values.last_name, req.body.newsletter === '1' ? 1 : 0]
   );
-  req.session.regenerate();
-  req.session.data.customer_id = Number(result.lastInsertRowid);
-  req.session.save();
+  keepCartAcrossLogin(req, Number(result.lastInsertRowid));
   audit.log(values.email, 'kunde.registriert', 'customer', String(result.lastInsertRowid), '', req.ip);
   req.flash('success', 'Dein Konto ist angelegt. Willkommen an Bord!');
   res.redirect(next);
