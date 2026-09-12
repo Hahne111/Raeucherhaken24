@@ -21,6 +21,12 @@
           <label class="field"><span>Kurzbeschreibung</span>
             <input type="text" name="subtitle" value="<%= product.subtitle || '' %>" maxlength="200">
           </label>
+          <label class="field"><span>Produktgruppe</span>
+            <select name="product_group">
+              <option value="" <%= product.product_group === 'naturgewuerze' ? '' : 'selected' %>>Allgemeines Sortiment</option>
+              <option value="naturgewuerze" <%= product.product_group === 'naturgewuerze' ? 'selected' : '' %>>Naturgewürze</option>
+            </select>
+          </label>
           <label class="field"><span>Beschreibung</span>
             <textarea name="description" rows="7"><%= product.description || '' %></textarea>
             <span class="field__hint">Leerzeile trennt Absätze.</span>

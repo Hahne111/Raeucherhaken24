@@ -1,0 +1,62 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/produkte/neu?gruppe=naturgewuerze">Naturgewürz anlegen</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+
+<div class="toolbar">
+  <form method="get" action="/verwaltung/produkte/naturgewuerze">
+    <label class="visually-hidden" for="q">Suche</label>
+    <input id="q" type="search" name="q" value="<%= q %>" placeholder="Name oder Artikelnummer">
+    <label class="visually-hidden" for="status">Status</label>
+    <select id="status" name="status">
+      <option value="">Alle Status</option>
+      <option value="entwurf" <%= status === 'entwurf' ? 'selected' : '' %>>Entwürfe</option>
+      <option value="online" <%= status === 'online' ? 'selected' : '' %>>Online</option>
+    </select>
+    <label class="visually-hidden" for="sort">Sortieren</label>
+    <select id="sort" name="sort">
+      <option value="name" <%= sort === 'name' ? 'selected' : '' %>>Name</option>
+      <option value="preis" <%= sort === 'preis' ? 'selected' : '' %>>Preis</option>
+      <option value="beliebtheit" <%= sort === 'beliebtheit' ? 'selected' : '' %>>Beliebtheit</option>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Filtern</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/produkte/naturgewuerze">Zurücksetzen</a>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2><%= total %> Naturgewürze</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Naturgewürze gefunden.</p>
+    <% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Bild</th><th>Artikel</th><th>Gewicht</th><th class="num">Preis</th><th class="num">Verkäufe</th><th class="num">Bestand</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (p) { %>
+            <tr>
+              <td><% if (p.image) { %><img class="thumb" src="<%= p.image %>" alt=""><% } %></td>
+              <td><a class="link" href="/verwaltung/produkte/<%= p.id %>"><%= p.name %></a><br><small style="color:var(--a-soft)"><%= p.sku || 'ohne Art.-Nr.' %></small></td>
+              <td><%= p.weight_g > 0 ? p.weight_g + ' g' : '–' %></td>
+              <td class="num"><%= p.price_cents > 0 ? fmt(p.price_cents) : 'Preis fehlt' %><% if (p.compare_cents > p.price_cents) { %><br><small style="color:var(--a-soft)">statt <%= fmt(p.compare_cents) %></small><% } %></td>
+              <td class="num"><%= p.sales %></td>
+              <td class="num"><span class="pill <%= p.stock_total === 0 ? 'pill--err' : (p.stock_total < 10 ? 'pill--warn' : 'pill--ok') %>"><%= p.stock_total %></span></td>
+              <td><span class="pill <%= p.active ? 'pill--ok' : '' %>"><%= p.active ? 'online' : 'Entwurf' %></span></td>
+              <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/produkte/<%= p.id %>">Bearbeiten</a></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<% if (pages > 1) { %>
+  <nav class="pager" aria-label="Seiten">
+    <% for (var i = 1; i <= pages; i++) { %>
+      <% if (i === page) { %><span class="is-current"><%= i %></span>
+      <% } else { %><a href="/verwaltung/produkte/naturgewuerze?seite=<%= i %>&q=<%= encodeURIComponent(q) %>&status=<%= status %>&sort=<%= sort %>"><%= i %></a><% } %>
+    <% } %>
+  </nav>
+<% } %>
+
+<%- include('../partials/admin-foot') %>

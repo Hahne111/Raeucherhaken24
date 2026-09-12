@@ -2,9 +2,29 @@
 // Isolierte Integrationstests: alle Rollen melden sich mit echten Sitzungen an.
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
+const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { DatabaseSync } = require('node:sqlite');
+
+// Ein bereits laufender Shop hat die neue Spalte noch nicht. Seine Datensätze müssen erhalten bleiben.
+const legacyFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'rh24-alt-')), 'shop.db');
+const legacyDb = new DatabaseSync(legacyFile);
+legacyDb.exec(fs.readFileSync(path.join(__dirname, '../src/schema.sql'), 'utf8')
+  .replace(/  product_group TEXT NOT NULL DEFAULT '',\r?\n/, ''));
+legacyDb.prepare('INSERT INTO products (slug, name, sku, details) VALUES (?,?,?,?)')
+  .run('altes-gewuerz', 'Altes Naturgewürz', 'NG-13001', 'Produktgruppe: Naturgewürze');
+legacyDb.prepare('INSERT INTO products (slug, name, sku, details) VALUES (?,?,?,?)')
+  .run('anderes-produkt', 'Anderes Produkt', 'RH-001', 'Sonstige Gruppe');
+legacyDb.close();
+const migrated = JSON.parse(execFileSync(process.execPath, ['-e',
+  'const db=require("./src/db"); process.stdout.write(JSON.stringify(db.all("SELECT slug, product_group FROM products ORDER BY id")));'],
+{ cwd: path.join(__dirname, '..'), env: { ...process.env, DB_FILE: legacyFile } }).toString());
+assert.deepEqual(migrated, [
+  { slug: 'altes-gewuerz', product_group: 'naturgewuerze' },
+  { slug: 'anderes-produkt', product_group: '' }
+]);
 
 process.env.DB_FILE = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'rh24-rollen-')), 'shop.db');
 process.env.PORT = '3996';
@@ -102,6 +122,7 @@ function csrf(html) {
 
   const editor = clients.redaktion;
   assert.equal((await editor.get('/verwaltung/produkte')).status, 200);
+  assert.equal((await editor.get('/verwaltung/produkte/naturgewuerze')).status, 200);
   assert.equal((await editor.get('/verwaltung/kategorien')).status, 200);
   assert.equal((await editor.get('/verwaltung/kunden')).status, 403);
   assert.equal((await editor.get('/verwaltung/uebersicht')).status, 403);
@@ -113,6 +134,7 @@ function csrf(html) {
   assert.equal((await finance.get('/verwaltung/bestellungen')).status, 403);
   const warehouse = clients.lager;
   assert.equal((await warehouse.get('/verwaltung/lager')).status, 200);
+  assert.equal((await warehouse.get('/verwaltung/produkte/naturgewuerze')).status, 403);
   const warehouseCsv = await warehouse.get('/verwaltung/lager/export.csv');
   assert.equal(warehouseCsv.status, 200);
   assert.ok(warehouseCsv.body.includes('Produkt;Variante;Artikelnummer;Bestand'));
@@ -144,6 +166,10 @@ function csrf(html) {
   })).status, 302);
   assert.equal(db.get('SELECT id FROM admin_users WHERE email = ?', ['ungueltig@example.test']), undefined);
   const draft = db.get("SELECT * FROM products WHERE sku = 'NG-13001'");
+  const spices = await admin.get('/verwaltung/produkte/naturgewuerze?status=entwurf');
+  assert.equal(spices.status, 200);
+  assert.ok(spices.body.includes('135 Naturgewürze'));
+  assert.equal(draft.product_group, 'naturgewuerze');
   assert.equal((await admin.get('/produkt/' + draft.slug)).status, 404);
   const draftForm = await admin.get('/verwaltung/produkte/' + draft.id);
   const fields = {
@@ -154,6 +180,9 @@ function csrf(html) {
   };
   assert.equal((await admin.post('/verwaltung/produkte/' + draft.id, fields)).status, 302);
   assert.equal(db.get('SELECT active FROM products WHERE id = ?', [draft.id]).active, 1);
+  assert.equal(db.get('SELECT product_group FROM products WHERE id = ?', [draft.id]).product_group, 'naturgewuerze');
+  const onlineSpices = await admin.get('/verwaltung/produkte/naturgewuerze?status=online');
+  assert.ok(onlineSpices.body.includes('1 Naturgewürze'));
   let variant = db.get('SELECT price_cents, stock, active FROM variants WHERE product_id = ?', [draft.id]);
   assert.equal(variant.price_cents, 590);
   assert.equal(variant.stock, 0);
@@ -163,6 +192,9 @@ function csrf(html) {
   assert.equal((await admin.post('/verwaltung/produkte/' + draft.id, fields)).status, 302);
   variant = db.get('SELECT price_cents FROM variants WHERE product_id = ?', [draft.id]);
   assert.equal(variant.price_cents, 640, 'Grundpreis und alleinige Standardvariante bleiben gleich');
+  fields.sku = 'NEUE-NATUR-ARTIKELNUMMER';
+  assert.equal((await admin.post('/verwaltung/produkte/' + draft.id, fields)).status, 302);
+  assert.equal(db.get('SELECT product_group FROM products WHERE id = ?', [draft.id]).product_group, 'naturgewuerze', 'SKU-Änderung erhält die Produktgruppe');
   const draftVariant = db.get('SELECT id, name, sku FROM variants WHERE product_id = ?', [draft.id]);
   const variantFields = {
     _csrf: fields._csrf, variant_id: String(draftVariant.id), variant_name: draftVariant.name,
@@ -185,6 +217,15 @@ function csrf(html) {
   assert.equal(invalid.status, 400);
   assert.equal(db.get('SELECT active FROM products WHERE id = ?', [incomplete.id]).active, 0);
   const createForm = await admin.get('/verwaltung/produkte/neu');
+  const newSpiceForm = await admin.get('/verwaltung/produkte/neu?gruppe=naturgewuerze');
+  assert.equal(newSpiceForm.status, 200);
+  assert.ok(newSpiceForm.body.includes('value="naturgewuerze" selected'));
+  const newSpice = await admin.post('/verwaltung/produkte/neu', {
+    _csrf: csrf(newSpiceForm.body), name: 'Neues Naturgewürz', slug: 'neues-naturgewuerz',
+    category_id: String(draft.category_id), price: '4,90', sku: 'NG-NEU', product_group: 'naturgewuerze'
+  });
+  assert.equal(newSpice.status, 302);
+  assert.equal(db.get('SELECT product_group FROM products WHERE slug = ?', ['neues-naturgewuerz']).product_group, 'naturgewuerze');
   const created = await admin.post('/verwaltung/produkte/neu', {
     _csrf: csrf(createForm.body), name: 'Testartikel Lagerjournal', slug: 'testartikel-lagerjournal',
     category_id: String(draft.category_id), price: '10,00', sku: 'TEST-LAGER', start_stock: '3'

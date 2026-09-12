@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS products (
   price_cents   INTEGER NOT NULL DEFAULT 0,
   compare_cents INTEGER,
   sku           TEXT NOT NULL DEFAULT '',
+  product_group TEXT NOT NULL DEFAULT '',
   brand         TEXT NOT NULL DEFAULT 'Räucherhaken24',
   material      TEXT NOT NULL DEFAULT '',
   weight_g      INTEGER NOT NULL DEFAULT 0,

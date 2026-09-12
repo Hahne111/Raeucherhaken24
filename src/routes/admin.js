@@ -265,6 +265,31 @@ router.get('/produkte', (req, res) => {
   });
 });
 
+router.get('/produkte/naturgewuerze', (req, res) => {
+  const q = String(req.query.q || '').trim().slice(0, 80);
+  const status = String(req.query.status || '');
+  const sort = ['name', 'preis', 'beliebtheit'].includes(req.query.sort) ? req.query.sort : 'name';
+  const page = Math.max(1, util.toInt(req.query.seite, 1));
+  const conditions = ["p.product_group = 'naturgewuerze'"];
+  const params = [];
+  if (q) { conditions.push('(p.name LIKE ? OR p.sku LIKE ?)'); params.push(`%${q}%`, `%${q}%`); }
+  if (status === 'entwurf') conditions.push('p.active = 0');
+  if (status === 'online') conditions.push('p.active = 1');
+  const where = conditions.join(' AND ');
+  const order = { name: 'p.name, p.id', preis: 'p.price_cents, p.name', beliebtheit: 'sales DESC, p.name' }[sort];
+  const total = db.get(`SELECT COUNT(*) AS c FROM products p WHERE ${where}`, params).c;
+  const rows = db.all(`SELECT p.*,
+    (SELECT url FROM product_images WHERE product_id = p.id ORDER BY sort, id LIMIT 1) AS image,
+    (SELECT COALESCE(SUM(stock),0) FROM variants WHERE product_id = p.id AND active = 1) AS stock_total,
+    (SELECT COALESCE(SUM(oi.qty),0) FROM order_items oi JOIN orders o ON o.id = oi.order_id
+      WHERE oi.product_id = p.id AND o.status != 'storniert') AS sales
+    FROM products p WHERE ${where} ORDER BY ${order} LIMIT 25 OFFSET ?`,
+  params.concat([(page - 1) * 25]));
+  res.render('admin/natural-spices', {
+    title: 'Naturgewürze', rows, total, page, pages: Math.max(1, Math.ceil(total / 25)), q, status, sort
+  });
+});
+
 function productForm(res, { product, images, variants, facets, errors = {}, title }) {
   res.render('admin/product-form', {
     title, product, images, variants, facets, errors,
@@ -276,7 +301,8 @@ function productForm(res, { product, images, variants, facets, errors = {}, titl
 router.get('/produkte/neu', (req, res) => {
   productForm(res, {
     title: 'Neues Produkt',
-    product: { id: 0, active: 1, featured: 0, tax_rate: 19, brand: 'Räucherhaken24', sort: 0, home_sort: 0 },
+    product: { id: 0, active: 1, featured: 0, tax_rate: 19, brand: 'Räucherhaken24', sort: 0, home_sort: 0,
+      product_group: req.query.gruppe === 'naturgewuerze' ? 'naturgewuerze' : '' },
     images: [], variants: [], facets: []
   });
 });
@@ -292,6 +318,7 @@ function readProductBody(body) {
     price_cents: util.parsePrice(body.price),
     compare_cents: body.compare ? util.parsePrice(body.compare) : null,
     sku: String(body.sku || '').trim().slice(0, 40),
+    product_group: body.product_group === 'naturgewuerze' ? 'naturgewuerze' : '',
     brand: String(body.brand || '').trim().slice(0, 60),
     material: String(body.material || '').trim().slice(0, 80),
     weight_g: util.toInt(body.weight_g, 0),
@@ -318,10 +345,10 @@ router.post('/produkte/neu', (req, res) => {
   const id = db.transaction(() => {
     const result = db.run(
     `INSERT INTO products (slug, name, category_id, subtitle, description, details, price_cents, compare_cents,
-      sku, brand, material, weight_g, tax_rate, active, featured, home_sort, sort)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      sku, product_group, brand, material, weight_g, tax_rate, active, featured, home_sort, sort)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [values.slug, values.name, values.category_id, values.subtitle, values.description, values.details,
-      values.price_cents, values.compare_cents, values.sku, values.brand, values.material, values.weight_g,
+      values.price_cents, values.compare_cents, values.sku, values.product_group, values.brand, values.material, values.weight_g,
       values.tax_rate, values.active, values.featured, values.home_sort, values.sort]
     );
     const productId = Number(result.lastInsertRowid);
@@ -356,6 +383,7 @@ router.post('/produkte/:id', (req, res, next) => {
   const product = db.get('SELECT * FROM products WHERE id = ?', [id]);
   if (!product) return next();
   const values = readProductBody(req.body);
+  if (req.body.product_group === undefined) values.product_group = product.product_group;
   const errors = {};
   if (!values.name) errors.name = 'Bitte einen Produktnamen angeben.';
   const clash = db.get('SELECT id FROM products WHERE slug = ? AND id != ?', [values.slug, id]);
@@ -381,10 +409,10 @@ router.post('/produkte/:id', (req, res, next) => {
   db.transaction(() => {
     db.run(
     `UPDATE products SET slug=?, name=?, category_id=?, subtitle=?, description=?, details=?, price_cents=?,
-      compare_cents=?, sku=?, brand=?, material=?, weight_g=?, tax_rate=?, active=?, featured=?, home_sort=?, sort=?,
+      compare_cents=?, sku=?, product_group=?, brand=?, material=?, weight_g=?, tax_rate=?, active=?, featured=?, home_sort=?, sort=?,
       updated_at=datetime('now') WHERE id = ?`,
     [values.slug, values.name, values.category_id, values.subtitle, values.description, values.details,
-      values.price_cents, values.compare_cents, values.sku, values.brand, values.material, values.weight_g,
+      values.price_cents, values.compare_cents, values.sku, values.product_group, values.brand, values.material, values.weight_g,
       values.tax_rate, values.active, values.featured, values.home_sort, values.sort, id]
     );
     if (single && (syncPrice || activateSingle)) {

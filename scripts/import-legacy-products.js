@@ -44,9 +44,10 @@ module.exports = function importLegacyProducts(db, catIds) {
       const details = `Archiv-Artikelnummer: ${row.article_no}\nProduktgruppe: ${row.category}`;
       const result = db.run(
         `INSERT INTO products (slug, name, category_id, subtitle, description, details,
-          price_cents, sku, active, sort) VALUES (?,?,?,?,?,?,?,?,?,?)`,
+          price_cents, sku, product_group, active, sort) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
         [slug, row.name, catIds[categorySlugs[row.category]], row.unit,
-          row.description, details, row.price_cents, row.sku, active, 1000 + index]
+          row.description, details, row.price_cents, row.sku,
+          row.category === 'Naturgewürze' ? 'naturgewuerze' : '', active, 1000 + index]
       );
       const id = Number(result.lastInsertRowid);
       const images = row.images.length ? row.images : ['/img/products/legacy/bild-folgt.svg'];
