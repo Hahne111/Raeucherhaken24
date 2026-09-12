@@ -6,14 +6,14 @@ const orders = require('../lib/orders');
 const addressLib = require('../lib/address');
 const util = require('../lib/util');
 const audit = require('../lib/audit');
+const payments = require('../lib/payments');
 
 const router = express.Router();
 
-const PAYMENTS = [
-  { code: 'vorkasse', name: 'Vorkasse per Überweisung', hint: 'Du erhältst die Bankdaten mit der Bestellbestätigung. Wir versenden nach Zahlungseingang.' },
-  { code: 'rechnung', name: 'Kauf auf Rechnung', hint: 'Zahlbar innerhalb von 14 Tagen nach Erhalt der Ware.' },
-  { code: 'nachnahme', name: 'Nachnahme', hint: 'Zahlung bei Lieferung an den Zusteller, zzgl. Nachnahmegebühr des Versanddienstleisters.' }
-];
+/* Zahlungsarten kommen aus der Verwaltung; gesperrte erscheinen hier nicht. */
+function paymentsFor(req) {
+  return payments.selectable(req.checkout ? req.checkout.totals.total : 0);
+}
 
 /** Alle Kassenschritte brauchen einen gefüllten Warenkorb. */
 function requireCart(req, res, next) {
@@ -140,13 +140,13 @@ router.get('/zahlung', requireCart, (req, res) => {
     steps: steps('zahlung'),
     checkout: req.checkout,
     draft: draft(req),
-    payments: PAYMENTS
+    payments: paymentsFor(req)
   });
 });
 
 router.post('/zahlung', requireCart, (req, res) => {
   const code = String(req.body.payment_method || '');
-  const payment = PAYMENTS.find((p) => p.code === code);
+  const payment = paymentsFor(req).find((p) => p.code === code);
   if (!payment) {
     req.flash('error', 'Bitte eine Zahlungsart wählen.');
     return res.redirect('/kasse/zahlung');
@@ -165,7 +165,7 @@ router.get('/pruefen', requireCart, (req, res) => {
     steps: steps('pruefen'),
     checkout: req.checkout,
     draft: d,
-    payment: PAYMENTS.find((p) => p.code === d.payment),
+    payment: payments.byCode(d.payment),
     addressLib
   });
 });
@@ -229,7 +229,7 @@ router.get('/danke/:number', (req, res, next) => {
     shipping: JSON.parse(order.shipping_address || '{}'),
     billing: JSON.parse(order.billing_address || '{}'),
     addressLib,
-    payment: PAYMENTS.find((p) => p.code === order.payment_method)
+    payment: payments.byCode(order.payment_method)
   });
 });
 

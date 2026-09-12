@@ -1,5 +1,13 @@
 <%- include('../partials/admin-head') %>
-<%- include('../partials/admin-shell') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/gutscheine/serie">Serie anlegen</a> <a class="btn btn--ghost btn--sm" href="/verwaltung/gutscheine/export.csv">CSV</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+
+<div class="kpis">
+  <div class="kpi"><span>Gutscheine</span><strong><%= rows.length %></strong></div>
+  <div class="kpi"><span>Offener Wert</span><strong><%= fmt(openValue) %></strong><small>Restwerte aller Wertgutscheine</small></div>
+  <div class="kpi"><span>Serien</span><strong><%= series.length %></strong></div>
+</div>
+
 <div class="card">
   <div class="card__head"><h2>Neuer Gutschein</h2></div>
   <div class="card__body">
@@ -7,73 +15,79 @@
       <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
       <input type="hidden" name="id" value="0">
       <div class="grid3">
-        <label class="field"><span>Code</span><input type="text" name="code" placeholder="RAUCHZEICHEN10" required></label>
+        <label class="field"><span>Code</span><input type="text" name="code" value="<%= suggestion %>" required></label>
         <label class="field"><span>Art</span>
           <select name="kind">
-            <option value="percent">Prozent-Rabatt</option>
-            <option value="fixed">Fester Betrag</option>
-            <option value="shipping">Versandkostenfrei</option>
+            <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>"><%= kinds[k] %></option><% }); %>
           </select>
         </label>
         <label class="field"><span>Wert</span>
           <input type="text" name="value" placeholder="10">
-          <span class="field__hint">Prozent als Zahl, fester Betrag in Euro.</span>
+          <span class="field__hint">Prozent als Zahl, Betrag und Wertgutschein in Euro.</span>
         </label>
       </div>
       <div class="grid3">
         <label class="field"><span>Mindestbestellwert</span><input type="text" name="min_subtotal" placeholder="29,00"></label>
-        <label class="field"><span>Maximale Einlösungen</span><input type="number" name="usage_limit" placeholder="leer = unbegrenzt" min="0"></label>
-        <label class="field"><span>Aktiv</span>
-          <select name="active"><option value="1">ja</option><option value="0">nein</option></select>
-        </label>
+        <label class="field"><span>Maximale Einlösungen</span><input type="number" name="usage_limit" placeholder="leer = unbegrenzt" min="1">
+          <span class="field__hint">Ein Wertgutschein gilt bis der Restwert aufgebraucht ist.</span></label>
+        <label class="field"><span>Serie (optional)</span><input type="text" name="series" placeholder="WEIHNACHTEN26"></label>
       </div>
-      <div class="grid2">
+      <div class="grid3">
         <label class="field"><span>Gültig ab (optional)</span><input type="date" name="starts_at"></label>
         <label class="field"><span>Gültig bis (optional)</span><input type="date" name="ends_at"></label>
+        <label class="field"><span>Notiz</span><input type="text" name="note" maxlength="300"></label>
       </div>
       <button class="btn btn--primary" type="submit">Gutschein anlegen</button>
     </form>
   </div>
 </div>
 
+<form method="get" class="filterbar">
+  <input type="search" name="q" value="<%= filter.q %>" placeholder="Code oder Notiz">
+  <label>Art
+    <select name="art"><option value="">alle</option>
+      <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>" <%= filter.kind === k ? 'selected' : '' %>><%= kinds[k] %></option><% }); %>
+    </select>
+  </label>
+  <label>Status
+    <select name="status"><option value="">alle</option>
+      <option value="aktiv" <%= filter.status === 'aktiv' ? 'selected' : '' %>>aktiv</option>
+      <option value="inaktiv" <%= filter.status === 'inaktiv' ? 'selected' : '' %>>gesperrt</option>
+      <option value="aufgebraucht" <%= filter.status === 'aufgebraucht' ? 'selected' : '' %>>aufgebraucht</option>
+    </select>
+  </label>
+  <label>Serie
+    <select name="serie"><option value="">alle</option>
+      <% series.forEach(function (s) { %><option value="<%= s.series %>" <%= filter.series === s.series ? 'selected' : '' %>><%= s.series %> (<%= s.count %>)</option><% }); %>
+    </select>
+  </label>
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+
 <div class="card">
   <div class="card__head"><h2><%= rows.length %> Gutscheine</h2></div>
   <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Gutscheine in dieser Auswahl.</p>
+    <% } else { %>
     <table class="tbl">
-      <thead><tr><th>Code</th><th>Art</th><th class="num">Wert</th><th class="num">ab Warenwert</th><th class="num">Eingelöst</th><th>Zeitraum</th><th>Status</th><th></th></tr></thead>
+      <thead><tr><th>Code</th><th>Art</th><th class="num">Wert</th><th class="num">Restwert</th><th class="num">ab Warenwert</th><th class="num">Eingelöst</th><th>Zeitraum</th><th>Status</th></tr></thead>
       <tbody>
         <% rows.forEach(function (c) { %>
           <tr>
-            <td><strong><%= c.code %></strong></td>
-            <td><%= c.kind === 'percent' ? 'Prozent' : (c.kind === 'fixed' ? 'Betrag' : 'Versandfrei') %></td>
-            <td class="num"><%= c.kind === 'percent' ? c.value + ' %' : (c.kind === 'fixed' ? fmt(c.value) : '–') %></td>
+            <td><a href="/verwaltung/gutscheine/<%= c.id %>"><strong><%= c.code %></strong></a><% if (c.series) { %><br><small><%= c.series %></small><% } %></td>
+            <td><%= kinds[c.kind] || c.kind %></td>
+            <td class="num"><%= c.kind === 'percent' ? c.value + ' %' : (c.kind === 'shipping' ? '–' : fmt(c.value)) %></td>
+            <td class="num"><%= c.kind === 'wert' ? fmt(c.balance_cents) : '–' %></td>
             <td class="num"><%= c.min_subtotal_cents ? fmt(c.min_subtotal_cents) : '–' %></td>
-            <td class="num"><%= c.used_count %><%= c.usage_limit != null ? ' / ' + c.usage_limit : '' %></td>
+            <td class="num"><%= c.used_count %><%= c.usage_limit != null && c.kind !== 'wert' ? ' / ' + c.usage_limit : '' %></td>
             <td style="font-size:12.5px;color:var(--a-soft)"><%= c.starts_at || '–' %> bis <%= c.ends_at || '–' %></td>
-            <td><span class="pill <%= c.active ? 'pill--ok' : '' %>"><%= c.active ? 'aktiv' : 'inaktiv' %></span></td>
-            <td class="num">
-              <form method="post" action="/verwaltung/gutscheine" style="display:inline">
-                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
-                <input type="hidden" name="id" value="<%= c.id %>">
-                <input type="hidden" name="code" value="<%= c.code %>">
-                <input type="hidden" name="kind" value="<%= c.kind %>">
-                <input type="hidden" name="value" value="<%= c.kind === 'percent' ? c.value : (c.value/100).toFixed(2).replace('.', ',') %>">
-                <input type="hidden" name="min_subtotal" value="<%= (c.min_subtotal_cents/100).toFixed(2).replace('.', ',') %>">
-                <input type="hidden" name="usage_limit" value="<%= c.usage_limit == null ? '' : c.usage_limit %>">
-                <input type="hidden" name="starts_at" value="<%= c.starts_at || '' %>">
-                <input type="hidden" name="ends_at" value="<%= c.ends_at || '' %>">
-                <input type="hidden" name="active" value="<%= c.active ? '0' : '1' %>">
-                <button class="btn btn--ghost btn--sm" type="submit"><%= c.active ? 'Deaktivieren' : 'Aktivieren' %></button>
-              </form>
-              <form method="post" action="/verwaltung/gutscheine/<%= c.id %>/loeschen" style="display:inline" data-confirm="Gutschein löschen?">
-                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
-                <button class="btn btn--danger btn--sm" type="submit">Löschen</button>
-              </form>
-            </td>
+            <td><span class="pill <%= c.active ? 'pill--ok' : '' %>"><%= c.active ? 'aktiv' : 'gesperrt' %></span></td>
           </tr>
         <% }); %>
       </tbody>
     </table>
+    <% } %>
   </div>
 </div>
 <%- include('../partials/admin-foot') %>

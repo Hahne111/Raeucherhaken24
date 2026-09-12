@@ -22,7 +22,8 @@ const GRANTS = {
   finanzen: [
     'uebersicht', 'produkt.analyse', 'bestellungen.lesen', 'belege', 'belege.ausstellen',
     'kassenbuch', 'kassenbuch.buchen', 'finanzen', 'finanzen.buchen', 'einkauf',
-    'provision.eigene', 'provision.verwalten', 'fahrtenbuch', 'fahrtenbuch.pruefen', 'nachrichten'
+    'provision.eigene', 'provision.verwalten', 'fahrtenbuch', 'fahrtenbuch.pruefen',
+    'gutscheine', 'zahlungsarten', 'nachrichten'
   ],
   vertrieb: [
     'kunden.lesen', 'kunden.bearbeiten', 'kunden.anlegen',

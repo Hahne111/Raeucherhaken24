@@ -1,0 +1,60 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/gutscheine">Zur Übersicht</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2><%= row.code %></h2>
+      <span class="pill <%= row.active ? 'pill--ok' : '' %>"><%= row.active ? 'aktiv' : 'gesperrt' %></span></div>
+    <div class="card__body">
+      <table class="tbl tbl--plain">
+        <tr><th>Art</th><td><%= kinds[row.kind] || row.kind %></td></tr>
+        <tr><th>Wert</th><td><%= row.kind === 'percent' ? row.value + ' %' : (row.kind === 'shipping' ? 'Versandkosten entfallen' : fmt(row.value)) %></td></tr>
+        <% if (row.kind === 'wert') { %>
+          <tr><th>Ausgestellt über</th><td><%= fmt(row.initial_cents) %></td></tr>
+          <tr><th>Restwert</th><td><strong><%= fmt(row.balance_cents) %></strong></td></tr>
+        <% } %>
+        <tr><th>Mindestbestellwert</th><td><%= row.min_subtotal_cents ? fmt(row.min_subtotal_cents) : '–' %></td></tr>
+        <tr><th>Zeitraum</th><td><%= row.starts_at || 'ohne Anfang' %> bis <%= row.ends_at || 'ohne Ende' %></td></tr>
+        <tr><th>Eingelöst</th><td><%= row.used_count %><%= row.usage_limit != null && row.kind !== 'wert' ? ' von ' + row.usage_limit : '' %></td></tr>
+        <% if (row.series) { %><tr><th>Serie</th><td><a href="/verwaltung/gutscheine?serie=<%= row.series %>"><%= row.series %></a></td></tr><% } %>
+        <% if (row.note) { %><tr><th>Notiz</th><td><%= row.note %></td></tr><% } %>
+      </table>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <form method="post" action="/verwaltung/gutscheine/<%= row.id %>/status">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <input type="hidden" name="active" value="<%= row.active ? '0' : '1' %>">
+          <button class="btn btn--ghost btn--sm" type="submit"><%= row.active ? 'Sperren' : 'Freigeben' %></button>
+        </form>
+        <form method="post" action="/verwaltung/gutscheine/<%= row.id %>/loeschen" data-confirm="Gutschein löschen?">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <button class="btn btn--danger btn--sm" type="submit">Löschen</button>
+        </form>
+      </div>
+      <p style="color:var(--a-soft)"><small>Ein benutzter Gutschein wird nicht gelöscht, sondern gesperrt – das Journal bleibt erhalten.</small></p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Journal</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!entries.length) { %>
+        <p style="padding:20px;margin:0;color:var(--a-soft)">Dieser Gutschein wurde noch nicht benutzt.</p>
+      <% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Zeitpunkt</th><th>Vorgang</th><th>Auftrag</th><th class="num">Betrag</th><th class="num">Restwert</th></tr></thead>
+        <tbody>
+          <% entries.forEach(function (e) { %>
+          <tr>
+            <td><small><%= e.created_at %></small></td>
+            <td><%= e.kind === 'einloesung' ? 'Einlösung' : 'Rückbuchung' %><% if (e.note) { %><br><small><%= e.note %></small><% } %></td>
+            <td><% if (e.order_number) { %><a href="/verwaltung/bestellungen/<%= e.order_id %>"><%= e.order_number %></a><% } else { %>–<% } %></td>
+            <td class="num"><%= e.kind === 'einloesung' ? '−' : '+' %><%= fmt(e.amount_cents) %></td>
+            <td class="num"><%= row.kind === 'wert' ? fmt(e.balance_cents) : '–' %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

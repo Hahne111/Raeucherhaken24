@@ -1,0 +1,48 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/gutscheine">Zur Übersicht</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Serie anlegen</h2></div>
+    <div class="card__body">
+      <p style="color:var(--a-soft)"><small>Es entstehen einzelne Gutscheine mit demselben Zuschnitt und je eigenem Code. Jeder Code lässt sich später getrennt sperren.</small></p>
+      <form method="post" action="/verwaltung/gutscheine/serie">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label>Name der Serie <input type="text" name="series" required maxlength="40" placeholder="WEIHNACHTEN26"></label>
+        <label>Anzahl <input type="number" name="count" value="25" min="1" max="500" required></label>
+        <label>Art
+          <select name="kind">
+            <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>"><%= kinds[k] %></option><% }); %>
+          </select>
+        </label>
+        <label>Wert <input type="text" name="value" placeholder="25,00"></label>
+        <label>Mindestbestellwert <input type="text" name="min_subtotal" placeholder="0,00"></label>
+        <div style="display:flex;gap:10px">
+          <label style="flex:1">Gültig ab <input type="date" name="starts_at"></label>
+          <label style="flex:1">Gültig bis <input type="date" name="ends_at"></label>
+        </div>
+        <label>Notiz <input type="text" name="note" maxlength="300"></label>
+        <button class="btn btn--dark" type="submit">Serie anlegen</button>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Bestehende Serien</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!series.length) { %>
+        <p style="padding:20px;margin:0;color:var(--a-soft)">Noch keine Serie angelegt.</p>
+      <% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Serie</th><th class="num">Codes</th><th class="num">Offener Wert</th></tr></thead>
+        <tbody>
+          <% series.forEach(function (s) { %>
+            <tr><td><a href="/verwaltung/gutscheine?serie=<%= s.series %>"><%= s.series %></a></td>
+              <td class="num"><%= s.count %></td><td class="num"><%= fmt(s.balance || 0) %></td></tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

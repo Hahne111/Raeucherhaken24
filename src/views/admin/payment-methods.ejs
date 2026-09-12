@@ -1,0 +1,81 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = ''; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="ad-alert ad-alert--info">
+  Zahlungsarten ohne Anbieter laufen vollständig im Shop. Für PayPal, Kreditkarte und ähnliche Verfahren ist
+  <strong>keine geprüfte Anbindung eingebaut</strong>; sie bleiben gesperrt, bis Vertrag, Zugangsdaten und eine
+  umgesetzte Anbindung vorliegen.
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Zahlungsarten</h2></div>
+  <div class="card__body card__body--flush">
+    <table class="tbl">
+      <thead><tr><th>Zahlungsart</th><th>Hinweis im Kassenvorgang</th><th class="num">Gebühr</th><th class="num">Betragsrahmen</th><th>Status</th><th style="width:160px"></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (m) { %>
+        <tr>
+          <td><strong><%= m.name %></strong><br><small><%= m.code %></small></td>
+          <td><%= m.hint %>
+            <% if (m.needs_provider) { %>
+              <br><small>Anbieter nötig<% if (m.missing.length) { %>; fehlende Zugangsdaten: <%= m.missing.join(', ') %><% } %></small>
+            <% } %>
+          </td>
+          <td class="num"><%= m.fee_cents ? fmt(m.fee_cents) : '–' %></td>
+          <td class="num"><%= m.min_total_cents ? fmt(m.min_total_cents) : '0,00 €' %><%= m.max_total_cents ? ' – ' + fmt(m.max_total_cents) : '' %></td>
+          <td>
+            <span class="pill <%= m.active ? 'pill--ok' : (m.blocked ? 'pill--err' : '') %>">
+              <%= m.active ? 'aktiv' : (m.needs_provider ? 'gesperrt' : 'aus') %>
+            </span>
+          </td>
+          <td>
+            <form method="post" action="/verwaltung/zahlungsarten/<%= m.id %>/status">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <input type="hidden" name="active" value="<%= m.active ? '0' : '1' %>">
+              <button class="btn btn--ghost btn--sm" type="submit"><%= m.active ? 'Abschalten' : 'Einschalten' %></button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Zahlungsart bearbeiten oder anlegen</h2></div>
+  <div class="card__body">
+    <form method="post" action="/verwaltung/zahlungsarten">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <div class="grid3">
+        <label class="field"><span>Bestehende ändern</span>
+          <select name="id" onchange="this.form.code.value=this.options[this.selectedIndex].dataset.code||''">
+            <option value="0" data-code="">neu anlegen</option>
+            <% rows.forEach(function (m) { %><option value="<%= m.id %>" data-code="<%= m.code %>"><%= m.name %></option><% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Kürzel</span><input type="text" name="code" required placeholder="vorkasse"></label>
+        <label class="field"><span>Name</span><input type="text" name="name" required placeholder="Vorkasse per Überweisung"></label>
+      </div>
+      <label class="field"><span>Hinweis im Kassenvorgang</span><input type="text" name="hint" maxlength="500"></label>
+      <label class="field"><span>Zahlungshinweis auf Beleg und Bestätigung</span><textarea name="instructions" rows="3" maxlength="2000"></textarea></label>
+      <div class="grid3">
+        <label class="field"><span>Gebühr in €</span><input type="text" name="fee" placeholder="0,00"></label>
+        <label class="field"><span>ab Betrag in €</span><input type="text" name="min_total" placeholder="0,00"></label>
+        <label class="field"><span>bis Betrag in €</span><input type="text" name="max_total" placeholder="leer = ohne Grenze"></label>
+      </div>
+      <div class="grid2">
+        <label class="field"><span>Anbieter nötig</span>
+          <select name="needs_provider"><option value="">nein</option><option value="1">ja</option></select>
+        </label>
+        <label class="field"><span>Benötigte Umgebungsvariablen</span>
+          <input type="text" name="provider_env" placeholder="PAYPAL_CLIENT_ID,PAYPAL_SECRET">
+          <span class="field__hint">Zugangsdaten stehen nur in der Umgebung, nie in der Datenbank oder im Quelltext.</span>
+        </label>
+      </div>
+      <label class="field"><span>Reihenfolge</span><input type="number" name="sort" value="0"></label>
+      <button class="btn btn--primary" type="submit">Speichern</button>
+    </form>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

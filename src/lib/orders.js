@@ -1,6 +1,7 @@
 'use strict';
 const db = require('../db');
 const cartLib = require('./cart');
+const coupons = require('./coupons');
 const util = require('./util');
 const audit = require('./audit');
 const stock = require('./stock');
@@ -35,20 +36,20 @@ function placeOrder({ cart, lines, totals, email, shippingAddress, billingAddres
     let couponRow = null;
     if (totals.coupon) {
       couponRow = db.get('SELECT * FROM coupons WHERE id = ?', [totals.coupon.id]);
-      const problem = cartLib.couponProblem(couponRow, totals.subtotal);
+      const problem = coupons.problem(couponRow, totals.subtotal);
       if (problem) return { ok: false, message: problem };
     }
 
     const res = db.run(
       `INSERT INTO orders (number, customer_id, email, status, payment_status, shipping_status, payment_method,
         shipping_code, shipping_name, subtotal_cents, discount_cents, shipping_cents, total_cents, tax_cents,
-        coupon_code, shipping_address, billing_address, customer_note)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        coupon_code, coupon_amount_cents, shipping_address, billing_address, customer_note)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         'TMP', customerId || null, email, 'offen', 'offen', 'nicht versandt', paymentMethod || 'vorkasse',
         totals.method ? totals.method.code : '', totals.method ? totals.method.name : '',
         totals.subtotal, totals.discount, totals.shipping, totals.total, totals.tax,
-        couponRow ? couponRow.code : '',
+        couponRow ? couponRow.code : '', couponRow ? totals.discount : 0,
         JSON.stringify(shippingAddress || {}), JSON.stringify(billingAddress || shippingAddress || {}),
         String(note || '').slice(0, 1000)
       ]
@@ -72,7 +73,11 @@ function placeOrder({ cart, lines, totals, email, shippingAddress, billingAddres
       }
     }
 
-    if (couponRow) db.run('UPDATE coupons SET used_count = used_count + 1 WHERE id = ?', [couponRow.id]);
+    if (couponRow) {
+      /* Wertgutscheine verlieren hier ihren angerechneten Betrag; das Journal haelt beides fest. */
+      const booked = coupons.redeem(couponRow.id, orderId, totals.discount, email);
+      if (!booked.ok) return { ok: false, message: booked.message };
+    }
     if (cart) {
       db.run('DELETE FROM cart_items WHERE cart_id = ?', [cart.id]);
       db.run("UPDATE carts SET coupon_code = '', updated_at = datetime('now') WHERE id = ?", [cart.id]);
@@ -137,7 +142,7 @@ function cancel(orderId, actor, ip) {
       }
     }
     db.run("UPDATE orders SET status = 'storniert', shipping_status = 'nicht versandt', updated_at = datetime('now') WHERE id = ?", [orderId]);
-    if (order.coupon_code) db.run('UPDATE coupons SET used_count = MAX(0, used_count - 1) WHERE UPPER(code) = UPPER(?)', [order.coupon_code]);
+    if (order.coupon_code) coupons.refund(order.coupon_code, orderId, order.coupon_amount_cents || order.discount_cents, actor);
     audit.log(actor, 'bestellung.storniert', 'order', String(orderId), order.number, ip || '');
     return { ok: true };
   });

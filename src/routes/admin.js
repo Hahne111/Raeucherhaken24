@@ -168,6 +168,7 @@ for (const [prefix, permission] of [
   ['/bewertungen', 'bewertungen'],
   ['/rezepte', 'rezepte'],
   ['/gutscheine', 'gutscheine'],
+  ['/zahlungsarten', 'zahlungsarten'],
   ['/versandarten', 'versandarten'],
   ['/einstellungen', 'einstellungen'],
   ['/protokoll', 'protokoll']
@@ -184,6 +185,7 @@ router.use('/', require('./admin-pos'));
 router.use('/', require('./admin-finance'));
 router.use('/', require('./admin-sales'));
 router.use('/', require('./admin-content'));
+router.use('/', require('./admin-coupons'));
 
 /* ------------------------------ Lager --------------------------------- */
 router.get('/lager', (req, res) => {
@@ -945,58 +947,6 @@ router.post('/bestellungen/:id/stornieren', access.requirePermission('bestellung
   const result = orders.cancel(id, req.admin.email, req.ip);
   req.flash(result.ok ? 'success' : 'error', result.ok ? 'Bestellung storniert, der Bestand wurde zurückgebucht.' : result.message);
   res.redirect('/verwaltung/bestellungen/' + id);
-});
-
-/* ------------------------------ Gutscheine ----------------------------- */
-router.get('/gutscheine', (req, res) => {
-  res.render('admin/coupons', {
-    title: 'Gutscheine',
-    rows: db.all('SELECT * FROM coupons ORDER BY active DESC, id DESC')
-  });
-});
-
-router.post('/gutscheine', (req, res) => {
-  const code = String(req.body.code || '').trim().toUpperCase().slice(0, 40);
-  const id = util.toInt(req.body.id, 0);
-  const kind = ['percent', 'fixed', 'shipping'].includes(req.body.kind) ? req.body.kind : 'percent';
-  const value = kind === 'percent' ? util.clamp(util.toInt(req.body.value, 0), 0, 100) : util.parsePrice(req.body.value);
-  const min = util.parsePrice(req.body.min_subtotal);
-  const limit = req.body.usage_limit === '' ? null : util.toInt(req.body.usage_limit, 0);
-  const active = req.body.active === '1' ? 1 : 0;
-  const starts = String(req.body.starts_at || '').trim() || null;
-  const ends = String(req.body.ends_at || '').trim() || null;
-
-  if (!code) {
-    req.flash('error', 'Bitte einen Gutscheincode angeben.');
-    return res.redirect('/verwaltung/gutscheine');
-  }
-  const clash = db.get('SELECT id FROM coupons WHERE UPPER(code) = ? AND id != ?', [code, id]);
-  if (clash) {
-    req.flash('error', 'Diesen Code gibt es bereits.');
-    return res.redirect('/verwaltung/gutscheine');
-  }
-  if (id) {
-    db.run('UPDATE coupons SET code=?, kind=?, value=?, min_subtotal_cents=?, usage_limit=?, active=?, starts_at=?, ends_at=? WHERE id = ?',
-      [code, kind, value, min, limit, active, starts, ends, id]);
-    audit.log(req.admin.email, 'gutschein.geaendert', 'coupon', String(id), code, req.ip);
-  } else {
-    db.run('INSERT INTO coupons (code, kind, value, min_subtotal_cents, usage_limit, active, starts_at, ends_at) VALUES (?,?,?,?,?,?,?,?)',
-      [code, kind, value, min, limit, active, starts, ends]);
-    audit.log(req.admin.email, 'gutschein.angelegt', 'coupon', code, code, req.ip);
-  }
-  req.flash('success', `Gutschein „${code}“ gespeichert.`);
-  res.redirect('/verwaltung/gutscheine');
-});
-
-router.post('/gutscheine/:id/loeschen', (req, res) => {
-  const id = util.toInt(req.params.id, 0);
-  const row = db.get('SELECT * FROM coupons WHERE id = ?', [id]);
-  if (row) {
-    db.run('DELETE FROM coupons WHERE id = ?', [id]);
-    audit.log(req.admin.email, 'gutschein.geloescht', 'coupon', String(id), row.code, req.ip);
-    req.flash('success', 'Gutschein gelöscht.');
-  }
-  res.redirect('/verwaltung/gutscheine');
 });
 
 /* ----------------------------- Versandarten ---------------------------- */

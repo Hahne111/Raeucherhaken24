@@ -1,6 +1,7 @@
 'use strict';
 const crypto = require('crypto');
 const db = require('../db');
+const coupons = require('./coupons');
 const settings = require('./settings');
 
 const MAX_QTY_PER_LINE = 99;
@@ -109,16 +110,7 @@ function findCoupon(code) {
 }
 
 function couponProblem(coupon, subtotal) {
-  if (!coupon) return 'Dieser Gutscheincode ist unbekannt.';
-  if (coupon.active !== 1) return 'Dieser Gutschein ist nicht mehr aktiv.';
-  const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
-  if (coupon.starts_at && coupon.starts_at > now) return 'Dieser Gutschein ist noch nicht gültig.';
-  if (coupon.ends_at && coupon.ends_at < now) return 'Dieser Gutschein ist abgelaufen.';
-  if (coupon.usage_limit != null && coupon.used_count >= coupon.usage_limit) return 'Dieser Gutschein wurde bereits vollständig eingelöst.';
-  if (subtotal < coupon.min_subtotal_cents) {
-    return `Dieser Gutschein gilt ab einem Warenwert von ${(coupon.min_subtotal_cents / 100).toFixed(2).replace('.', ',')} €.`;
-  }
-  return null;
+  return coupons.problem(coupon, subtotal);
 }
 
 /** Rechnet den kompletten Warenkorb durch: Zwischensumme, Rabatt, Versand, Summe, MwSt. */
@@ -134,9 +126,8 @@ function totals(cart, lines) {
   if (coupon) {
     const problem = couponProblem(coupon, subtotal);
     if (problem) { couponError = problem; coupon = null; }
-    else if (coupon.kind === 'percent') discount = Math.round(subtotal * coupon.value / 100);
-    else if (coupon.kind === 'fixed') discount = Math.min(subtotal, coupon.value);
     else if (coupon.kind === 'shipping') freeShipping = true;
+    else discount = coupons.discountFor(coupon, subtotal);
   }
 
   const goods = Math.max(0, subtotal - discount);

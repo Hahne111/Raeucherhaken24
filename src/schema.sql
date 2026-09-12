@@ -1323,3 +1323,44 @@ CREATE TABLE IF NOT EXISTS recipe_products (
   product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   PRIMARY KEY (recipe_id, product_id)
 );
+
+/* ===================== Gutscheinjournal und Zahlungsarten ===================== */
+
+/*
+ * Journal jeder Gutscheinbewegung. Jede Einloesung und jede Rueckbuchung
+ * steht hier mit Betrag und Restwert; daraus laesst sich der Stand eines
+ * Wertgutscheins jederzeit nachrechnen.
+ */
+CREATE TABLE IF NOT EXISTS coupon_entries (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  coupon_id    INTEGER NOT NULL REFERENCES coupons(id) ON DELETE CASCADE,
+  order_id     INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  kind         TEXT NOT NULL DEFAULT 'einloesung',
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  balance_cents INTEGER NOT NULL DEFAULT 0,
+  actor        TEXT NOT NULL DEFAULT '',
+  note         TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_coupon_entries ON coupon_entries(coupon_id, id);
+
+/*
+ * Zahlungsarten des Shops. Eine Zahlungsart mit `needs_provider = 1` verlangt
+ * einen Vertrag und Zugangsdaten beim Anbieter; ohne geprueften Zugang laesst
+ * sie sich nicht aktivieren.
+ */
+CREATE TABLE IF NOT EXISTS payment_methods (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  code          TEXT NOT NULL UNIQUE,
+  name          TEXT NOT NULL,
+  hint          TEXT NOT NULL DEFAULT '',
+  instructions  TEXT NOT NULL DEFAULT '',
+  fee_cents     INTEGER NOT NULL DEFAULT 0,
+  min_total_cents INTEGER NOT NULL DEFAULT 0,
+  max_total_cents INTEGER NOT NULL DEFAULT 0,
+  needs_provider INTEGER NOT NULL DEFAULT 0,
+  provider_env  TEXT NOT NULL DEFAULT '',
+  active        INTEGER NOT NULL DEFAULT 1,
+  sort          INTEGER NOT NULL DEFAULT 0,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
