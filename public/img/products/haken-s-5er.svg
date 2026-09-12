@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Fünf S-förmige Räucherhaken aus Edelstahl">
+  <defs>
+    <linearGradient id="p1bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f4ed"/><stop offset="1" stop-color="#e7e2d6"/></linearGradient>
+    <linearGradient id="p1s" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8a949c"/><stop offset=".3" stop-color="#f3f7f9"/><stop offset=".6" stop-color="#a7b1b9"/><stop offset="1" stop-color="#6f7982"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#p1bg)"/>
+  <ellipse cx="200" cy="258" rx="150" ry="16" fill="#b9b2a4" opacity=".35"/>
+  <g fill="none" stroke="url(#p1s)" stroke-width="11" stroke-linecap="round">
+    <path d="M92 72c-19 0-27 15-27 30s10 25 25 25 24-11 24-27V83c0-19 10-31 27-31s25 13 25 28"/>
+    <path d="M152 78c-19 0-27 15-27 30s10 25 25 25 24-11 24-27V89c0-19 10-31 27-31s25 13 25 28"/>
+    <path d="M212 72c-19 0-27 15-27 30s10 25 25 25 24-11 24-27V83c0-19 10-31 27-31s25 13 25 28"/>
+    <path d="M272 78c-19 0-27 15-27 30s10 25 25 25 24-11 24-27V89c0-19 10-31 27-31s25 13 25 28"/>
+    <path d="M332 72c-19 0-27 15-27 30s10 25 25 25 24-11 24-27V83c0-19 10-31 27-31s25 13 25 28"/>
+  </g>
+  <g stroke="#fff" stroke-width="2.4" fill="none" opacity=".55" stroke-linecap="round">
+    <path d="M84 80c-8 4-12 12-12 22"/><path d="M144 86c-8 4-12 12-12 22"/><path d="M204 80c-8 4-12 12-12 22"/>
+    <path d="M264 86c-8 4-12 12-12 22"/><path d="M324 80c-8 4-12 12-12 22"/>
+  </g>
+</svg>

@@ -1,0 +1,164 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<%
+  function buildUrl(overrides) {
+    var params = new URLSearchParams();
+    Object.keys(query).forEach(function (k) {
+      if (k === 'seite') return;
+      var v = query[k];
+      (Array.isArray(v) ? v : [v]).forEach(function (item) { if (item !== '') params.append(k, item); });
+    });
+    Object.keys(overrides).forEach(function (k) {
+      params.delete(k);
+      var v = overrides[k];
+      if (v !== null && v !== '' && v !== undefined) {
+        (Array.isArray(v) ? v : [v]).forEach(function (item) { params.append(k, item); });
+      }
+    });
+    var qs = params.toString();
+    return baseUrl + (qs ? '?' + qs : '');
+  }
+%>
+<main id="inhalt" class="page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Pfad">
+      <a href="/">Start</a><span>/</span>
+      <% if (category) { %><a href="/produkte">Produkte</a><span>/</span><span><%= category.name %></span>
+      <% } else { %><span><%= title %></span><% } %>
+    </nav>
+
+    <div class="section">
+      <div class="pagehead">
+        <p class="pagehead__eyebrow"><%= category ? 'Kategorie' : (onlySale ? 'Reduziert' : (searchTerm ? 'Suchergebnis' : 'Sortiment')) %></p>
+        <h1><%= category ? category.name : (searchTerm ? 'Suche nach „' + searchTerm + '“' : title) %></h1>
+        <% if (category && category.description) { %><p><%= category.description %></p><% } %>
+        <% if (!category && !searchTerm && !onlySale) { %><p>Haken, Öfen, Holz, Gewürze und Zubehör – alles, was zum Räuchern gehört.</p><% } %>
+      </div>
+
+      <div class="layout-aside">
+        <form class="filters" method="get" action="<%= baseUrl %>" data-autosubmit>
+          <% if (searchTerm) { %><input type="hidden" name="q" value="<%= searchTerm %>"><% } %>
+          <h2>Filter</h2>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0 0 6px"><%= total %> Artikel gefunden</p>
+
+          <div class="filters__group">
+            <h3>Preis</h3>
+            <div class="price-row">
+              <label class="visually-hidden" for="preis_von">Preis von</label>
+              <input id="preis_von" type="text" inputmode="decimal" name="preis_von" placeholder="<%= (bounds.lo/100).toFixed(0) %> €" value="<%= query.preis_von || '' %>">
+              <span>–</span>
+              <label class="visually-hidden" for="preis_bis">Preis bis</label>
+              <input id="preis_bis" type="text" inputmode="decimal" name="preis_bis" placeholder="<%= (bounds.hi/100).toFixed(0) %> €" value="<%= query.preis_bis || '' %>">
+            </div>
+            <button class="btn btn--ghost btn--sm" type="submit" style="margin-top:10px">Preis übernehmen</button>
+          </div>
+
+          <div class="filters__group">
+            <h3>Verfügbarkeit</h3>
+            <label><input type="checkbox" name="lager" value="1" <%= query.lager === '1' ? 'checked' : '' %>> Nur lieferbare Artikel</label>
+            <% if (!onlySale) { %>
+              <label><input type="checkbox" name="angebot" value="1" <%= query.angebot === '1' ? 'checked' : '' %>> Nur reduzierte Artikel</label>
+            <% } %>
+          </div>
+
+          <% Object.keys(availableFacets).forEach(function (key) { %>
+            <div class="filters__group">
+              <h3><%= key %></h3>
+              <% availableFacets[key].forEach(function (entry) { %>
+                <label>
+                  <input type="checkbox" name="f_<%= key %>" value="<%= entry.value %>"
+                         <%= (facets[key] || []).indexOf(entry.value) >= 0 ? 'checked' : '' %>>
+                  <%= entry.value %><span class="count"><%= entry.count %></span>
+                </label>
+              <% }); %>
+            </div>
+          <% }); %>
+
+          <noscript><button class="btn btn--primary btn--sm btn--block" type="submit" style="margin-top:12px">Filter anwenden</button></noscript>
+          <a class="btn btn--ghost btn--sm btn--block" href="<%= baseUrl %><%= searchTerm ? '?q=' + encodeURIComponent(searchTerm) : '' %>" style="margin-top:10px">Filter zurücksetzen</a>
+        </form>
+
+        <div>
+          <div class="toolbar">
+            <span><%= total %> Artikel<%= pages > 1 ? ' · Seite ' + page + ' von ' + pages : '' %></span>
+            <form method="get" action="<%= baseUrl %>" data-autosubmit>
+              <% Object.keys(query).forEach(function (k) {
+                   if (k === 'sortierung' || k === 'seite') return;
+                   var v = query[k];
+                   (Array.isArray(v) ? v : [v]).forEach(function (item) { %>
+                     <input type="hidden" name="<%= k %>" value="<%= item %>">
+              <%   }); }); %>
+              <label for="sortierung" style="margin-right:8px">Sortierung</label>
+              <select id="sortierung" name="sortierung">
+                <option value="empfehlung" <%= sort === 'empfehlung' ? 'selected' : '' %>>Empfehlung</option>
+                <option value="preis_auf" <%= sort === 'preis_auf' ? 'selected' : '' %>>Preis aufsteigend</option>
+                <option value="preis_ab" <%= sort === 'preis_ab' ? 'selected' : '' %>>Preis absteigend</option>
+                <option value="name" <%= sort === 'name' ? 'selected' : '' %>>Name A–Z</option>
+                <option value="neu" <%= sort === 'neu' ? 'selected' : '' %>>Neuheiten</option>
+              </select>
+              <noscript><button class="btn btn--ghost btn--sm" type="submit">Anwenden</button></noscript>
+            </form>
+          </div>
+
+          <% if (!products.length) { %>
+            <div class="empty">
+              <h2>Nichts gefunden</h2>
+              <p>Für diese Auswahl haben wir keine Artikel. Versuch es mit weniger Filtern oder einem anderen Suchbegriff.</p>
+              <a class="btn btn--primary" href="/produkte" style="margin-top:12px">Alle Produkte ansehen</a>
+            </div>
+          <% } else { %>
+            <div class="grid-products">
+              <% products.forEach(function (p) { %>
+                <article class="pcard">
+                  <a class="pcard__media" href="/produkt/<%= p.slug %>">
+                    <img src="<%= p.image %>" alt="<%= p.image_alt || p.name %>" width="400" height="300" loading="lazy">
+                    <span class="pcard__flags">
+                      <% if (p.on_sale) { %><span class="flag">Angebot</span><% } %>
+                      <% if (!p.in_stock) { %><span class="flag flag--out">Ausverkauft</span><% } %>
+                    </span>
+                  </a>
+                  <div class="pcard__body">
+                    <% if (p.category_name) { %><span class="pcard__cat"><%= p.category_name %></span><% } %>
+                    <h2 class="pcard__title"><a href="/produkt/<%= p.slug %>"><%= p.name %></a></h2>
+                    <p class="pcard__sub"><%= p.subtitle %></p>
+                    <div class="pcard__foot">
+                      <span class="price">
+                        <% if (p.on_sale) { %><s><%= fmt(p.compare_cents) %></s><% } %><%= fmt(p.price_from) %>
+                        <% if (p.has_range) { %><small>ab, je nach Variante</small><% } %>
+                      </span>
+                      <form action="/warenkorb/hinzufuegen" method="post" data-cart-form>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                        <input type="hidden" name="variant_id" value="<%= p.default_variant_id %>">
+                        <input type="hidden" name="qty" value="1">
+                        <input type="hidden" name="redirect" value="<%= currentPath %>">
+                        <button class="btn-cart" type="submit" <%= p.in_stock ? '' : 'disabled' %>
+                                aria-label="<%= p.name %> in den Warenkorb legen">
+                          <svg aria-hidden="true"><use href="#i-cart"/></svg>
+                        </button>
+                      </form>
+                    </div>
+                    <span class="stockdot <%= p.in_stock ? (p.stock_total < 10 ? 'stockdot--low' : '') : 'stockdot--out' %>">
+                      <%= p.in_stock ? (p.stock_total < 10 ? 'Nur noch ' + p.stock_total + ' verfügbar' : 'Auf Lager') : 'Derzeit nicht verfügbar' %>
+                    </span>
+                  </div>
+                </article>
+              <% }); %>
+            </div>
+
+            <% if (pages > 1) { %>
+              <nav class="pager" aria-label="Seiten">
+                <% if (page > 1) { %><a href="<%= buildUrl({ seite: page - 1 }) %>" rel="prev">Zurück</a><% } %>
+                <% for (var i = 1; i <= pages; i++) { %>
+                  <% if (i === page) { %><span class="is-current" aria-current="page"><%= i %></span>
+                  <% } else { %><a href="<%= buildUrl({ seite: i }) %>"><%= i %></a><% } %>
+                <% } %>
+                <% if (page < pages) { %><a href="<%= buildUrl({ seite: page + 1 }) %>" rel="next">Weiter</a><% } %>
+              </nav>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

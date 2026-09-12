@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Räucherbrett aus Zedernholz für Fisch">
+  <defs>
+    <linearGradient id="p11bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f4ed"/><stop offset="1" stop-color="#e6e0d2"/></linearGradient>
+    <linearGradient id="p11w" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c08a55"/><stop offset=".3" stop-color="#e0ab72"/><stop offset=".62" stop-color="#b67f4a"/><stop offset="1" stop-color="#8e5e33"/>
+    </linearGradient>
+    <linearGradient id="p11f" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2a173"/><stop offset=".5" stop-color="#e27f4d"/><stop offset="1" stop-color="#c2653a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#p11bg)"/>
+  <ellipse cx="200" cy="240" rx="150" ry="20" fill="#bcb4a4" opacity=".38"/>
+  <rect x="44" y="96" width="312" height="112" rx="10" fill="url(#p11w)"/>
+  <g stroke="#9a6a3c" stroke-width="2" opacity=".5" fill="none">
+    <path d="M52 122c80 8 220 8 296 0M52 152c80 8 220 8 296 0M52 182c80 8 220 8 296 0"/>
+  </g>
+  <rect x="44" y="96" width="312" height="10" rx="5" fill="#f0c48c" opacity=".5"/>
+  <path d="M96 152c34-30 120-38 176-16 22 9 22 23 0 32-56 22-142 14-176-16z" fill="url(#p11f)"/>
+  <g stroke="#f7c6a6" stroke-width="2.4" opacity=".65" fill="none">
+    <path d="M118 142c40-16 110-20 150-6M118 162c40 16 110 20 150 6M124 152h146"/>
+  </g>
+  <g fill="#8b9a6b" opacity=".85">
+    <ellipse cx="286" cy="134" rx="12" ry="5" transform="rotate(-18 286 134)"/>
+    <ellipse cx="300" cy="146" rx="11" ry="4.5" transform="rotate(8 300 146)"/>
+  </g>
+</svg>

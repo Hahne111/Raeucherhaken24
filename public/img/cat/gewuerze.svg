@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170" width="300" height="170" role="img" aria-label="Schalen mit Räuchergewürzen, Pfeffer, Salz und Kräutern">
+  <defs>
+    <linearGradient id="gw-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b2116"/><stop offset=".5" stop-color="#1a130b"/><stop offset="1" stop-color="#0c0804"/>
+    </linearGradient>
+    <radialGradient id="gw-light" cx=".45" cy=".18" r=".78">
+      <stop offset="0" stop-color="#ffd79a" stop-opacity=".34"/><stop offset="1" stop-color="#ffd79a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gw-bowl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6b5334"/><stop offset=".45" stop-color="#42321d"/><stop offset="1" stop-color="#20180d"/>
+    </linearGradient>
+    <radialGradient id="gw-red" cx=".4" cy=".3" r=".7">
+      <stop offset="0" stop-color="#e0603a"/><stop offset=".6" stop-color="#a8371c"/><stop offset="1" stop-color="#6d2110"/>
+    </radialGradient>
+    <radialGradient id="gw-dark" cx=".4" cy=".3" r=".7">
+      <stop offset="0" stop-color="#5c5148"/><stop offset=".6" stop-color="#2e2823"/><stop offset="1" stop-color="#191512"/>
+    </radialGradient>
+    <radialGradient id="gw-salt" cx=".4" cy=".3" r=".7">
+      <stop offset="0" stop-color="#fdfaf3"/><stop offset=".6" stop-color="#e2dbcb"/><stop offset="1" stop-color="#bdb5a3"/>
+    </radialGradient>
+    <radialGradient id="gw-yellow" cx=".4" cy=".3" r=".7">
+      <stop offset="0" stop-color="#f0c162"/><stop offset=".6" stop-color="#c8912d"/><stop offset="1" stop-color="#8c6117"/>
+    </radialGradient>
+    <linearGradient id="gw-shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#04090e" stop-opacity="0"/><stop offset="1" stop-color="#04090e" stop-opacity=".85"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="170" fill="url(#gw-bg)"/>
+  <g opacity=".35" stroke="#3f2f1c" stroke-width="1">
+    <path d="M0 34h300M0 76h300M0 118h300"/>
+  </g>
+  <rect width="300" height="170" fill="url(#gw-light)"/>
+  <!-- Schale links (dunkler Pfeffer) -->
+  <g>
+    <ellipse cx="62" cy="104" rx="46" ry="16" fill="#0b0805" opacity=".6"/>
+    <path d="M18 86a44 20 0 0 0 88 0z" fill="url(#gw-bowl)"/>
+    <ellipse cx="62" cy="86" rx="44" ry="19" fill="#2a1f12"/>
+    <ellipse cx="62" cy="85" rx="37" ry="15" fill="url(#gw-dark)"/>
+    <g fill="#191512"><circle cx="48" cy="82" r="2.6"/><circle cx="60" cy="88" r="2.8"/><circle cx="72" cy="80" r="2.4"/><circle cx="66" cy="92" r="2.2"/><circle cx="54" cy="92" r="2.4"/></g>
+    <g fill="#7a6c60" opacity=".7"><circle cx="50" cy="80" r="1"/><circle cx="70" cy="86" r="1"/></g>
+  </g>
+  <!-- Schale Mitte (Salz) -->
+  <g>
+    <ellipse cx="152" cy="112" rx="44" ry="15" fill="#0b0805" opacity=".6"/>
+    <path d="M110 96a42 19 0 0 0 84 0z" fill="url(#gw-bowl)"/>
+    <ellipse cx="152" cy="96" rx="42" ry="18" fill="#2a1f12"/>
+    <ellipse cx="152" cy="95" rx="35" ry="14" fill="url(#gw-salt)"/>
+    <g fill="#ffffff" opacity=".85"><circle cx="140" cy="92" r="1.8"/><circle cx="156" cy="98" r="2"/><circle cx="164" cy="90" r="1.6"/><circle cx="148" cy="99" r="1.5"/></g>
+  </g>
+  <!-- Schale rechts (Paprika) -->
+  <g>
+    <ellipse cx="240" cy="100" rx="42" ry="15" fill="#0b0805" opacity=".6"/>
+    <path d="M200 84a40 18 0 0 0 80 0z" fill="url(#gw-bowl)"/>
+    <ellipse cx="240" cy="84" rx="40" ry="17" fill="#2a1f12"/>
+    <ellipse cx="240" cy="83" rx="33" ry="13" fill="url(#gw-red)"/>
+  </g>
+  <!-- kleine Schale hinten -->
+  <g opacity=".95">
+    <ellipse cx="196" cy="58" rx="30" ry="12" fill="#241a0f"/>
+    <ellipse cx="196" cy="57" rx="24" ry="9" fill="url(#gw-yellow)"/>
+  </g>
+  <g opacity=".9">
+    <ellipse cx="92" cy="54" rx="28" ry="11" fill="#241a0f"/>
+    <ellipse cx="92" cy="53" rx="22" ry="8" fill="#7f8f4e"/>
+    <g fill="#9fae63"><ellipse cx="86" cy="51" rx="4" ry="2"/><ellipse cx="97" cy="55" rx="4.5" ry="2"/></g>
+  </g>
+  <!-- verstreute Körner -->
+  <g fill="#3a3129">
+    <circle cx="120" cy="128" r="2.4"/><circle cx="132" cy="134" r="2"/><circle cx="108" cy="136" r="2.2"/>
+    <circle cx="196" cy="126" r="2.3"/><circle cx="210" cy="133" r="2"/><circle cx="184" cy="134" r="1.8"/>
+  </g>
+  <g fill="#c9563a" opacity=".85">
+    <circle cx="272" cy="120" r="2"/><circle cx="284" cy="128" r="1.7"/><circle cx="262" cy="130" r="1.6"/>
+  </g>
+  <!-- Kräuterzweig -->
+  <g stroke="#7f8f4e" stroke-width="1.6" fill="none" opacity=".85">
+    <path d="M22 132c14-8 30-8 44-2"/>
+    <g fill="#8fa059" stroke="none">
+      <ellipse cx="30" cy="129" rx="5" ry="2.4" transform="rotate(-18 30 129)"/>
+      <ellipse cx="44" cy="127" rx="5" ry="2.4" transform="rotate(-8 44 127)"/>
+      <ellipse cx="58" cy="129" rx="5" ry="2.4" transform="rotate(6 58 129)"/>
+    </g>
+  </g>
+  <rect y="72" width="300" height="98" fill="url(#gw-shade)"/>
+</svg>

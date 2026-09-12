@@ -1,0 +1,94 @@
+<div class="topbar">
+  <div class="topbar__inner">
+    <% const usps = [
+      { icon: 'i-anchor',  text: settings.get('home.topbar_1', 'Für echten Rauchgenuss') },
+      { icon: 'i-smoke',   text: settings.get('home.topbar_2', 'Räuchern verbindet') },
+      { icon: 'i-leaf',    text: settings.get('home.topbar_3', 'Beste Zutaten') },
+      { icon: 'i-tools',   text: settings.get('home.topbar_4', 'Zubehör mit Charakter') },
+      { icon: 'i-headset', text: settings.get('home.topbar_5', 'Persönlicher Kundenservice') }
+    ]; %>
+    <% usps.forEach(function (u) { %>
+      <span class="topbar__item"><svg aria-hidden="true"><use href="#<%= u.icon %>"/></svg><%= u.text %></span>
+    <% }); %>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="header__inner">
+    <a class="logo" href="/" aria-label="<%= site.name %> – zur Startseite">
+      <span class="logo__word">Räucherhaken<em>24</em></span>
+      <span class="logo__sub"><%= site.claim %></span>
+    </a>
+
+    <nav class="mainnav" aria-label="Hauptnavigation">
+      <ul>
+        <% navCategories.forEach(function (cat) { %>
+          <li class="mainnav__item">
+            <a class="mainnav__link" href="/kategorie/<%= cat.slug %>" <%= currentPath === '/kategorie/' + cat.slug ? 'aria-current="page"' : '' %>>
+              <%= cat.name %><svg aria-hidden="true"><use href="#i-chevron"/></svg>
+            </a>
+            <ul class="mainnav__flyout">
+              <li><a class="is-lead" href="/kategorie/<%= cat.slug %>">Alle <%= cat.name %></a></li>
+              <% (typeof navProducts !== 'undefined' ? (navProducts[cat.id] || []) : []).forEach(function (p) { %>
+                <li><a href="/produkt/<%= p.slug %>"><%= p.name %></a></li>
+              <% }); %>
+              <li><a href="/produkte?kategorie=<%= cat.slug %>&amp;sortierung=neu">Neuheiten ansehen</a></li>
+            </ul>
+          </li>
+        <% }); %>
+        <li class="mainnav__item">
+          <a class="mainnav__link" href="/angebote" <%= currentPath === '/angebote' ? 'aria-current="page"' : '' %>>Angebote</a>
+        </li>
+      </ul>
+    </nav>
+
+    <span class="header__spacer"></span>
+
+    <form class="searchform" action="/suche" method="get" role="search">
+      <label class="visually-hidden" for="q">Suchbegriff</label>
+      <input id="q" type="search" name="q" placeholder="Wonach suchst du?" value="<%= query.q || '' %>" autocomplete="off">
+      <button type="submit" aria-label="Suchen"><svg aria-hidden="true"><use href="#i-search"/></svg></button>
+    </form>
+
+    <a class="header__action" href="<%= customer ? '/konto' : '/konto/anmelden' %>">
+      <svg aria-hidden="true"><use href="#i-user"/></svg>
+      <span><%= customer ? 'Mein Konto' : 'Mein Konto' %></span>
+    </a>
+
+    <a class="header__action header__action--cart" href="/warenkorb">
+      <svg aria-hidden="true"><use href="#i-cart"/></svg>
+      <span class="cart-badge" data-cart-count><%= cartCount %></span>
+      <span>Warenkorb</span>
+    </a>
+
+    <button class="navtoggle" type="button" aria-expanded="false" aria-controls="mobilenav" aria-label="Menü öffnen">
+      <svg aria-hidden="true"><use href="#i-menu"/></svg>
+    </button>
+  </div>
+
+  <nav class="mobilenav" id="mobilenav" hidden aria-label="Mobile Navigation">
+    <form class="searchform searchform--mobile" action="/suche" method="get" role="search">
+      <label class="visually-hidden" for="q-mobile">Suchbegriff</label>
+      <input id="q-mobile" type="search" name="q" placeholder="Wonach suchst du?" value="<%= query.q || '' %>">
+      <button type="submit" aria-label="Suchen"><svg aria-hidden="true"><use href="#i-search"/></svg></button>
+    </form>
+    <% navCategories.forEach(function (cat) { %>
+      <a href="/kategorie/<%= cat.slug %>"><%= cat.name %></a>
+    <% }); %>
+    <a href="/angebote">Angebote</a>
+    <a class="is-sub" href="/produkte">Alle Produkte</a>
+    <a class="is-sub" href="<%= customer ? '/konto' : '/konto/anmelden' %>">Mein Konto</a>
+    <a class="is-sub" href="/warenkorb">Warenkorb (<%= cartCount %>)</a>
+  </nav>
+</header>
+
+<% if (flashes && flashes.length) { %>
+  <div class="alerts">
+    <% flashes.forEach(function (f) { %>
+      <div class="alert alert--<%= f.type %>" role="status">
+        <svg aria-hidden="true" style="width:18px;height:18px;flex:none"><use href="#<%= f.type === 'error' ? 'i-close' : 'i-check' %>"/></svg>
+        <span><%= f.message %></span>
+      </div>
+    <% }); %>
+  </div>
+<% } %>

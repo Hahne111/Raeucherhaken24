@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Räucherchips aus Buche in loser Schüttung">
+  <defs>
+    <linearGradient id="p3bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f4ed"/><stop offset="1" stop-color="#e7e1d3"/></linearGradient>
+    <linearGradient id="p3a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8bb7c"/><stop offset="1" stop-color="#a8763c"/></linearGradient>
+    <linearGradient id="p3b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d2a163"/><stop offset="1" stop-color="#8c5e2b"/></linearGradient>
+    <linearGradient id="p3c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4d5a4"/><stop offset="1" stop-color="#c08e4f"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#p3bg)"/>
+  <ellipse cx="200" cy="238" rx="158" ry="40" fill="#c9b795" opacity=".45"/>
+  <g fill="url(#p3b)">
+    <path d="M60 214l46-16 26 20-42 18z"/><path d="M140 226l44-16 24 20-40 18z"/><path d="M228 216l46-16 26 20-42 18z"/>
+    <path d="M96 190l40-14 22 18-36 16z"/><path d="M266 192l40-14 22 18-36 16z"/>
+  </g>
+  <g fill="url(#p3a)">
+    <path d="M108 168l44-18 26 20-40 18z"/><path d="M186 160l46-16 26 20-42 18z"/>
+    <path d="M64 184l38-14 20 16-34 16z"/><path d="M254 172l42-16 24 18-38 18z"/>
+    <path d="M150 196l40-14 22 18-36 16z"/>
+  </g>
+  <g fill="url(#p3c)">
+    <path d="M134 140l40-16 24 18-36 18z"/><path d="M198 132l38-14 22 18-34 16z"/>
+    <path d="M96 150l32-12 18 14-28 14z"/><path d="M242 144l34-12 20 16-30 14z"/>
+    <path d="M168 176l34-12 20 16-30 14z"/>
+  </g>
+  <g fill="url(#p3a)" opacity=".9">
+    <path d="M158 112l34-14 20 16-30 16z"/><path d="M206 106l28-10 16 14-24 12z"/>
+  </g>
+</svg>

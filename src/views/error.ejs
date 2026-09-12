@@ -1,0 +1,16 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main id="inhalt" class="page">
+  <div class="wrap wrap--narrow">
+    <div class="section" style="text-align:center">
+      <p class="pagehead__eyebrow"><%= status %></p>
+      <h1 style="font-size:38px;color:var(--navy-800);margin-bottom:12px"><%= title %></h1>
+      <p style="color:var(--ink-soft);max-width:540px;margin:0 auto 26px"><%= message %></p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a class="btn btn--primary" href="/">Zur Startseite</a>
+        <a class="btn btn--ghost" href="/produkte">Alle Produkte</a>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('partials/footer') %>

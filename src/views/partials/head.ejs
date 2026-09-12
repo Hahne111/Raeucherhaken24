@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title ? title + ' – ' + site.name : site.name + ' – ' + site.claim %></title>
+<% if (metaDescription) { %><meta name="description" content="<%= metaDescription %>"><% } %>
+<meta name="theme-color" content="#0a1c2b">
+<link rel="preload" href="/fonts/playfair-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/site.css">
+<link rel="icon" href="/img/ui/favicon.svg" type="image/svg+xml">
+</head>
+<body class="<%= bodyClass %>">
+<a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+<%- include('icons') %>

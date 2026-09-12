@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Räucherschnur aus Naturhanf auf einer Rolle">
+  <defs>
+    <linearGradient id="p10bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f4ed"/><stop offset="1" stop-color="#e7e2d6"/></linearGradient>
+    <linearGradient id="p10r" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e4cb9d"/><stop offset=".5" stop-color="#bb9a63"/><stop offset="1" stop-color="#83683c"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#p10bg)"/>
+  <ellipse cx="200" cy="242" rx="122" ry="22" fill="#bcb4a4" opacity=".4"/>
+  <g fill="none" stroke="url(#p10r)" stroke-width="15" stroke-linecap="round">
+    <ellipse cx="200" cy="160" rx="104" ry="56"/><ellipse cx="200" cy="172" rx="88" ry="46"/>
+    <ellipse cx="200" cy="182" rx="70" ry="36"/><ellipse cx="202" cy="148" rx="52" ry="28"/>
+    <ellipse cx="198" cy="134" rx="34" ry="18"/>
+  </g>
+  <g fill="none" stroke="#f2e2bd" stroke-width="2.4" opacity=".5">
+    <ellipse cx="200" cy="154" rx="104" ry="56"/><ellipse cx="200" cy="178" rx="70" ry="36"/>
+  </g>
+  <path d="M296 168c30 12 46 30 50 56" stroke="url(#p10r)" stroke-width="13" fill="none" stroke-linecap="round"/>
+  <path d="M104 172c-30 12-46 30-50 56" stroke="url(#p10r)" stroke-width="13" fill="none" stroke-linecap="round"/>
+</svg>
