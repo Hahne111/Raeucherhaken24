@@ -15,6 +15,7 @@
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lager" class="<%= currentPath === '/lager' || currentPath.indexOf('/lager/') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Lager</a><% } %>
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/lagerorte" class="<%= currentPath.indexOf('/lagerorte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Lagerorte</a><% } %>
       <% if (adminCan('lager.lesen')) { %><a href="/verwaltung/inventur" class="<%= currentPath.indexOf('/inventur') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Inventur</a><% } %>
+      <% if (adminCan('etiketten')) { %><a href="/verwaltung/etiketten" class="<%= currentPath.indexOf('/etiketten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Etikettenstudio</a><% } %>
       <% if (adminCan('finanzen')) { %><span class="ad-nav__sep">Finanzen</span>
       <a href="/verwaltung/finanzen" class="<%= currentPath === '/finanzen' ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Cockpit</a>
       <a href="/verwaltung/finanzen/eingangsbelege" class="<%= currentPath.indexOf('/finanzen/eingangsbelege') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Eingangsbelege</a>

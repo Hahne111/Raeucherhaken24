@@ -32,9 +32,12 @@ const GRANTS = {
   ],
   produktion: [
     'produktion', 'produktion.bearbeiten', 'prototypen', 'prototypen.bearbeiten',
-    'bestellungen.lesen', 'lager.lesen', 'termine', 'nachrichten'
+    'bestellungen.lesen', 'lager.lesen', 'etiketten', 'termine', 'nachrichten'
   ],
-  lager: ['lager.lesen', 'lager.buchen', 'bestellungen.lesen', 'versand', 'belege', 'belege.ausstellen', 'einkauf', 'termine', 'nachrichten'],
+  lager: [
+    'lager.lesen', 'lager.buchen', 'bestellungen.lesen', 'versand', 'belege', 'belege.ausstellen',
+    'einkauf', 'etiketten', 'termine', 'nachrichten'
+  ],
   kasse: ['kasse', 'kassenbuch', 'bestellungen.lesen', 'nachrichten']
 };
 

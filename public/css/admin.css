@@ -219,3 +219,20 @@ body.is-print { background: #fff; padding: 20px; }
 .pos-bon hr { border: none; border-top: 1px dashed #bbb; margin: 8px 0; }
 .pos-bon__row { display: flex; justify-content: space-between; gap: 12px; }
 .pos-bon__training { text-align: center; font-weight: bold; color: var(--a-warn); }
+
+/* Etikettenstudio: Vorschau im Millimeterraster. */
+.label-sheet {
+  display: grid;
+  grid-template-columns: repeat(var(--label-cols, 3), var(--label-w, 70mm));
+  gap: var(--label-gap, 2mm);
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.label-sheet .label {
+  width: var(--label-w, 70mm); height: var(--label-h, 37mm);
+  box-sizing: border-box; padding: 2mm; overflow: hidden; background: #fff;
+  border: 1px dashed var(--a-line); border-radius: 2px;
+  display: flex; flex-direction: column; justify-content: space-between; line-height: 1.25;
+}
+.label-sheet .label__line--first { font-weight: 700; }
+.label-sheet .label__code svg { display: block; margin-top: 1mm; max-width: 100%; }

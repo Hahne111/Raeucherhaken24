@@ -1,0 +1,42 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/etiketten/lauf/' + run.id + '/druck">Drucken</a> <a class="btn btn--ghost btn--sm" href="/verwaltung/etiketten">Zum Studio</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Lauf #<%= run.id %></h2></div>
+    <div class="card__body">
+      <table class="tbl tbl--plain">
+        <tr><th>Vorlage</th><td><%= run.template_name %></td></tr>
+        <tr><th>Quelle</th><td><%= sources[run.source] || run.source %></td></tr>
+        <tr><th>Etiketten</th><td><strong><%= run.count %></strong></td></tr>
+        <tr><th>Angelegt</th><td><%= run.created_at %> durch <%= run.created_by %></td></tr>
+        <% if (run.reprint_of) { %><tr><th>Nachdruck von</th><td><a href="/verwaltung/etiketten/lauf/<%= run.reprint_of %>">#<%= run.reprint_of %></a></td></tr><% } %>
+        <% if (run.note) { %><tr><th>Notiz</th><td><%= run.note %></td></tr><% } %>
+      </table>
+      <form method="post" action="/verwaltung/etiketten/lauf/<%= run.id %>/nachdruck" style="margin-top:14px">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn btn--ghost btn--sm" type="submit">Nachdruck anlegen</button>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Vorschau</h2></div>
+    <div class="card__body">
+      <% if (!template) { %>
+        <p style="color:var(--a-soft)">Zu diesem Lauf fehlt die Vorlage.</p>
+      <% } else { %>
+      <div class="label-sheet" style="--label-w: <%= template.width_mm %>mm; --label-h: <%= template.height_mm %>mm; --label-gap: <%= template.gap_mm %>mm; --label-cols: <%= template.columns %>">
+        <% labels.slice(0, template.columns * template.rows).forEach(function (l) { %>
+          <div class="label" style="font-size: <%= (2.6 * template.font_scale).toFixed(2) %>mm">
+            <% l.lines.forEach(function (line, i) { %>
+              <div class="label__line <%= i === 0 ? 'label__line--first' : '' %>"><%= line.value %></div>
+            <% }); %>
+            <% if (l.svg) { %><div class="label__code"><%- l.svg %></div><% } %>
+          </div>
+        <% }); %>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

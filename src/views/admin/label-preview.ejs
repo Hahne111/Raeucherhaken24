@@ -1,0 +1,52 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/etiketten?vorlage=' + template.id + '&quelle=' + template.source + '">Zurück zur Auswahl</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="kpis">
+  <div class="kpi"><span>Vorlage</span><strong><%= template.name %></strong><small><%= template.width_mm %> × <%= template.height_mm %> mm</small></div>
+  <div class="kpi"><span>Datensätze</span><strong><%= records.length %></strong></div>
+  <div class="kpi"><span>Etiketten</span><strong><%= labels.length %></strong></div>
+  <div class="kpi"><span>Bögen</span><strong><%= Math.ceil(labels.length / (template.columns * template.rows)) %></strong></div>
+</div>
+<% var warnings = labels.filter(function (l) { return l.warning; }); %>
+<% if (warnings.length) { %>
+<div class="ad-alert ad-alert--warn">
+  <%= warnings[0].warning %> Betroffen sind <%= warnings.length %> Etiketten.
+</div>
+<% } %>
+
+<div class="card">
+  <div class="card__head"><h2>Vorschau</h2></div>
+  <div class="card__body">
+    <div class="label-sheet" style="--label-w: <%= template.width_mm %>mm; --label-h: <%= template.height_mm %>mm; --label-gap: <%= template.gap_mm %>mm; --label-cols: <%= template.columns %>">
+      <% labels.slice(0, template.columns * template.rows).forEach(function (l) { %>
+        <div class="label" style="font-size: <%= (2.6 * template.font_scale).toFixed(2) %>mm">
+          <% l.lines.forEach(function (line, i) { %>
+            <div class="label__line <%= i === 0 ? 'label__line--first' : '' %>"><%= line.value %></div>
+          <% }); %>
+          <% if (l.svg) { %><div class="label__code"><%- l.svg %></div><% } %>
+        </div>
+      <% }); %>
+    </div>
+    <% if (labels.length > template.columns * template.rows) { %>
+      <p style="color:var(--a-soft)"><small>Gezeigt ist der erste Bogen; gedruckt werden alle <%= labels.length %> Etiketten.</small></p>
+    <% } %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Lauf speichern</h2></div>
+  <div class="card__body">
+    <form method="post" action="/verwaltung/etiketten/lauf">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="template_id" value="<%= template.id %>">
+      <% items.forEach(function (i) { %>
+        <input type="hidden" name="id" value="<%= i.id %>">
+        <input type="hidden" name="menge_<%= i.id %>" value="<%= i.qty %>">
+      <% }); %>
+      <label>Notiz <input type="text" name="note" maxlength="300" placeholder="z. B. Nachschub Regal 3"></label>
+      <button class="btn btn--dark" type="submit">Lauf speichern und drucken</button>
+    </form>
+    <p style="color:var(--a-soft)"><small>Der Lauf hält fest, was gedruckt wurde. Ein Nachdruck ist daraus jederzeit möglich.</small></p>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

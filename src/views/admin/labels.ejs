@@ -1,0 +1,116 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/etiketten/vorlage/neu">Vorlage anlegen</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="ad-alert ad-alert--info">
+  Der Druck läuft über die Druckfunktion des Browsers auf ein millimetergenaues Raster für A4.
+  Ein Etikettendrucker mit eigenem Treiber oder Druckerprofil ist <strong>nicht</strong> angebunden;
+  für Rollendrucker ist das entsprechende Papierformat im Druckdialog zu wählen.
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Vorlagen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!templates.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Noch keine Vorlage. Lege zuerst eine an.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Vorlage</th><th>Quelle</th><th class="num">Größe</th><th class="num">Bogen</th><th>Barcode</th><th>Status</th><th style="width:160px"></th></tr></thead>
+      <tbody>
+        <% templates.forEach(function (t) { %>
+        <tr>
+          <td><a href="/verwaltung/etiketten/vorlage/<%= t.id %>"><%= t.name %></a></td>
+          <td><%= sources[t.source] || t.source %></td>
+          <td class="num"><%= t.width_mm %> × <%= t.height_mm %> mm</td>
+          <td class="num"><%= t.columns %> × <%= t.rows %></td>
+          <td><%= barcodes[t.barcode] || t.barcode %></td>
+          <td><span class="pill <%= t.active ? 'pill--ok' : '' %>"><%= t.active ? 'aktiv' : 'stillgelegt' %></span></td>
+          <td>
+            <form method="post" action="/verwaltung/etiketten/vorlage/<%= t.id %>/status">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <input type="hidden" name="active" value="<%= t.active ? '0' : '1' %>">
+              <button class="btn btn--ghost btn--sm" type="submit"><%= t.active ? 'Stilllegen' : 'Aktivieren' %></button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+
+<form method="get" class="filterbar">
+  <label>Vorlage
+    <select name="vorlage">
+      <% templates.filter(function (t) { return t.active; }).forEach(function (t) { %>
+        <option value="<%= t.id %>" <%= templateId === t.id ? 'selected' : '' %>><%= t.name %> (<%= sources[t.source] %>)</option>
+      <% }); %>
+    </select>
+  </label>
+  <label>Quelle
+    <select name="quelle">
+      <% Object.keys(sources).forEach(function (k) { %><option value="<%= k %>" <%= source === k ? 'selected' : '' %>><%= sources[k] %></option><% }); %>
+    </select>
+  </label>
+  <input type="search" name="q" value="<%= q %>" placeholder="Suchen">
+  <button class="btn btn--dark btn--sm" type="submit">Anzeigen</button>
+</form>
+
+<div class="card">
+  <div class="card__head"><h2>Etiketten auswählen</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!templateId) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Bitte zuerst eine aktive Vorlage wählen.</p>
+    <% } else if (!candidates.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Datensätze in dieser Auswahl.</p>
+    <% } else { %>
+    <form method="post" action="/verwaltung/etiketten/vorschau">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="template_id" value="<%= templateId %>">
+      <table class="tbl">
+        <thead><tr><th style="width:34px"></th><th>Datensatz</th><th>Code</th><th class="num">Bestand</th><th style="width:120px">Menge</th></tr></thead>
+        <tbody>
+          <% candidates.forEach(function (c) { %>
+          <tr>
+            <td><input type="checkbox" name="id" value="<%= c.id %>" aria-label="<%= c.label %> wählen"></td>
+            <td><%= c.label %></td>
+            <td><small><%= c.code || '–' %></small></td>
+            <td class="num"><%= source === 'variante' ? c.stock : '–' %></td>
+            <td><input type="number" name="menge_<%= c.id %>" value="1" min="1" max="200" style="width:80px" aria-label="Menge"></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <div style="padding:14px 20px;display:flex;gap:8px">
+        <button class="btn btn--dark btn--sm" type="submit">Vorschau</button>
+        <button class="btn btn--ghost btn--sm" type="submit" formaction="/verwaltung/etiketten/lauf">Direkt als Lauf speichern</button>
+      </div>
+    </form>
+    <% } %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card__head"><h2>Serienläufe</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!runs.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Noch kein Lauf gespeichert.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Lauf</th><th>Vorlage</th><th class="num">Etiketten</th><th>Angelegt</th><th>Art</th></tr></thead>
+      <tbody>
+        <% runs.forEach(function (r) { %>
+        <tr>
+          <td><a href="/verwaltung/etiketten/lauf/<%= r.id %>">#<%= r.id %></a></td>
+          <td><%= r.template_name %></td>
+          <td class="num"><%= r.count %></td>
+          <td><small><%= r.created_at %><br><%= r.created_by %></small></td>
+          <td><%= r.reprint_of ? 'Nachdruck von #' + r.reprint_of : 'Erstdruck' %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

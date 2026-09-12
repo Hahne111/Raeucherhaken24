@@ -1364,3 +1364,43 @@ CREATE TABLE IF NOT EXISTS payment_methods (
   sort          INTEGER NOT NULL DEFAULT 0,
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+/* ===================== Etikettenstudio ===================== */
+
+/*
+ * Etikettenvorlage: Groesse in Millimetern, Aufteilung auf dem Bogen und die
+ * Felder, die gedruckt werden. Der Druck laeuft ueber die Druckfunktion des
+ * Browsers; ein Etikettendrucker mit eigenem Treiber ist nicht angebunden.
+ */
+CREATE TABLE IF NOT EXISTS label_templates (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT NOT NULL,
+  source      TEXT NOT NULL DEFAULT 'variante',
+  width_mm    REAL NOT NULL DEFAULT 70,
+  height_mm   REAL NOT NULL DEFAULT 37,
+  columns     INTEGER NOT NULL DEFAULT 3,
+  rows        INTEGER NOT NULL DEFAULT 8,
+  margin_mm   REAL NOT NULL DEFAULT 8,
+  gap_mm      REAL NOT NULL DEFAULT 2,
+  fields      TEXT NOT NULL DEFAULT '[]',
+  barcode     TEXT NOT NULL DEFAULT 'code128',
+  font_scale  REAL NOT NULL DEFAULT 1,
+  note        TEXT NOT NULL DEFAULT '',
+  active      INTEGER NOT NULL DEFAULT 1,
+  created_by  TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/* Ein Serienlauf haelt fest, was mit welcher Vorlage gedruckt wurde. */
+CREATE TABLE IF NOT EXISTS label_runs (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  template_id INTEGER NOT NULL REFERENCES label_templates(id) ON DELETE CASCADE,
+  source      TEXT NOT NULL DEFAULT 'variante',
+  items       TEXT NOT NULL DEFAULT '[]',
+  count       INTEGER NOT NULL DEFAULT 0,
+  reprint_of  INTEGER REFERENCES label_runs(id) ON DELETE SET NULL,
+  note        TEXT NOT NULL DEFAULT '',
+  created_by  TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_label_runs ON label_runs(template_id, id);

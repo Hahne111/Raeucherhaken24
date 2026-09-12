@@ -23,7 +23,8 @@
     "test:vertrieb": "node scripts/sales-test.js",
     "test:inhalte": "node scripts/content-test.js",
     "test:gutscheine": "node scripts/coupon-test.js",
-    "test:alle": "node scripts/smoke-test.js && node scripts/role-test.js && node scripts/crm-test.js && node scripts/calendar-test.js && node scripts/document-test.js && node scripts/purchasing-test.js && node scripts/production-test.js && node scripts/pos-test.js && node scripts/finance-test.js && node scripts/sales-test.js && node scripts/content-test.js && node scripts/coupon-test.js"
+    "test:etiketten": "node scripts/label-test.js",
+    "test:alle": "node scripts/smoke-test.js && node scripts/role-test.js && node scripts/crm-test.js && node scripts/calendar-test.js && node scripts/document-test.js && node scripts/purchasing-test.js && node scripts/production-test.js && node scripts/pos-test.js && node scripts/finance-test.js && node scripts/sales-test.js && node scripts/content-test.js && node scripts/coupon-test.js && node scripts/label-test.js"
   },
   "dependencies": {
     "ejs": "^3.1.10",

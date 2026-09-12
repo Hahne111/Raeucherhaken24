@@ -1,0 +1,60 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/etiketten">Zum Studio</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="post" action="/verwaltung/etiketten/vorlage">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <input type="hidden" name="id" value="<%= row.id %>">
+  <div class="cols">
+    <div class="card">
+      <div class="card__head"><h2>Maße</h2></div>
+      <div class="card__body">
+        <label>Name <input type="text" name="name" value="<%= row.name %>" required maxlength="120"></label>
+        <label>Datenquelle
+          <select name="source">
+            <% Object.keys(sources).forEach(function (k) { %><option value="<%= k %>" <%= row.source === k ? 'selected' : '' %>><%= sources[k] %></option><% }); %>
+          </select>
+        </label>
+        <div style="display:flex;gap:10px">
+          <label style="flex:1">Breite in mm <input type="text" name="width_mm" value="<%= row.width_mm %>" required></label>
+          <label style="flex:1">Höhe in mm <input type="text" name="height_mm" value="<%= row.height_mm %>" required></label>
+        </div>
+        <div style="display:flex;gap:10px">
+          <label style="flex:1">Spalten <input type="number" name="columns" value="<%= row.columns %>" min="1" max="12"></label>
+          <label style="flex:1">Zeilen <input type="number" name="rows" value="<%= row.rows %>" min="1" max="20"></label>
+        </div>
+        <div style="display:flex;gap:10px">
+          <label style="flex:1">Seitenrand in mm <input type="text" name="margin_mm" value="<%= row.margin_mm %>"></label>
+          <label style="flex:1">Abstand in mm <input type="text" name="gap_mm" value="<%= row.gap_mm %>"></label>
+        </div>
+        <p style="color:var(--a-soft)"><small>Die Aufteilung muss auf eine A4-Seite passen (210 × 297 mm), sonst wird sie abgewiesen.</small></p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Inhalt</h2></div>
+      <div class="card__body">
+        <fieldset style="border:1px solid var(--a-line);border-radius:8px;padding:12px">
+          <legend>Felder je Quelle</legend>
+          <% Object.keys(fields).forEach(function (src) { %>
+            <p style="margin:8px 0 4px"><strong><%= sources[src] %></strong></p>
+            <% Object.keys(fields[src]).forEach(function (f) { %>
+              <label style="display:flex;gap:8px;align-items:center;font-weight:400">
+                <input type="checkbox" name="field" value="<%= f %>" <%= row.field_list.indexOf(f) >= 0 ? 'checked' : '' %>>
+                <%= fields[src][f] %>
+              </label>
+            <% }); %>
+          <% }); %>
+          <p style="color:var(--a-soft)"><small>Es werden nur Felder übernommen, die zur gewählten Quelle gehören.</small></p>
+        </fieldset>
+        <label>Barcode
+          <select name="barcode">
+            <% Object.keys(barcodes).forEach(function (k) { %><option value="<%= k %>" <%= row.barcode === k ? 'selected' : '' %>><%= barcodes[k] %></option><% }); %>
+          </select>
+        </label>
+        <label>Schriftgröße (0,6 bis 2,0) <input type="text" name="font_scale" value="<%= row.font_scale %>"></label>
+        <label>Notiz <input type="text" name="note" value="<%= row.note %>" maxlength="300"></label>
+        <button class="btn btn--dark" type="submit">Speichern</button>
+      </div>
+    </div>
+  </div>
+</form>
+<%- include('../partials/admin-foot') %>

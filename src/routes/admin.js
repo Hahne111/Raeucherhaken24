@@ -169,6 +169,7 @@ for (const [prefix, permission] of [
   ['/rezepte', 'rezepte'],
   ['/gutscheine', 'gutscheine'],
   ['/zahlungsarten', 'zahlungsarten'],
+  ['/etiketten', 'etiketten'],
   ['/versandarten', 'versandarten'],
   ['/einstellungen', 'einstellungen'],
   ['/protokoll', 'protokoll']
@@ -186,6 +187,7 @@ router.use('/', require('./admin-finance'));
 router.use('/', require('./admin-sales'));
 router.use('/', require('./admin-content'));
 router.use('/', require('./admin-coupons'));
+router.use('/', require('./admin-labels'));
 
 /* ------------------------------ Lager --------------------------------- */
 router.get('/lager', (req, res) => {
