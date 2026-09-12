@@ -77,15 +77,15 @@ settings.invalidate();
 /* Kategorien                                                           */
 /* ------------------------------------------------------------------ */
 const categories = [
-  { slug: 'raeucherhaken', name: 'Räucherhaken', tagline: 'Robust. Langlebig. Zuverlässig.', image: '/img/cat/raeucherhaken.svg',
+  { slug: 'raeucherhaken', name: 'Räucherhaken', tagline: 'Robust. Langlebig. Zuverlässig.', image: '/img/cat/raeucherhaken.webp',
     description: 'Haken aus Edelstahl für Fisch, Fleisch und Wurst – in S-Form, als Doppelhaken oder als komplette Hakenleiste.' },
-  { slug: 'raeucheroefen', name: 'Räucheröfen', tagline: 'Für echte Genießer.', image: '/img/cat/raeucheroefen.svg',
+  { slug: 'raeucheroefen', name: 'Räucheröfen', tagline: 'Für echte Genießer.', image: '/img/cat/raeucheroefen.webp',
     description: 'Vom Tischräucherofen bis zum Standmodell mit Thermometer – für Kalt- und Heißräuchern.' },
-  { slug: 'raeucherholz', name: 'Räucherholz', tagline: 'Aromen, die begeistern.', image: '/img/cat/raeucherholz.svg',
+  { slug: 'raeucherholz', name: 'Räucherholz', tagline: 'Aromen, die begeistern.', image: '/img/cat/raeucherholz.webp',
     description: 'Chips, Mehl und Bretter aus Buche, Erle, Eiche und Zeder – sortenrein und trocken gelagert.' },
-  { slug: 'gewuerze', name: 'Gewürze', tagline: 'Feine Mischungen. Großer Geschmack.', image: '/img/cat/gewuerze.svg',
+  { slug: 'gewuerze', name: 'Gewürze', tagline: 'Feine Mischungen. Großer Geschmack.', image: '/img/cat/gewuerze.webp',
     description: 'Räuchergewürze, Lakenmischungen und Salze, abgestimmt auf Fisch, Fleisch und Gemüse.' },
-  { slug: 'zubehoer', name: 'Zubehör', tagline: 'Praktisch bis ins Detail.', image: '/img/cat/zubehoer.svg',
+  { slug: 'zubehoer', name: 'Zubehör', tagline: 'Praktisch bis ins Detail.', image: '/img/cat/zubehoer.webp',
     description: 'Thermometer, Räucherschnur, Bürsten und alles, was das Räuchern leichter macht.' }
 ];
 const catIds = {};

@@ -24,7 +24,7 @@
         <% homeCategories.forEach(function (cat, i) { %>
           <a class="tile reveal reveal--d<%= Math.min(3, i) %>" href="/kategorie/<%= cat.slug %>">
             <span class="tile__media">
-              <img src="<%= cat.image || '/img/cat/' + cat.slug + '.svg' %>" alt="" width="300" height="170" loading="<%= i > 2 ? 'lazy' : 'eager' %>">
+              <img src="<%= cat.image || '/img/cat/' + cat.slug + '.webp' %>" alt="" width="598" height="334" loading="<%= i > 2 ? 'lazy' : 'eager' %>" decoding="async">
             </span>
             <span class="tile__body">
               <span class="tile__title"><%= cat.name %></span>
@@ -43,7 +43,7 @@
           </div>
           <a class="favorites__link reveal reveal--d1" href="/produkte">
             <%= settings.get('home.fav_link_label', 'Alle Produkte ansehen') %>
-            <svg aria-hidden="true" style="width:15px;height:15px"><use href="#i-arrow"/></svg>
+            <svg aria-hidden="true" style="width:13px;height:13px"><use href="#i-arrow"/></svg>
           </a>
         </div>
 
@@ -51,7 +51,7 @@
           <% featured.forEach(function (p, i) { %>
             <div class="minicard reveal reveal--d<%= Math.min(3, i) %>">
               <a class="minicard__media" href="/produkt/<%= p.slug %>" aria-label="<%= p.name %>">
-                <img src="<%= p.image || '/img/ui/placeholder.svg' %>" alt="<%= p.image_alt || p.name %>" width="400" height="300" loading="lazy">
+                <img src="<%= p.thumb || p.image %>" alt="<%= p.image_alt || p.name %>" width="248" height="248" loading="lazy" decoding="async">
               </a>
               <div class="minicard__body">
                 <a class="minicard__title" href="/produkt/<%= p.slug %>"><%= p.name %></a>
@@ -112,7 +112,7 @@
         <a class="btn btn--ghost" href="/seite/ueber-uns">Mehr über uns <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
       </div>
       <div class="story__art">
-        <img src="/img/cat/raeucherholz.svg" alt="Räucherholz in einer Holzkiste" width="300" height="170" loading="lazy" style="width:100%;height:auto">
+        <img src="/img/cat/raeucherholz.webp" alt="Räucherholz in einer Holzkiste" width="598" height="334" loading="lazy" style="width:100%;height:auto">
       </div>
     </div>
   </section>

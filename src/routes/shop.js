@@ -1,4 +1,6 @@
 'use strict';
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const db = require('../db');
 const catalog = require('../lib/catalog');
@@ -8,6 +10,14 @@ const util = require('../lib/util');
 const router = express.Router();
 const PER_PAGE = 12;
 
+const THUMB_DIR = path.join(__dirname, '..', '..', 'public', 'img', 'products', 'thumb');
+
+/** Kleines Startseitenbild, sofern für das Produkt eines hinterlegt ist. */
+function thumbFor(slug) {
+  const file = path.join(THUMB_DIR, slug + '.webp');
+  return fs.existsSync(file) ? '/img/products/thumb/' + slug + '.webp' : null;
+}
+
 /** Erste kaufbare Variante eines Produkts (für Schnellkauf-Buttons). */
 function withDefaultVariant(products) {
   return products.map((p) => {
@@ -15,6 +25,7 @@ function withDefaultVariant(products) {
     const preferred = variants.find((v) => v.stock > 0) || variants[0];
     p.default_variant_id = preferred ? preferred.id : 0;
     p.variants = variants;
+    p.thumb = thumbFor(p.slug);
     return p;
   });
 }

@@ -87,8 +87,9 @@ src/
 public/
   css/                 site.css (Shop), admin.css (Verwaltung)
   js/                  boot.js, site.js, hero.js, product.js, cart.js, admin.js
-  img/cat, img/products, img/ui   Bildmotive als einzelne SVG-Dateien
-  fonts/               Playfair Display und Inter, lokal eingebunden
+  img/hero             Bühnenfoto (WebP, mehrere Breiten, eigener Kopfausschnitt)
+  img/cat, img/products, img/ui   Kachel- und Produktmotive als einzelne Bilddateien
+  fonts/               Prata, Playfair Display und Inter, lokal eingebunden
   uploads/             Bilder aus der Verwaltung (nicht in Git)
 data/shop.db           Datenbank (nicht in Git)
 scripts/               seed, create-admin, smoke-test
@@ -118,29 +119,40 @@ Ein Storno in der Verwaltung bucht den Bestand zurück.
 
 ## Startseite und Bewegung
 
-Die Nordsee-Szene steckt als SVG-Ebenenstapel in `src/views/partials/scene.ejs`.
-Bewegt werden ausschließlich `transform` und `opacity`:
+Die Bühne besteht aus zwei deckungsgleichen Schichten in
+`src/views/partials/scene.ejs`:
 
-* Leuchtturm: ein Rotor dreht zwei gegenüberliegende Lichtkegel um die Laterne,
-  die Sichtbarkeit wird über die Deckkraft moduliert – der Kegel wirkt beim
-  Überstreichen von Hafen und Wasser hell und verliert sich beim Wegdrehen.
-* Rauch: sechs Bewegungsmuster in unterschiedlichen Geschwindigkeiten mit
-  organisch geformten Schwaden, die aufsteigen, sich verwirbeln, vom Wind
-  getrieben zur Seite ziehen und weich auslaufen.
-* Wasser: mehrere exakt 480 px periodische Wellenbänder mit unterschiedlichem Tempo,
-  dazu Schaumkronen, Gischtstöße, Nebelbänder und schaukelnde Boote.
-* Tiefe: `hero.js` verschiebt die Ebenen beim Scrollen unterschiedlich stark.
+1. **Foto** (`public/img/hero/szene-*.webp`) – der Bildinhalt der Designvorlage,
+   in mehreren Breiten als WebP. Alle in der Vorlage eingebrannten Texte sind
+   entfernt; die Flächen hinter Kachel- und Kartenreihe wurden aus echten
+   Wasser- und Holzausschnitten neu aufgebaut. Sämtliche Beschriftungen,
+   Schaltflächen und Produktdaten sind eigene HTML-Elemente.
+2. **Bewegungsebene** – ein schlankes SVG über dem Foto. Bewegt werden
+   ausschließlich `transform` und `opacity`:
+   * Leuchtturm: ein Rotor dreht den Lichtkegel um die Laterne des Fotos; drei
+     gestaffelte Keile und ein Halo erzeugen Tiefe in Nebel und Gischt.
+   * Rauch: acht Schwaden in unterschiedlichen Geschwindigkeiten steigen über
+     den hängenden Fischen auf, verwirbeln, ziehen mit dem Wind und laufen
+     weich aus.
+   * Wasser und Luft: Gischtstöße vor der Hafenmauer, ziehende Möwen.
+   * Tiefe: `hero.js` verschiebt Foto und Bewegungsebene beim Scrollen
+     unterschiedlich stark.
 
-Die Szene ist in sechs gestapelte Ebenen zerlegt (`.scene-layer`). Statische
-Ebenen – Himmel, Räucherkate mit Fischen, Kapitän, Vordergrund – zeichnet der
-Browser einmal und setzt sie danach nur noch zusammen; neu gezeichnet werden
-ausschließlich die bewegten Ebenen. Aus demselben Grund kommt die Szene ohne
-SVG-Filter und ohne `mix-blend-mode` aus: beides zwingt zum Neuzeichnen der
-gesamten Fläche. Weiche Kanten entstehen über Verläufe.
+Foto und SVG nutzen dieselbe Zuschnittregel (`object-fit: cover` bzw.
+`preserveAspectRatio="xMidYMid slice"`) und bleiben dadurch in jeder Größe
+deckungsgleich. SVG-Filter und `mix-blend-mode` kommen nicht vor, weil beides
+zum Neuzeichnen der gesamten Fläche zwingt; weiche Kanten entstehen über
+Verläufe.
 
-Unterhalb von 860 px Breite wird die Szene auf den Kopfbereich begrenzt und die
-Bewegung vereinfacht. Bei `prefers-reduced-motion: reduce` steht alles still,
-Lichtkegel und Rauch bleiben als stimmiges Standbild sichtbar.
+Unterhalb von 1120 px Breite zeigt das Foto einen eigenen Kopfausschnitt
+(`szene-kopf-*.webp`), der bei Leuchtturm und Räucherkate liegt – so bleiben
+Lichtkegel und Rauch auch auf dem Telefon sichtbar. Bei
+`prefers-reduced-motion: reduce` steht alles still, Lichtkegel und Rauch
+bleiben als stimmiges Standbild sichtbar.
+
+Die Designvorlage selbst liegt unter `design/referenz.png`, also außerhalb von
+`public/` – sie wird nie ausgeliefert und ist nur Quelle für die einzelnen
+Bildmotive.
 
 ## Sicherheit
 
