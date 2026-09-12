@@ -1,0 +1,84 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/kasse">Zur Kasse</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="ad-alert ad-alert--info">
+  <strong>Fiskalischer Livebetrieb:</strong> Diese Anwendung bringt <strong>keine</strong> technische Sicherheitseinrichtung (TSE) mit.
+  Bevor live kassiert werden darf, muss eine TSE beschafft, angebunden und abgenommen werden; erst danach darf hier
+  „geprüft“ stehen. Bis dahin läuft jede Kasse im Trainingsbetrieb – ohne Bestands- und Kassenbuchung.
+</div>
+<% rows.forEach(function (t) { %>
+  <div class="card">
+    <div class="card__head">
+      <h2><%= t.name %> <span class="pill <%= t.mode === 'live' ? 'pill--ok' : 'pill--warn' %>"><%= modes[t.mode] %></span></h2>
+      <span style="font-size:13px;color:var(--a-soft)"><%= t.code %></span>
+    </div>
+    <div class="card__body">
+      <div class="cols">
+        <div>
+          <form method="post" action="/verwaltung/kassen/<%= t.id %>">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <label class="field"><span>Name</span><input type="text" name="name" value="<%= t.name %>" maxlength="120"></label>
+            <div class="field-row">
+              <label class="field"><span>Bondrucker</span><input type="text" name="printer" value="<%= t.printer %>" placeholder="z. B. Epson TM-T20III (USB)"></label>
+              <label class="field"><span>Barcodescanner</span><input type="text" name="scanner" value="<%= t.scanner %>" placeholder="z. B. Tastatur-Scanner"></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span>TSE-Anbieter</span><input type="text" name="tse_provider" value="<%= t.tse_provider %>"></label>
+              <label class="field"><span>TSE-Seriennummer</span><input type="text" name="tse_serial" value="<%= t.tse_serial %>"></label>
+            </div>
+            <label class="check"><input type="checkbox" name="active" value="1" <%= t.active ? 'checked' : '' %>><span>Kasse aktiv</span></label>
+            <label class="field"><span>Notiz</span><input type="text" name="note" value="<%= t.note %>" maxlength="500"></label>
+            <button class="btn btn--dark" type="submit">Speichern</button>
+          </form>
+        </div>
+        <div>
+          <h3 style="font-size:14px;margin:0 0 8px">Stand der Voraussetzungen</h3>
+          <% if (!t.blockers.length) { %>
+            <p style="margin:0 0 14px;color:var(--a-ok)">Alle Voraussetzungen erfüllt.</p>
+          <% } else { %>
+            <ul style="margin:0 0 14px;padding-left:18px;font-size:13.5px">
+              <% t.blockers.forEach(function (b) { %><li><%= b %></li><% }); %>
+            </ul>
+          <% } %>
+          <p style="margin:0 0 12px;font-size:13px">
+            TSE-Status: <strong><%= t.tse_state === 'geprueft' ? 'geprüft' : 'keine geprüfte Anbindung' %></strong><br>
+            Freigabe: <%= t.live_released_at ? t.live_released_by + ' am ' + formatDay(t.live_released_at) : 'nicht erteilt' %>
+          </p>
+          <form method="post" action="/verwaltung/kassen/<%= t.id %>/freigabe" style="margin-bottom:14px">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <label class="check"><input type="checkbox" name="bestaetigt" value="1"><span>Geräte, Konfiguration und fachliche Anforderungen sind geprüft</span></label>
+            <button class="btn btn--ghost btn--sm" type="submit">Freigabe vermerken</button>
+          </form>
+          <form method="post" action="/verwaltung/kassen/<%= t.id %>/modus" style="display:flex;gap:10px;align-items:flex-end">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <label class="field" style="margin:0"><span>Betriebsmodus</span>
+              <select name="mode">
+                <% Object.keys(modes).forEach(function (k) { %><option value="<%= k %>" <%= t.mode === k ? 'selected' : '' %>><%= modes[k] %></option><% }); %>
+              </select>
+            </label>
+            <button class="btn btn--primary btn--sm" type="submit">Umstellen</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<% }); %>
+<div class="card" style="max-width:560px">
+  <div class="card__head"><h2>Neue Kasse</h2></div>
+  <div class="card__body">
+    <form method="post" action="/verwaltung/kassen">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <div class="field-row">
+        <label class="field"><span>Kürzel *</span><input type="text" name="code" required maxlength="20" placeholder="z. B. K1"></label>
+        <label class="field"><span>Name *</span><input type="text" name="name" required maxlength="120"></label>
+      </div>
+      <div class="field-row">
+        <label class="field"><span>Bondrucker</span><input type="text" name="printer" maxlength="120"></label>
+        <label class="field"><span>Barcodescanner</span><input type="text" name="scanner" maxlength="120"></label>
+      </div>
+      <button class="btn btn--primary" type="submit">Kasse anlegen</button>
+      <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Eine neue Kasse startet immer im Trainingsbetrieb.</p>
+    </form>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

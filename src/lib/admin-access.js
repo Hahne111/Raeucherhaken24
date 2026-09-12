@@ -18,7 +18,7 @@ const GRANTS = {
     'termine', 'termine.alle', 'beratung', 'belege', 'versand', 'produktion', 'prototypen', 'nachrichten'
   ],
   redaktion: ['produkte', 'kategorien', 'medien', 'nachrichten'],
-  finanzen: ['uebersicht', 'produkt.analyse', 'bestellungen.lesen', 'belege', 'belege.ausstellen', 'nachrichten'],
+  finanzen: ['uebersicht', 'produkt.analyse', 'bestellungen.lesen', 'belege', 'belege.ausstellen', 'kassenbuch', 'kassenbuch.buchen', 'nachrichten'],
   vertrieb: [
     'kunden.lesen', 'kunden.bearbeiten', 'kunden.anlegen',
     'haendler', 'gebiete.lesen', 'gebietsbuch',
@@ -29,7 +29,7 @@ const GRANTS = {
     'bestellungen.lesen', 'lager.lesen', 'termine', 'nachrichten'
   ],
   lager: ['lager.lesen', 'lager.buchen', 'bestellungen.lesen', 'versand', 'belege', 'belege.ausstellen', 'einkauf', 'termine', 'nachrichten'],
-  kasse: ['nachrichten']
+  kasse: ['kasse', 'kassenbuch', 'bestellungen.lesen', 'nachrichten']
 };
 
 function can(user, permission) {
@@ -47,6 +47,8 @@ function limitedToOwnRecords(user) {
 
 function startPath(user) {
   if (can(user, 'uebersicht')) return '/verwaltung/uebersicht';
+  if (user && user.role === 'kasse') return '/verwaltung/kasse';
+  if (user && user.role === 'produktion') return '/verwaltung/produktion';
   if (can(user, 'produkte')) return '/verwaltung/produkte';
   if (can(user, 'bestellungen.lesen')) return '/verwaltung/bestellungen';
   if (can(user, 'haendler')) return '/verwaltung/haendler';

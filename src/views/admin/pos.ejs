@@ -1,0 +1,150 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/kasse/schichten">Schichten</a>'
+  + (adminCan('kasse.einrichten') ? ' <a class="btn btn--ghost btn--sm" href="/verwaltung/kassen">Kassen einrichten</a>' : ''); %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+
+<% if (!terminals.length) { %>
+  <div class="ad-alert ad-alert--warn">Es ist noch keine Kasse angelegt.<% if (adminCan('kasse.einrichten')) { %> <a class="link" href="/verwaltung/kassen">Jetzt einrichten</a>.<% } %></div>
+<% } else if (!shift) { %>
+  <div class="card" style="max-width:520px">
+    <div class="card__head"><h2>Schicht öffnen</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/kasse/schicht">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="field"><span>Kasse</span>
+          <select name="terminal_id" required>
+            <% terminals.forEach(function (t) { %>
+              <option value="<%= t.id %>" <%= terminal && terminal.id === t.id ? 'selected' : '' %>><%= t.name %> · <%= modes[t.mode] %></option>
+            <% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Wechselgeld zu Beginn</span><input type="text" name="opening" placeholder="z. B. 150,00"></label>
+        <label class="field"><span>Notiz</span><input type="text" name="note" maxlength="500"></label>
+        <button class="btn btn--primary btn--block" type="submit">Schicht öffnen</button>
+      </form>
+    </div>
+  </div>
+<% } else { %>
+
+<div class="ad-alert <%= shift.mode === 'live' ? 'ad-alert--success' : 'ad-alert--warn' %>">
+  <strong><%= modes[shift.mode] %></strong> an <strong><%= shift.terminal_name %></strong>, geöffnet <%= formatDate(shift.opened_at) %>.
+  <% if (shift.mode === 'training') { %>
+    Ein Trainingsbon bucht <strong>keinen Bestand</strong> und geht <strong>nicht ins Kassenbuch</strong>. Die Bonnummer beginnt mit „T“.
+  <% } %>
+</div>
+<% if (blockers.length) { %>
+  <div class="ad-alert ad-alert--info">
+    <strong>Für den fiskalischen Livebetrieb fehlt noch:</strong>
+    <ul style="margin:6px 0 0;padding-left:18px"><% blockers.forEach(function (b) { %><li><%= b %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<form method="post" action="/verwaltung/kasse/bon">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <input type="hidden" name="shift_id" value="<%= shift.id %>">
+  <div class="cols">
+    <div>
+      <div class="card">
+        <div class="card__head">
+          <h2>Artikel</h2>
+          <span style="font-size:13px;color:var(--a-soft)">Menge eintragen, dann kassieren</span>
+        </div>
+        <div class="card__body card__body--flush">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--a-line)">
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <input class="inp" type="search" id="pos-suche" value="<%= q %>" placeholder="Artikel, Artikelnummer oder Barcode" style="flex:1;min-width:220px">
+              <a class="btn btn--ghost" id="pos-suche-los" href="/verwaltung/kasse?kasse=<%= shift.terminal_id %>">Suchen</a>
+            </div>
+            <p style="margin:8px 0 0;font-size:12.5px;color:var(--a-soft)">
+              Ein Barcodescanner tippt die Artikelnummer in dieses Feld und bestätigt mit Enter – dafür ist keine zusätzliche Anbindung nötig.
+            </p>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Artikel</th><th>Art.-Nr.</th><th class="num">Bestand</th><th class="num">Preis</th><th class="num">Menge</th><th class="num">Rabatt</th></tr></thead>
+            <tbody>
+              <% articles.forEach(function (a) { %>
+                <tr>
+                  <td><%= a.product_name %><br><span style="font-size:12px;color:var(--a-soft)"><%= a.variant_name %></span></td>
+                  <td><%= a.sku %></td>
+                  <td class="num"><%= a.stock %></td>
+                  <td class="num"><%= fmt(a.price_cents) %></td>
+                  <td class="num"><input type="number" name="menge_<%= a.id %>" min="0" max="999" value="0" style="width:80px"></td>
+                  <td class="num"><input type="text" name="rabatt_<%= a.id %>" placeholder="0,00" style="width:90px"></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card__head"><h2>Letzte Bons dieser Schicht</h2>
+          <a class="btn btn--ghost btn--sm" href="/verwaltung/kasse/export.csv?modus=<%= shift.mode %>">CSV-Export</a>
+        </div>
+        <div class="card__body card__body--flush">
+          <% if (!recent.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch kein Bon.</p><% } else { %>
+          <table class="tbl">
+            <thead><tr><th>Nummer</th><th>Art</th><th>Zahlart</th><th class="num">Betrag</th><th>Zeit</th><th></th></tr></thead>
+            <tbody>
+              <% recent.forEach(function (r) { %>
+                <tr><td><%= r.number %></td><td><%= r.kind %></td><td><%= payments[r.payment_method] || r.payment_method %></td>
+                  <td class="num"><%= fmt(r.total_cents) %></td><td><%= formatDate(r.created_at) %></td>
+                  <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/kasse/bon/<%= r.id %>">Bon</a></td></tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card__head"><h2>Kassieren</h2></div>
+        <div class="card__body">
+          <label class="field"><span>Vorgang</span>
+            <select name="kind"><option value="verkauf">Verkauf</option><option value="retoure">Retoure</option></select>
+          </label>
+          <label class="field"><span>Zahlart</span>
+            <select name="payment_method">
+              <% Object.keys(payments).forEach(function (k) { %><option value="<%= k %>"><%= payments[k] %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Rabatt auf den ganzen Bon</span><input type="text" name="discount" placeholder="0,00"></label>
+          <label class="field"><span>Gegeben (bar)</span><input type="text" name="given" placeholder="z. B. 50,00"></label>
+          <label class="field"><span>Notiz auf dem Bon</span><input type="text" name="note" maxlength="500"></label>
+          <button class="btn btn--primary btn--block" type="submit">Bon abschließen</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card__head"><h2>Schicht</h2></div>
+        <div class="card__body">
+          <table class="tbl tbl--plain"><tbody>
+            <tr><th style="text-align:left">Bons</th><td><%= totals.count %></td></tr>
+            <tr><th style="text-align:left">Umsatz</th><td><%= fmt(totals.gross) %></td></tr>
+            <tr><th style="text-align:left">davon bar</th><td><%= fmt(totals.cash) %></td></tr>
+            <tr><th style="text-align:left">Retouren</th><td><%= fmt(totals.refunds) %></td></tr>
+            <tr><th style="text-align:left">Wechselgeld</th><td><%= fmt(shift.opening_cents) %></td></tr>
+            <tr><th style="text-align:left">Soll in der Lade</th><td><strong><%= fmt(shift.opening_cents + totals.cash) %></strong></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="card" style="max-width:520px">
+  <div class="card__head"><h2>Kassensturz und Z-Abschluss</h2></div>
+  <div class="card__body">
+    <form method="post" action="/verwaltung/kasse/schicht/<%= shift.id %>/abschluss">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <label class="field"><span>Gezählter Bargeldbestand</span><input type="text" name="counted" required placeholder="z. B. 312,50"></label>
+      <label class="field"><span>Notiz</span><input type="text" name="note" maxlength="500"></label>
+      <button class="btn btn--dark btn--block" type="submit">Schicht abschließen</button>
+      <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">
+        <% if (shift.mode === 'training') { %>Ein Trainingsabschluss erzeugt einen TZ-Bericht und berührt das Kassenbuch nicht.<% } else { %>Der Abschluss schreibt Umsatz und Differenz ins Kassenbuch.<% } %>
+      </p>
+    </form>
+  </div>
+</div>
+<% } %>
+<%- include('../partials/admin-foot') %>

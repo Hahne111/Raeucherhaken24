@@ -1,0 +1,54 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/kasse">Zur Kasse</a> <a class="btn btn--ghost btn--sm" href="/verwaltung/kasse/export.csv">CSV-Export</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="card">
+  <div class="card__head"><h2>Schichten</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!shifts.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Schicht.</p><% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Kasse</th><th>Modus</th><th>Person</th><th>Geöffnet</th><th>Geschlossen</th><th class="num">Bons</th><th class="num">Erwartet</th><th class="num">Gezählt</th><th class="num">Differenz</th><th>Status</th></tr></thead>
+      <tbody>
+        <% shifts.forEach(function (s) { %>
+          <tr>
+            <td><%= s.terminal_name %></td>
+            <td><span class="pill <%= s.mode === 'live' ? 'pill--ok' : 'pill--warn' %>"><%= modes[s.mode] || s.mode %></span></td>
+            <td><%= s.user_name || '–' %></td>
+            <td><%= formatDate(s.opened_at) %></td>
+            <td><%= s.closed_at ? formatDate(s.closed_at) : '–' %></td>
+            <td class="num"><%= s.receipt_count %></td>
+            <td class="num"><%= s.expected_cents === null ? '–' : fmt(s.expected_cents) %></td>
+            <td class="num"><%= s.counted_cents === null ? '–' : fmt(s.counted_cents) %></td>
+            <td class="num"><%= s.diff_cents === null ? '–' : fmt(s.diff_cents) %></td>
+            <td><span class="pill <%= s.status === 'offen' ? 'pill--info' : '' %>"><%= s.status %></span></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<div class="card">
+  <div class="card__head"><h2>Z-Abschlüsse</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!reports.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch kein Abschluss.</p><% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Nummer</th><th>Kasse</th><th>Modus</th><th>Zeitraum</th><th class="num">Bons</th><th class="num">Brutto</th><th class="num">MwSt.</th><th class="num">Differenz</th><th>Erstellt von</th></tr></thead>
+      <tbody>
+        <% reports.forEach(function (z) { %>
+          <tr>
+            <td><%= z.number %></td><td><%= z.terminal_name %></td>
+            <td><span class="pill <%= z.mode === 'live' ? 'pill--ok' : 'pill--warn' %>"><%= modes[z.mode] || z.mode %></span></td>
+            <td><%= formatDate(z.from_at) %> – <%= formatDate(z.to_at) %></td>
+            <td class="num"><%= z.receipt_count %></td>
+            <td class="num"><%= fmt(z.gross_cents) %></td>
+            <td class="num"><%= fmt(z.tax_cents) %></td>
+            <td class="num"><%= z.diff_cents === null ? '–' : fmt(z.diff_cents) %></td>
+            <td><%= z.created_by %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

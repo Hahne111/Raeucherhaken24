@@ -1,0 +1,61 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/kasse?kasse=' + row.terminal_id + '">Zur Kasse</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card" style="max-width:420px">
+    <div class="card__head"><h2>Bon</h2></div>
+    <div class="card__body">
+      <div class="pos-bon">
+        <strong><%= shop.name %></strong>
+        <div><%= shop.street %><br><%= shop.city %></div>
+        <% if (shop.tax_id) { %><div>St.-Nr. <%= shop.tax_id %></div><% } %>
+        <hr>
+        <% if (row.mode === 'training') { %>
+          <div class="pos-bon__training">*** TRAININGSBON – KEIN BELEG ***<br>ohne Bestands- und Kassenbuchung</div>
+          <hr>
+        <% } %>
+        <div><%= row.number %> · <%= formatDate(row.created_at) %></div>
+        <div><%= row.terminal_name %> · <%= row.created_by %></div>
+        <hr>
+        <% row.items.forEach(function (i) { %>
+          <div class="pos-bon__row"><span><%= i.qty %> × <%= i.name %><%= i.variant_name ? ' ' + i.variant_name : '' %></span><span><%= fmt(i.total_cents) %></span></div>
+          <% if (i.discount_cents) { %><div class="pos-bon__row" style="color:#777"><span>  Rabatt</span><span>− <%= fmt(i.discount_cents) %></span></div><% } %>
+        <% }); %>
+        <hr>
+        <div class="pos-bon__row"><strong>Summe</strong><strong><%= fmt(row.total_cents) %></strong></div>
+        <div class="pos-bon__row"><span>darin MwSt.</span><span><%= fmt(row.tax_cents) %></span></div>
+        <div class="pos-bon__row"><span><%= payments[row.payment_method] || row.payment_method %></span><span><%= row.given_cents ? fmt(row.given_cents) : '' %></span></div>
+        <% if (row.change_cents) { %><div class="pos-bon__row"><span>Rückgeld</span><span><%= fmt(row.change_cents) %></span></div><% } %>
+        <% if (row.note) { %><hr><div><%= row.note %></div><% } %>
+        <hr>
+        <div style="text-align:center">
+          <% if (row.mode === 'live') { %>Vielen Dank für Ihren Einkauf.<% } else { %>Übungsbeleg ohne Gültigkeit.<% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Angaben</h2></div>
+      <div class="card__body">
+        <table class="tbl tbl--plain"><tbody>
+          <tr><th style="text-align:left">Nummer</th><td><%= row.number %></td></tr>
+          <tr><th style="text-align:left">Modus</th><td><%= modes[row.mode] || row.mode %></td></tr>
+          <tr><th style="text-align:left">Art</th><td><%= row.kind %></td></tr>
+          <tr><th style="text-align:left">Kasse</th><td><%= row.terminal_name %></td></tr>
+          <tr><th style="text-align:left">Betrag</th><td><strong><%= fmt(row.total_cents) %></strong></td></tr>
+          <tr><th style="text-align:left">Erfasst von</th><td><%= row.created_by %></td></tr>
+          <% if (row.refund_of_id) { %><tr><th style="text-align:left">Retoure zu</th><td><a class="link" href="/verwaltung/kasse/bon/<%= row.refund_of_id %>">Bon <%= row.refund_of_id %></a></td></tr><% } %>
+        </tbody></table>
+        <% if (row.kind === 'verkauf') { %>
+        <form method="post" action="/verwaltung/kasse/bon/<%= row.id %>/retoure" style="margin-top:14px" data-confirm="Retoure über den kompletten Bon erstellen?">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <button class="btn btn--danger btn--block" type="submit">Retoure über den ganzen Bon</button>
+        </form>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Die Retoure läuft in demselben Modus wie der ursprüngliche Bon.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

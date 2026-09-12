@@ -839,3 +839,114 @@ CREATE TABLE IF NOT EXISTS prototype_files (
   created_by   TEXT NOT NULL DEFAULT '',
   created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+/* ============================ Kasse (POS) ============================== */
+
+CREATE TABLE IF NOT EXISTS pos_terminals (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  code         TEXT NOT NULL UNIQUE,
+  name         TEXT NOT NULL,
+  /* training = Uebungsbetrieb ohne Bestands- und Kassenbuchung.
+     live     = fiskalischer Betrieb; erst nach Freigabe moeglich. */
+  mode         TEXT NOT NULL DEFAULT 'training',
+  printer      TEXT NOT NULL DEFAULT '',
+  scanner      TEXT NOT NULL DEFAULT '',
+  tse_provider TEXT NOT NULL DEFAULT '',
+  tse_serial   TEXT NOT NULL DEFAULT '',
+  /* Nur echte, geprueefte Anbindungen duerfen hier stehen. */
+  tse_state    TEXT NOT NULL DEFAULT 'keine',
+  live_released_by TEXT NOT NULL DEFAULT '',
+  live_released_at TEXT,
+  active       INTEGER NOT NULL DEFAULT 1,
+  note         TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS pos_shifts (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  terminal_id   INTEGER NOT NULL REFERENCES pos_terminals(id) ON DELETE CASCADE,
+  admin_user_id INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  mode          TEXT NOT NULL DEFAULT 'training',
+  status        TEXT NOT NULL DEFAULT 'offen',
+  opening_cents INTEGER NOT NULL DEFAULT 0,
+  counted_cents INTEGER,
+  expected_cents INTEGER,
+  diff_cents    INTEGER,
+  opened_at     TEXT NOT NULL DEFAULT (datetime('now')),
+  closed_at     TEXT,
+  note          TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_pos_shifts ON pos_shifts(terminal_id, status);
+
+CREATE TABLE IF NOT EXISTS pos_receipts (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  number        TEXT NOT NULL UNIQUE,
+  shift_id      INTEGER NOT NULL REFERENCES pos_shifts(id) ON DELETE CASCADE,
+  terminal_id   INTEGER NOT NULL,
+  mode          TEXT NOT NULL DEFAULT 'training',
+  kind          TEXT NOT NULL DEFAULT 'verkauf',
+  customer_id   INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  subtotal_cents INTEGER NOT NULL DEFAULT 0,
+  discount_cents INTEGER NOT NULL DEFAULT 0,
+  tax_cents     INTEGER NOT NULL DEFAULT 0,
+  total_cents   INTEGER NOT NULL DEFAULT 0,
+  payment_method TEXT NOT NULL DEFAULT 'bar',
+  given_cents   INTEGER NOT NULL DEFAULT 0,
+  change_cents  INTEGER NOT NULL DEFAULT 0,
+  refund_of_id  INTEGER REFERENCES pos_receipts(id) ON DELETE SET NULL,
+  note          TEXT NOT NULL DEFAULT '',
+  created_by    TEXT NOT NULL DEFAULT '',
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_pos_receipts_shift ON pos_receipts(shift_id);
+
+CREATE TABLE IF NOT EXISTS pos_receipt_items (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  receipt_id  INTEGER NOT NULL REFERENCES pos_receipts(id) ON DELETE CASCADE,
+  variant_id  INTEGER,
+  name        TEXT NOT NULL,
+  variant_name TEXT NOT NULL DEFAULT '',
+  sku         TEXT NOT NULL DEFAULT '',
+  qty         INTEGER NOT NULL DEFAULT 1,
+  unit_price_cents INTEGER NOT NULL DEFAULT 0,
+  discount_cents INTEGER NOT NULL DEFAULT 0,
+  total_cents INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_pos_receipt_items ON pos_receipt_items(receipt_id);
+
+CREATE TABLE IF NOT EXISTS pos_z_reports (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  number       TEXT NOT NULL UNIQUE,
+  terminal_id  INTEGER NOT NULL,
+  shift_id     INTEGER NOT NULL,
+  mode         TEXT NOT NULL DEFAULT 'training',
+  from_at      TEXT NOT NULL,
+  to_at        TEXT NOT NULL,
+  receipt_count INTEGER NOT NULL DEFAULT 0,
+  gross_cents  INTEGER NOT NULL DEFAULT 0,
+  tax_cents    INTEGER NOT NULL DEFAULT 0,
+  refund_cents INTEGER NOT NULL DEFAULT 0,
+  payments     TEXT NOT NULL DEFAULT '{}',
+  counted_cents INTEGER,
+  diff_cents   INTEGER,
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/* ============================== Kassenbuch ============================= */
+
+CREATE TABLE IF NOT EXISTS cash_book (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  booked_on   TEXT NOT NULL,
+  kind        TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL,
+  balance_cents INTEGER NOT NULL DEFAULT 0,
+  category    TEXT NOT NULL DEFAULT '',
+  note        TEXT NOT NULL DEFAULT '',
+  receipt_no  TEXT NOT NULL DEFAULT '',
+  ref_type    TEXT NOT NULL DEFAULT '',
+  ref_id      TEXT NOT NULL DEFAULT '',
+  actor       TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_cash_book ON cash_book(booked_on, id);

@@ -1,0 +1,66 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/kassenbuch/export.csv?von=' + from + '&bis=' + to + '">CSV-Export</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="kpis">
+  <div class="kpi"><span>Kassenbestand</span><strong><%= fmt(balance) %></strong><small>letzter gebuchter Stand</small></div>
+  <div class="kpi"><span>Buchungen</span><strong><%= rows.length %></strong><small>im gewählten Zeitraum</small></div>
+</div>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/kassenbuch">
+    <label class="visually-hidden" for="von">Von</label>
+    <input id="von" type="date" name="von" value="<%= from %>">
+    <label class="visually-hidden" for="bis">Bis</label>
+    <input id="bis" type="date" name="bis" value="<%= to %>">
+    <button class="btn btn--dark btn--sm" type="submit">Filtern</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/kassenbuch">Zurücksetzen</a>
+  </form>
+</div>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Buchungen</h2></div>
+    <div class="card__body card__body--flush">
+      <% if (!rows.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Keine Buchung im Zeitraum. Kassenumsätze entstehen beim Z-Abschluss einer Live-Schicht.</p><% } else { %>
+      <table class="tbl">
+        <thead><tr><th>Datum</th><th>Art</th><th>Kategorie</th><th>Text</th><th>Beleg</th><th class="num">Betrag</th><th class="num">Bestand</th><th>Person</th></tr></thead>
+        <tbody>
+          <% rows.forEach(function (r) { %>
+            <tr>
+              <td><%= r.booked_on %></td>
+              <td><%= kinds[r.kind] || r.kind %></td>
+              <td><%= r.category || '–' %></td>
+              <td><%= r.note %></td>
+              <td><%= r.receipt_no || '–' %></td>
+              <td class="num" style="color:<%= r.amount_cents < 0 ? 'var(--a-err)' : 'var(--a-ok)' %>"><%= fmt(r.amount_cents) %></td>
+              <td class="num"><%= fmt(r.balance_cents) %></td>
+              <td><%= r.actor %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+  <% if (canWrite) { %>
+  <div class="card">
+    <div class="card__head"><h2>Neue Buchung</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/kassenbuch">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="field"><span>Art</span>
+          <select name="kind">
+            <% Object.keys(kinds).forEach(function (k) { %><option value="<%= k %>"><%= kinds[k] %></option><% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Betrag</span><input type="text" name="amount" required placeholder="z. B. 25,00"></label>
+        <label class="field"><span>Datum</span><input type="date" name="booked_on" value="<%= new Date().toISOString().slice(0,10) %>"></label>
+        <label class="field"><span>Kategorie</span><input type="text" name="category" maxlength="80" placeholder="z. B. Porto"></label>
+        <label class="field"><span>Belegnummer</span><input type="text" name="receipt_no" maxlength="60"></label>
+        <label class="field"><span>Text</span><input type="text" name="note" maxlength="500"></label>
+        <button class="btn btn--primary btn--block" type="submit">Buchen</button>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--a-soft)">Der Bestand darf nicht negativ werden. Buchungen bleiben stehen; Korrekturen erfolgen als Gegenbuchung.</p>
+      </form>
+    </div>
+  </div>
+  <% } %>
+</div>
+<%- include('../partials/admin-foot') %>

@@ -213,3 +213,9 @@ body.is-print { background: #fff; padding: 20px; }
 .kanban__card span { display: block; font-size: 12px; color: var(--a-soft); }
 .kanban__bar { display: block; height: 5px; background: #e8e4da; border-radius: 3px; overflow: hidden; margin: 6px 0 4px; }
 .kanban__bar i { display: block; height: 100%; background: var(--a-ok); }
+
+/* Kassenbon */
+.pos-bon { font-family: 'Liberation Mono', 'Courier New', monospace; font-size: 12.5px; line-height: 1.5; }
+.pos-bon hr { border: none; border-top: 1px dashed #bbb; margin: 8px 0; }
+.pos-bon__row { display: flex; justify-content: space-between; gap: 12px; }
+.pos-bon__training { text-align: center; font-weight: bold; color: var(--a-warn); }
