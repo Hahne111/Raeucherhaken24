@@ -5,9 +5,10 @@ const util = require('../lib/util');
 
 const router = express.Router();
 
+/** Nur seiteneigene Pfade zulassen – kein //host und kein /\host. */
 function safeRedirect(value, fallback) {
   const target = String(value || '');
-  return /^\/(?!\/)/.test(target) ? target : fallback;
+  return /^\/(?![/\\])/.test(target) ? target : fallback;
 }
 
 function wantsJson(req) {

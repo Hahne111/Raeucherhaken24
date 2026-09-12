@@ -31,7 +31,12 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: config.isProd ? '7d' : 0,
   setHeaders(res, filePath) {
-    if (filePath.includes(path.sep + 'uploads' + path.sep)) res.setHeader('Cache-Control', 'public, max-age=300');
+    if (filePath.includes(path.sep + 'uploads' + path.sep)) {
+      res.setHeader('Cache-Control', 'public, max-age=300');
+      // Hochgeladene Dateien (vor allem SVG) beim direkten Aufruf abschotten:
+      // als <img> eingebunden ändert das nichts, direkt aufgerufen läuft nichts.
+      res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox");
+    }
   }
 }));
 app.use(express.urlencoded({ extended: false, limit: '256kb' }));

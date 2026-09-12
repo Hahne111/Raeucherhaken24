@@ -398,7 +398,7 @@ router.post('/produkte/:id/bilder', upload.array('bilder', 6), (req, res, next) 
     added++;
   });
   const fromLibrary = String(req.body.media_url || '').trim();
-  if (fromLibrary && /^\/(uploads|img)\//.test(fromLibrary)) {
+  if (fromLibrary && /^\/(uploads|img)\//.test(fromLibrary) && !fromLibrary.includes('..')) {
     db.run('INSERT INTO product_images (product_id, url, alt, sort) VALUES (?,?,?,?)',
       [id, fromLibrary, String(req.body.alt || '').slice(0, 160), sortStart + added]);
     added++;
@@ -467,7 +467,9 @@ function saveCategory(req, res, id) {
   if (!values.name) errors.name = 'Bitte einen Namen angeben.';
   const clash = db.get('SELECT id FROM categories WHERE slug = ? AND id != ?', [values.slug, id || 0]);
   if (clash) errors.slug = 'Diese URL-Kennung wird bereits verwendet.';
-  if (values.image && !/^\/(uploads|img)\//.test(values.image)) errors.image = 'Bitte einen Pfad unterhalb von /img/ oder /uploads/ angeben.';
+  if (values.image && (!/^\/(uploads|img)\//.test(values.image) || values.image.includes('..'))) {
+    errors.image = 'Bitte einen Pfad unterhalb von /img/ oder /uploads/ angeben.';
+  }
   if (Object.keys(errors).length) {
     return res.status(400).render('admin/category-form', {
       title: id ? 'Kategorie bearbeiten' : 'Neue Kategorie',

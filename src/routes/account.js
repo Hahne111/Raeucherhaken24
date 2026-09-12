@@ -17,9 +17,10 @@ function requireCustomer(req, res, next) {
   next();
 }
 
+/** Nur seiteneigene Pfade zulassen – kein //host und kein /\host. */
 function safeNext(value, fallback = '/konto') {
   const target = String(value || '');
-  return /^\/(?!\/)/.test(target) ? target : fallback;
+  return /^\/(?![/\\])/.test(target) ? target : fallback;
 }
 
 /**
