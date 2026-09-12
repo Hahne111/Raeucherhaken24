@@ -70,6 +70,7 @@
   </div>
 
   <div>
+    <% if (adminCan('bestellungen.bearbeiten')) { %>
     <div class="card">
       <div class="card__head"><h2>Status pflegen</h2></div>
       <div class="card__body">
@@ -96,6 +97,7 @@
         </form>
       </div>
     </div>
+    <% } %>
 
     <div class="card">
       <div class="card__head"><h2>Kunde</h2></div>
@@ -110,6 +112,7 @@
       </div>
     </div>
 
+    <% if (adminCan('bestellungen.bearbeiten')) { %>
     <div class="card">
       <div class="card__head"><h2>Stornieren</h2></div>
       <div class="card__body">
@@ -124,6 +127,7 @@
         </form>
       </div>
     </div>
+    <% } %>
   </div>
 </div>
 <%- include('../partials/admin-foot') %>

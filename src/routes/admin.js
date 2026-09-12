@@ -7,6 +7,7 @@ const multer = require('multer');
 const config = require('../config');
 const db = require('../db');
 const adminAuth = require('../lib/admin-auth');
+const access = require('../lib/admin-access');
 const auth = require('../lib/auth');
 const catalog = require('../lib/catalog');
 const orders = require('../lib/orders');
@@ -45,6 +46,7 @@ router.use((req, res, next) => {
   res.locals.adminNav = true;
   // Innerhalb des Routers ist req.path relativ zum Mount-Punkt – passend fuer die Navigation.
   res.locals.currentPath = req.path;
+  res.locals.adminCan = (permission) => access.can(req.admin, permission);
   next();
 });
 
@@ -61,7 +63,7 @@ function requireAdmin(req, res, next) {
 
 /* ------------------------- Anmeldung / Einrichtung --------------------- */
 router.get('/', (req, res) => {
-  if (req.admin) return res.redirect('/verwaltung/uebersicht');
+  if (req.admin) return res.redirect(access.startPath(req.admin));
   if (adminAuth.count() === 0) return res.redirect('/verwaltung/einrichten');
   res.render('admin/login', { title: 'Verwaltung', error: null, email: '' });
 });
@@ -76,7 +78,7 @@ router.post('/anmelden', (req, res) => {
   req.adminSession.regenerate();
   req.adminSession.data.admin_id = result.user.id;
   req.adminSession.save();
-  res.redirect('/verwaltung/uebersicht');
+  res.redirect(access.startPath(result.user));
 });
 
 router.post('/abmelden', (req, res) => {
@@ -126,6 +128,19 @@ router.post('/einrichten', (req, res) => {
 
 router.use(requireAdmin);
 
+for (const [prefix, permission] of [
+  ['/uebersicht', 'uebersicht'],
+  ['/produkte', 'produkte'],
+  ['/kategorien', 'kategorien'],
+  ['/medien', 'medien'],
+  ['/bestellungen', 'bestellungen.lesen'],
+  ['/kunden', 'kunden.lesen'],
+  ['/gutscheine', 'gutscheine'],
+  ['/versandarten', 'versandarten'],
+  ['/einstellungen', 'einstellungen'],
+  ['/protokoll', 'protokoll']
+]) router.use(prefix, access.requirePermission(permission));
+
 /* ------------------------------ Übersicht ------------------------------ */
 router.get('/uebersicht', (req, res) => {
   const today = db.get("SELECT COUNT(*) AS c, COALESCE(SUM(total_cents),0) AS s FROM orders WHERE date(created_at) = date('now')");
@@ -148,7 +163,7 @@ router.get('/uebersicht', (req, res) => {
        WHERE v.active = 1 AND p.active = 1 AND v.stock <= 10 ORDER BY v.stock LIMIT 8`
     ),
     recentOrders: db.all('SELECT * FROM orders ORDER BY id DESC LIMIT 8'),
-    recentLog: audit.recent(8),
+    recentLog: access.can(req.admin, 'protokoll') ? audit.recent(8) : [],
     revenueSeries: db.all(
       `SELECT date(created_at) AS tag, COALESCE(SUM(total_cents),0) AS summe, COUNT(*) AS anzahl
        FROM orders WHERE created_at >= datetime('now','-13 days') AND status != 'storniert'
@@ -561,7 +576,7 @@ router.get('/bestellungen/:id', (req, res, next) => {
   });
 });
 
-router.post('/bestellungen/:id', (req, res, next) => {
+router.post('/bestellungen/:id', access.requirePermission('bestellungen.bearbeiten'), (req, res, next) => {
   const id = util.toInt(req.params.id, 0);
   const order = orders.byId(id);
   if (!order) return next();
@@ -584,7 +599,7 @@ router.post('/bestellungen/:id', (req, res, next) => {
   res.redirect('/verwaltung/bestellungen/' + id);
 });
 
-router.post('/bestellungen/:id/stornieren', (req, res, next) => {
+router.post('/bestellungen/:id/stornieren', access.requirePermission('bestellungen.bearbeiten'), (req, res, next) => {
   const id = util.toInt(req.params.id, 0);
   if (!orders.byId(id)) return next();
   const result = orders.cancel(id, req.admin.email, req.ip);
@@ -618,7 +633,7 @@ router.get('/kunden/:id', (req, res, next) => {
   });
 });
 
-router.post('/kunden/:id', (req, res, next) => {
+router.post('/kunden/:id', access.requirePermission('kunden.bearbeiten'), (req, res, next) => {
   const id = util.toInt(req.params.id, 0);
   const row = db.get('SELECT * FROM customers WHERE id = ?', [id]);
   if (!row) return next();
@@ -811,15 +826,17 @@ router.get('/protokoll', (req, res) => {
 /* ---------------------------- Adminkonten ------------------------------ */
 router.get('/team', (req, res) => {
   res.render('admin/team', {
-    title: 'Zugänge',
-    rows: db.all('SELECT id, email, name, role, active, created_at, last_login_at FROM admin_users ORDER BY id')
+    title: access.can(req.admin, 'team') ? 'Zugänge' : 'Mein Konto',
+    roles: access.ROLES,
+    rows: access.can(req.admin, 'team')
+      ? db.all('SELECT id, email, name, role, active, created_at, last_login_at FROM admin_users ORDER BY id') : []
   });
 });
 
-router.post('/team', (req, res) => {
+router.post('/team', access.requirePermission('team'), (req, res) => {
   const result = adminAuth.create({
     email: req.body.email, password: String(req.body.password || ''),
-    name: req.body.name, role: req.body.role
+    name: req.body.name, role: req.body.role || ''
   });
   if (!result.ok) req.flash('error', result.message);
   else {
@@ -829,7 +846,7 @@ router.post('/team', (req, res) => {
   res.redirect('/verwaltung/team');
 });
 
-router.post('/team/:id/status', (req, res) => {
+router.post('/team/:id/status', access.requirePermission('team'), (req, res) => {
   const id = util.toInt(req.params.id, 0);
   if (id === req.admin.id) {
     req.flash('error', 'Der eigene Zugang kann nicht deaktiviert werden.');

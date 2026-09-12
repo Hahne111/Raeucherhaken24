@@ -5,20 +5,20 @@
       <span>Verwaltung</span>
     </div>
     <nav class="ad-nav" aria-label="Verwaltungsnavigation">
-      <a href="/verwaltung/uebersicht" class="<%= currentPath === '/uebersicht' ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Übersicht</a>
-      <span class="ad-nav__sep">Katalog</span>
-      <a href="/verwaltung/produkte" class="<%= currentPath.indexOf('/produkte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Produkte</a>
-      <a href="/verwaltung/kategorien" class="<%= currentPath.indexOf('/kategorien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-leaf"/></svg>Kategorien</a>
-      <a href="/verwaltung/medien" class="<%= currentPath.indexOf('/medien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Medien</a>
-      <span class="ad-nav__sep">Verkauf</span>
-      <a href="/verwaltung/bestellungen" class="<%= currentPath.indexOf('/bestellungen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-cart"/></svg>Bestellungen</a>
-      <a href="/verwaltung/kunden" class="<%= currentPath.indexOf('/kunden') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-user"/></svg>Kunden</a>
-      <a href="/verwaltung/gutscheine" class="<%= currentPath.indexOf('/gutscheine') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Gutscheine</a>
-      <a href="/verwaltung/versandarten" class="<%= currentPath.indexOf('/versandarten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-truck"/></svg>Versandarten</a>
-      <span class="ad-nav__sep">Shop</span>
-      <a href="/verwaltung/einstellungen" class="<%= currentPath.indexOf('/einstellungen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Einstellungen</a>
-      <a href="/verwaltung/team" class="<%= currentPath.indexOf('/team') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-lock"/></svg>Zugänge</a>
-      <a href="/verwaltung/protokoll" class="<%= currentPath.indexOf('/protokoll') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Protokoll</a>
+      <% if (adminCan('uebersicht')) { %><a href="/verwaltung/uebersicht" class="<%= currentPath === '/uebersicht' ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Übersicht</a><% } %>
+      <% if (adminCan('produkte') || adminCan('kategorien') || adminCan('medien')) { %><span class="ad-nav__sep">Katalog</span><% } %>
+      <% if (adminCan('produkte')) { %><a href="/verwaltung/produkte" class="<%= currentPath.indexOf('/produkte') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-package"/></svg>Produkte</a><% } %>
+      <% if (adminCan('kategorien')) { %><a href="/verwaltung/kategorien" class="<%= currentPath.indexOf('/kategorien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-leaf"/></svg>Kategorien</a><% } %>
+      <% if (adminCan('medien')) { %><a href="/verwaltung/medien" class="<%= currentPath.indexOf('/medien') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Medien</a><% } %>
+      <% if (adminCan('bestellungen.lesen') || adminCan('kunden.lesen') || adminCan('gutscheine') || adminCan('versandarten')) { %><span class="ad-nav__sep">Verkauf</span><% } %>
+      <% if (adminCan('bestellungen.lesen')) { %><a href="/verwaltung/bestellungen" class="<%= currentPath.indexOf('/bestellungen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-cart"/></svg>Bestellungen</a><% } %>
+      <% if (adminCan('kunden.lesen')) { %><a href="/verwaltung/kunden" class="<%= currentPath.indexOf('/kunden') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-user"/></svg>Kunden</a><% } %>
+      <% if (adminCan('gutscheine')) { %><a href="/verwaltung/gutscheine" class="<%= currentPath.indexOf('/gutscheine') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-star"/></svg>Gutscheine</a><% } %>
+      <% if (adminCan('versandarten')) { %><a href="/verwaltung/versandarten" class="<%= currentPath.indexOf('/versandarten') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-truck"/></svg>Versandarten</a><% } %>
+      <span class="ad-nav__sep">Konto</span>
+      <% if (adminCan('einstellungen')) { %><a href="/verwaltung/einstellungen" class="<%= currentPath.indexOf('/einstellungen') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-tools"/></svg>Einstellungen</a><% } %>
+      <a href="/verwaltung/team" class="<%= currentPath.indexOf('/team') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-lock"/></svg><%= adminCan('team') ? 'Zugänge' : 'Mein Konto' %></a>
+      <% if (adminCan('protokoll')) { %><a href="/verwaltung/protokoll" class="<%= currentPath.indexOf('/protokoll') === 0 ? 'is-active' : '' %>"><svg aria-hidden="true"><use href="#i-shield"/></svg>Protokoll</a><% } %>
     </nav>
     <div class="ad-side__foot">
       Angemeldet als<br><strong style="color:#fff"><%= admin.name || admin.email %></strong><br>

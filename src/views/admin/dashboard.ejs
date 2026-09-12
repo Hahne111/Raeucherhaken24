@@ -30,7 +30,7 @@
     </div>
 
     <div class="card">
-      <div class="card__head"><h2>Neueste Bestellungen</h2><a class="btn btn--ghost btn--sm" href="/verwaltung/bestellungen">Alle Bestellungen</a></div>
+      <div class="card__head"><h2>Neueste Bestellungen</h2><% if (adminCan('bestellungen.lesen')) { %><a class="btn btn--ghost btn--sm" href="/verwaltung/bestellungen">Alle Bestellungen</a><% } %></div>
       <div class="card__body card__body--flush">
         <% if (!recentOrders.length) { %>
           <p style="padding:18px;margin:0;color:var(--a-soft)">Noch keine Bestellungen vorhanden.</p>
@@ -40,7 +40,7 @@
           <tbody>
             <% recentOrders.forEach(function (o) { %>
               <tr>
-                <td><a class="link" href="/verwaltung/bestellungen/<%= o.id %>"><%= o.number %></a><br><small style="color:var(--a-soft)"><%= formatDate(o.created_at) %></small></td>
+                <td><% if (adminCan('bestellungen.lesen')) { %><a class="link" href="/verwaltung/bestellungen/<%= o.id %>"><%= o.number %></a><% } else { %><%= o.number %><% } %><br><small style="color:var(--a-soft)"><%= formatDate(o.created_at) %></small></td>
                 <td><%= o.email %></td>
                 <td><span class="pill <%= o.status === 'offen' ? 'pill--warn' : (o.status === 'abgeschlossen' ? 'pill--ok' : (o.status === 'storniert' ? 'pill--err' : 'pill--info')) %>"><%= o.status %></span></td>
                 <td><%= o.shipping_status %></td>
@@ -75,8 +75,9 @@
       </div>
     </div>
 
+    <% if (adminCan('protokoll')) { %>
     <div class="card">
-      <div class="card__head"><h2>Letzte Änderungen</h2><a class="btn btn--ghost btn--sm" href="/verwaltung/protokoll">Protokoll</a></div>
+      <div class="card__head"><h2>Letzte Änderungen</h2><% if (adminCan('protokoll')) { %><a class="btn btn--ghost btn--sm" href="/verwaltung/protokoll">Protokoll</a><% } %></div>
       <div class="card__body card__body--flush">
         <table class="tbl">
           <tbody>
@@ -90,6 +91,7 @@
         </table>
       </div>
     </div>
+    <% } %>
   </div>
 </div>
 

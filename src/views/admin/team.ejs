@@ -1,6 +1,7 @@
 <%- include('../partials/admin-head') %>
 <%- include('../partials/admin-shell') %>
 <div class="cols">
+  <% if (adminCan('team')) { %>
   <div class="card">
     <div class="card__head"><h2>Zugänge</h2></div>
     <div class="card__body card__body--flush">
@@ -29,8 +30,10 @@
       </table>
     </div>
   </div>
+  <% } %>
 
   <div>
+    <% if (adminCan('team')) { %>
     <div class="card">
       <div class="card__head"><h2>Neuen Zugang anlegen</h2></div>
       <div class="card__body">
@@ -39,7 +42,7 @@
           <label class="field"><span>Name</span><input type="text" name="name"></label>
           <label class="field"><span>E-Mail</span><input type="email" name="email" required autocomplete="off"></label>
           <label class="field"><span>Rolle</span>
-            <select name="role"><option value="admin">Administration</option><option value="redaktion">Redaktion</option></select>
+            <select name="role"><% Object.entries(roles).forEach(function (entry) { %><option value="<%= entry[0] %>"><%= entry[1] %></option><% }); %></select>
           </label>
           <label class="field"><span>Passwort</span>
             <input type="password" name="password" required autocomplete="new-password">
@@ -49,6 +52,7 @@
         </form>
       </div>
     </div>
+    <% } %>
 
     <div class="card">
       <div class="card__head"><h2>Eigenes Passwort ändern</h2></div>

@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const db = require('../db');
 const auth = require('./auth');
 const audit = require('./audit');
+const access = require('./admin-access');
 
 const MAX_FAILED = 6;
 const LOCK_MINUTES = 15;
@@ -51,8 +52,9 @@ function create({ email, password, name, role = 'admin' }) {
   if (findByEmail(clean)) return { ok: false, message: 'Diese E-Mail-Adresse wird bereits verwendet.' };
   const problem = auth.passwordProblem(password);
   if (problem) return { ok: false, message: problem };
+  if (!Object.hasOwn(access.ROLES, role)) return { ok: false, message: 'Bitte eine gültige Rolle auswählen.' };
   const res = db.run('INSERT INTO admin_users (email, password_hash, name, role) VALUES (?,?,?,?)',
-    [clean, auth.hashPassword(password), String(name || '').slice(0, 80), role === 'redaktion' ? 'redaktion' : 'admin']);
+    [clean, auth.hashPassword(password), String(name || '').slice(0, 80), role]);
   return { ok: true, id: Number(res.lastInsertRowid) };
 }
 

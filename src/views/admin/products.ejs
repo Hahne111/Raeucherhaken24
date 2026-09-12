@@ -50,7 +50,7 @@
             </td>
             <td class="num">
               <a class="btn btn--ghost btn--sm" href="/verwaltung/produkte/<%= p.id %>">Bearbeiten</a>
-              <a class="btn btn--ghost btn--sm" href="/produkt/<%= p.slug %>" target="_blank" rel="noopener">Ansehen</a>
+              <% if (p.active) { %><a class="btn btn--ghost btn--sm" href="/produkt/<%= p.slug %>" target="_blank" rel="noopener">Ansehen</a><% } %>
             </td>
           </tr>
         <% }); %>
