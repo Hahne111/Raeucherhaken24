@@ -968,14 +968,36 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
    Responsive – gleicher Charakter auf kleineren Geräten
    ========================================================================== */
 @media (max-width: 1560px) {
-  :root { --pad-main: 72px; --pad-wide: 44px; }
+  :root { --pad-main: 56px; --pad-wide: 40px; }
   .hero__title { font-size: 62px; }
-  .mainnav__link { font-size: 15px; padding: 8px 8px; }
-  .searchform input { width: 180px; }
+  .header__inner { gap: 16px; }
+  .mainnav { margin-left: 4px; }
+  .mainnav > ul { gap: 0; }
+  .mainnav__link { font-size: 15px; padding: 8px 7px; }
+  .searchform input { width: 168px; }
+}
+
+/* Zwischen Laptop- und Desktopbreite wird der Kopf sonst breiter als das Fenster. */
+@media (max-width: 1400px) {
+  :root { --pad-main: 36px; --pad-wide: 30px; }
+  .header__inner { gap: 12px; }
+  .mainnav__link { font-size: 14.5px; padding: 7px 6px; gap: 4px; }
+  .searchform input { width: 132px; }
+  .header__action { gap: 6px; }
+  .header__action span { display: none; }
+  .logo__word { font-size: 28px; }
+  .logo__sub { font-size: 8px; letter-spacing: .19em; }
+}
+
+@media (max-width: 1240px) {
+  :root { --pad-main: 26px; --pad-wide: 24px; }
+  .mainnav__link { font-size: 14px; padding: 7px 5px; }
+  .searchform input { width: 104px; }
+  .logo__word { font-size: 26px; }
 }
 
 @media (max-width: 1340px) {
-  :root { --pad-main: 48px; --pad-wide: 32px; --stage-h: 800px; }
+  :root { --stage-h: 800px; }
   .hero { height: 410px; padding-top: 36px; }
   .hero__title { font-size: 54px; }
   .tilerow { height: 156px; gap: 11px; }
@@ -983,7 +1005,6 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
   .minirow { grid-template-columns: repeat(3, 1fr); }
   .minicard:nth-child(n+4) { display: none; }
   .favorites__title { font-size: 30px; }
-  .searchform input { width: 150px; }
   .grid-products { grid-template-columns: repeat(3, 1fr); }
 }
 
@@ -991,6 +1012,8 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; line-he
   :root { --stage-h: auto; }
   .header__inner { gap: 14px; }
   .mainnav { display: none; }
+  .searchform input { width: 190px; }
+  .header__action span { display: inline; }
   .navtoggle {
     display: grid; place-items: center; width: 40px; height: 40px;
     border: 1px solid #c3b79d; border-radius: 3px; background: #fffdf8; cursor: pointer;
