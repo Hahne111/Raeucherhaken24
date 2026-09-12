@@ -1,0 +1,53 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/berater">Zur Übersicht</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div class="card">
+    <div class="card__head"><h2>Provisionsmodell</h2></div>
+    <div class="card__body">
+      <form method="post" action="/verwaltung/berater/<%= row.id %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <label class="field"><span>Team</span>
+          <select name="team_id">
+            <option value="">– ohne Team –</option>
+            <% teams.forEach(function (t) { %>
+              <option value="<%= t.id %>" <%= String(row.team_id || '') === String(t.id) ? 'selected' : '' %>><%= t.name %></option>
+            <% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Modell</span>
+          <select name="commission_model">
+            <% ['basis','stufen','team'].forEach(function (m) { %>
+              <option value="<%= m %>" <%= (row.commission_model || 'basis') === m ? 'selected' : '' %>><%= m %></option>
+            <% }); %>
+          </select>
+        </label>
+        <div class="field-row">
+          <label class="field"><span>Basisprovision (%)</span><input type="text" name="base_percent" inputmode="decimal" value="<%= row.base_percent || 0 %>"></label>
+          <label class="field"><span>Teamleiterbonus (%)</span><input type="text" name="leader_percent" inputmode="decimal" value="<%= row.leader_percent || 0 %>"></label>
+        </div>
+        <label class="field"><span>Monatsziel (Umsatz)</span><input type="text" name="monthly_target" value="<%= row.monthly_target_cents ? (row.monthly_target_cents/100).toFixed(2).replace('.',',') : '' %>" placeholder="z. B. 25000,00"></label>
+        <label class="check"><input type="checkbox" name="is_leader" value="1" <%= row.is_leader ? 'checked' : '' %>><span>Teamleitung</span></label>
+        <label class="check"><input type="checkbox" name="profile_active" value="1" <%= row.profile_active === 0 ? '' : 'checked' %>><span>Im Vertrieb aktiv</span></label>
+        <label class="field"><span>Notiz</span><textarea name="note" rows="3"><%= row.note || '' %></textarea></label>
+        <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2><%= row.name || row.email %></h2></div>
+    <div class="card__body">
+      <p style="margin:0 0 14px;font-size:14px">
+        <%= row.email %><br>
+        <span style="color:var(--a-soft)">Rolle: <%= row.role %> · Zugang <%= row.active ? 'aktiv' : 'gesperrt' %></span>
+      </p>
+      <p style="font-size:14px"><strong><%= customers %></strong> Kunden · <strong><%= dealers %></strong> Händler</p>
+      <h3 style="font-size:14px;margin:16px 0 6px">Gebiete</h3>
+      <% if (!territories.length) { %><p style="margin:0;color:var(--a-soft)">Kein Gebiet zugeordnet.</p><% } else { %>
+        <ul style="margin:0;padding-left:18px"><% territories.forEach(function (t) { %><li><%= t.name %></li><% }); %></ul>
+      <% } %>
+      <p style="margin:16px 0 0;font-size:12.5px;color:var(--a-soft)">Eine Änderung am Modell gilt ab sofort. Bereits abgerechnete Aufträge behalten die zum Auftragszeitpunkt gültige Grundlage.</p>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

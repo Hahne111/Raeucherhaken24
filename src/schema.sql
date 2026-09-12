@@ -300,3 +300,192 @@ CREATE TABLE IF NOT EXISTS media (
   bytes      INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+/* ===================== CRM, Vertrieb und Gebiete ===================== */
+
+CREATE TABLE IF NOT EXISTS sales_teams (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  name       TEXT NOT NULL,
+  leader_id  INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  note       TEXT NOT NULL DEFAULT '',
+  active     INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/* Zusatzangaben zu einem Mitarbeiterzugang, sobald er im Vertrieb arbeitet. */
+CREATE TABLE IF NOT EXISTS advisor_profiles (
+  admin_user_id     INTEGER PRIMARY KEY REFERENCES admin_users(id) ON DELETE CASCADE,
+  team_id           INTEGER REFERENCES sales_teams(id) ON DELETE SET NULL,
+  is_leader         INTEGER NOT NULL DEFAULT 0,
+  commission_model  TEXT NOT NULL DEFAULT 'basis',
+  base_percent      REAL NOT NULL DEFAULT 0,
+  leader_percent    REAL NOT NULL DEFAULT 0,
+  monthly_target_cents INTEGER NOT NULL DEFAULT 0,
+  active            INTEGER NOT NULL DEFAULT 1,
+  note              TEXT NOT NULL DEFAULT '',
+  created_at        TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at        TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+/* Die 16 Bundeslaender als geschuetzte Vertriebsgebiete. */
+CREATE TABLE IF NOT EXISTS sales_territories (
+  code       TEXT PRIMARY KEY,
+  name       TEXT NOT NULL,
+  advisor_id INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  note       TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS dealers (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  name          TEXT NOT NULL,
+  customer_id   INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  contact_name  TEXT NOT NULL DEFAULT '',
+  email         TEXT NOT NULL DEFAULT '',
+  phone         TEXT NOT NULL DEFAULT '',
+  street        TEXT NOT NULL DEFAULT '',
+  zip           TEXT NOT NULL DEFAULT '',
+  city          TEXT NOT NULL DEFAULT '',
+  country       TEXT NOT NULL DEFAULT 'DE',
+  territory_code TEXT NOT NULL DEFAULT '',
+  advisor_id    INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  terms         TEXT NOT NULL DEFAULT '',
+  discount_percent REAL NOT NULL DEFAULT 0,
+  visit_interval_days INTEGER NOT NULL DEFAULT 14,
+  last_visit_at TEXT,
+  next_visit_at TEXT,
+  status        TEXT NOT NULL DEFAULT 'aktiv',
+  note          TEXT NOT NULL DEFAULT '',
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_dealers_advisor ON dealers(advisor_id);
+CREATE INDEX IF NOT EXISTS idx_dealers_territory ON dealers(territory_code);
+
+CREATE TABLE IF NOT EXISTS dealer_visits (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  dealer_id  INTEGER NOT NULL REFERENCES dealers(id) ON DELETE CASCADE,
+  advisor_id INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  visited_at TEXT NOT NULL,
+  result     TEXT NOT NULL DEFAULT '',
+  note       TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_dealer_visits_dealer ON dealer_visits(dealer_id);
+
+/* Chronik zur Kundenakte: Notizen, Anrufe, Beratungen, Aufträge, Termine. */
+CREATE TABLE IF NOT EXISTS customer_activities (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  kind        TEXT NOT NULL DEFAULT 'notiz',
+  title       TEXT NOT NULL DEFAULT '',
+  body        TEXT NOT NULL DEFAULT '',
+  ref_type    TEXT NOT NULL DEFAULT '',
+  ref_id      TEXT NOT NULL DEFAULT '',
+  created_by  TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_customer_activities ON customer_activities(customer_id, id);
+
+/* ===================== Termine, Beratung, Gebietsbuch ================== */
+
+CREATE TABLE IF NOT EXISTS appointments (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  title        TEXT NOT NULL,
+  kind         TEXT NOT NULL DEFAULT 'termin',
+  customer_id  INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  dealer_id    INTEGER REFERENCES dealers(id) ON DELETE SET NULL,
+  owner_id     INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  starts_at    TEXT NOT NULL,
+  ends_at      TEXT NOT NULL DEFAULT '',
+  all_day      INTEGER NOT NULL DEFAULT 0,
+  location     TEXT NOT NULL DEFAULT '',
+  priority     TEXT NOT NULL DEFAULT 'normal',
+  status       TEXT NOT NULL DEFAULT 'geplant',
+  note         TEXT NOT NULL DEFAULT '',
+  series_id    INTEGER,
+  series_rule  TEXT NOT NULL DEFAULT '',
+  remind_minutes INTEGER NOT NULL DEFAULT 0,
+  reminded_at  TEXT,
+  created_by   TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_appointments_start ON appointments(starts_at);
+CREATE INDEX IF NOT EXISTS idx_appointments_owner ON appointments(owner_id, starts_at);
+
+CREATE TABLE IF NOT EXISTS appointment_participants (
+  appointment_id INTEGER NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
+  admin_user_id  INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+  response       TEXT NOT NULL DEFAULT 'offen',
+  PRIMARY KEY (appointment_id, admin_user_id)
+);
+
+/* Zustellprotokoll: eine Erinnerung wird je Termin genau einmal versendet. */
+CREATE TABLE IF NOT EXISTS appointment_reminders (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  appointment_id INTEGER NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
+  recipient      TEXT NOT NULL,
+  due_at         TEXT NOT NULL,
+  sent_at        TEXT,
+  status         TEXT NOT NULL DEFAULT 'geplant',
+  detail         TEXT NOT NULL DEFAULT '',
+  UNIQUE (appointment_id, recipient)
+);
+
+CREATE TABLE IF NOT EXISTS consultations (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+  advisor_id  INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  title       TEXT NOT NULL DEFAULT '',
+  usage_area  TEXT NOT NULL DEFAULT '',
+  demand      TEXT NOT NULL DEFAULT '',
+  budget_cents INTEGER NOT NULL DEFAULT 0,
+  wishes      TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'offen',
+  order_id    INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_consultations_customer ON consultations(customer_id);
+
+CREATE TABLE IF NOT EXISTS consultation_items (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  consultation_id INTEGER NOT NULL REFERENCES consultations(id) ON DELETE CASCADE,
+  variant_id      INTEGER NOT NULL,
+  qty             INTEGER NOT NULL DEFAULT 1,
+  note            TEXT NOT NULL DEFAULT '',
+  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_consultation_items ON consultation_items(consultation_id);
+
+CREATE TABLE IF NOT EXISTS territory_books (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT NOT NULL,
+  territory_code TEXT NOT NULL DEFAULT '',
+  owner_id    INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  note        TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS territory_entries (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  book_id    INTEGER NOT NULL REFERENCES territory_books(id) ON DELETE CASCADE,
+  company    TEXT NOT NULL DEFAULT '',
+  branch     TEXT NOT NULL DEFAULT '',
+  contact    TEXT NOT NULL DEFAULT '',
+  email      TEXT NOT NULL DEFAULT '',
+  phone      TEXT NOT NULL DEFAULT '',
+  street     TEXT NOT NULL DEFAULT '',
+  zip        TEXT NOT NULL DEFAULT '',
+  city       TEXT NOT NULL DEFAULT '',
+  contact_status TEXT NOT NULL DEFAULT 'offen',
+  owner_id   INTEGER REFERENCES admin_users(id) ON DELETE SET NULL,
+  followup_at TEXT,
+  dealer_id  INTEGER REFERENCES dealers(id) ON DELETE SET NULL,
+  note       TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_territory_entries_book ON territory_entries(book_id);
+CREATE INDEX IF NOT EXISTS idx_territory_entries_owner ON territory_entries(owner_id);

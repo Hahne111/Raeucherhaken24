@@ -1,0 +1,74 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/kunden">Zur Kundenliste</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="post" action="<%= action %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <div class="cols">
+    <div class="card">
+      <div class="card__head"><h2>Kontakt</h2></div>
+      <div class="card__body">
+        <label class="field"><span>E-Mail *</span>
+          <input type="email" name="email" required maxlength="160" value="<%= row.email %>">
+          <% if (errors.email) { %><small class="field__err"><%= errors.email %></small><% } %>
+        </label>
+        <div class="field-row">
+          <label class="field"><span>Vorname</span><input type="text" name="first_name" maxlength="80" value="<%= row.first_name %>"></label>
+          <label class="field"><span>Nachname</span>
+            <input type="text" name="last_name" maxlength="80" value="<%= row.last_name %>">
+            <% if (errors.last_name) { %><small class="field__err"><%= errors.last_name %></small><% } %>
+          </label>
+        </div>
+        <label class="field"><span>Firma</span>
+          <input type="text" name="company" maxlength="120" value="<%= row.company %>">
+          <% if (errors.company) { %><small class="field__err"><%= errors.company %></small><% } %>
+        </label>
+        <div class="field-row">
+          <label class="field"><span>Telefon</span><input type="text" name="phone" maxlength="60" value="<%= row.phone %>"></label>
+          <label class="field"><span>USt-IdNr.</span><input type="text" name="vat_id" maxlength="40" value="<%= row.vat_id %>"></label>
+        </div>
+        <label class="field"><span>Interne Notiz</span><textarea name="note" rows="5"><%= row.note %></textarea></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Einstufung und Konditionen</h2></div>
+      <div class="card__body">
+        <label class="field"><span>Kundentyp</span>
+          <select name="customer_type">
+            <% Object.keys(types).forEach(function (k) { %>
+              <option value="<%= k %>" <%= row.customer_type === k ? 'selected' : '' %>><%= types[k] %></option>
+            <% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Status</span>
+          <select name="customer_status">
+            <% Object.keys(states).forEach(function (k) { %>
+              <option value="<%= k %>" <%= row.customer_status === k ? 'selected' : '' %>><%= states[k] %></option>
+            <% }); %>
+          </select>
+        </label>
+        <div class="field-row">
+          <label class="field"><span>Zahlungsziel (Tage)</span><input type="number" name="payment_terms_days" min="0" max="180" value="<%= row.payment_terms_days %>"></label>
+          <label class="field"><span>Rabatt (%)</span><input type="text" name="discount_percent" inputmode="decimal" value="<%= row.discount_percent %>"></label>
+        </div>
+        <label class="field"><span>Tags (Komma getrennt)</span><input type="text" name="tags" maxlength="300" value="<%= row.tags %>"></label>
+        <label class="field"><span>Kundenberater</span>
+          <select name="advisor_id" <%= adminCan('crm.berater') ? '' : 'disabled' %>>
+            <option value="">– ohne Zuordnung –</option>
+            <% advisors.forEach(function (a) { %>
+              <option value="<%= a.id %>" <%= String(row.advisor_id || '') === String(a.id) ? 'selected' : '' %>><%= a.name || a.email %></option>
+            <% }); %>
+          </select>
+        </label>
+        <% if (!adminCan('crm.berater')) { %>
+          <p style="margin:-6px 0 14px;font-size:12.5px;color:var(--a-soft)">Als Vertriebszugang wird der Kunde automatisch dir zugeordnet.</p>
+        <% } %>
+        <label class="check"><input type="checkbox" name="active" value="1" <%= row.active ? 'checked' : '' %>><span>Kundenkonto aktiv</span></label>
+        <label class="check"><input type="checkbox" name="newsletter" value="1" <%= row.newsletter ? 'checked' : '' %>><span>Newsletter gewünscht</span></label>
+        <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+        <% if (row.id) { %><p style="margin:12px 0 0"><a class="link" href="/verwaltung/kunden/<%= row.id %>">Abbrechen</a></p><% } %>
+      </div>
+    </div>
+  </div>
+</form>
+<%- include('../partials/admin-foot') %>

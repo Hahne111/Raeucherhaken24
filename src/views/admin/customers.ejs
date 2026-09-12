@@ -1,13 +1,37 @@
 <%- include('../partials/admin-head') %>
-<%- include('../partials/admin-shell') %>
+<% var headActions = adminCan('kunden.anlegen') ? '<a class="btn btn--primary btn--sm" href="/verwaltung/kunden/neu">Kunde anlegen</a>' : ''; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
 <div class="toolbar">
   <form method="get" action="/verwaltung/kunden">
     <label class="visually-hidden" for="q">Suche</label>
-    <input id="q" type="search" name="q" value="<%= q %>" placeholder="E-Mail oder Name">
+    <input id="q" type="search" name="q" value="<%= q %>" placeholder="Name, Firma, E-Mail, Tag">
+    <select name="typ" aria-label="Kundentyp">
+      <option value="">Alle Typen</option>
+      <% Object.keys(types).forEach(function (k) { %>
+        <option value="<%= k %>" <%= type === k ? 'selected' : '' %>><%= types[k] %></option>
+      <% }); %>
+    </select>
+    <select name="status" aria-label="Status">
+      <option value="">Alle Status</option>
+      <% Object.keys(states).forEach(function (k) { %>
+        <option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option>
+      <% }); %>
+    </select>
+    <% if (!ownOnly) { %>
+      <select name="berater" aria-label="Kundenberater">
+        <option value="">Alle Berater</option>
+        <% advisors.forEach(function (a) { %>
+          <option value="<%= a.id %>" <%= advisor === a.id ? 'selected' : '' %>><%= a.name || a.email %></option>
+        <% }); %>
+      </select>
+    <% } %>
     <button class="btn btn--dark btn--sm" type="submit">Suchen</button>
     <a class="btn btn--ghost btn--sm" href="/verwaltung/kunden">Zurücksetzen</a>
   </form>
 </div>
+<% if (ownOnly) { %>
+  <div class="ad-alert ad-alert--info">Als Vertriebszugang siehst du ausschließlich die dir zugeordneten Kunden.</div>
+<% } %>
 <div class="card">
   <div class="card__head"><h2><%= rows.length %> Kunden</h2></div>
   <div class="card__body card__body--flush">
@@ -15,19 +39,23 @@
       <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Kunden gefunden.</p>
     <% } else { %>
     <table class="tbl">
-      <thead><tr><th>Name</th><th>E-Mail</th><th>Seit</th><th class="num">Bestellungen</th><th class="num">Umsatz</th><th>Status</th><th></th></tr></thead>
+      <thead><tr><th>Name / Firma</th><th>E-Mail</th><th>Typ</th><th>Status</th><th>Berater</th><th class="num">Bestellungen</th><th class="num">Umsatz</th><th></th></tr></thead>
       <tbody>
         <% rows.forEach(function (c) { %>
           <tr>
-            <td><a class="link" href="/verwaltung/kunden/<%= c.id %>"><%= c.first_name %> <%= c.last_name %></a></td>
+            <td>
+              <a class="link" href="/verwaltung/kunden/<%= c.id %>"><%= c.company || ((c.first_name + ' ' + c.last_name).trim() || c.email) %></a>
+              <% if (c.tags) { %><br><span style="font-size:12px;color:var(--a-soft)"><%= c.tags %></span><% } %>
+            </td>
             <td><%= c.email %></td>
-            <td><%= formatDay(c.created_at) %></td>
+            <td><%= types[c.customer_type] || c.customer_type %></td>
+            <td>
+              <span class="pill <%= c.customer_status === 'aktiv' ? 'pill--ok' : (c.customer_status === 'gesperrt' ? 'pill--err' : '') %>"><%= states[c.customer_status] || c.customer_status %></span>
+              <% if (!c.active) { %><span class="pill pill--err">Konto gesperrt</span><% } %>
+            </td>
+            <td><%= c.advisor_name || '–' %></td>
             <td class="num"><%= c.order_count %></td>
             <td class="num"><%= fmt(c.revenue) %></td>
-            <td>
-              <span class="pill <%= c.active ? 'pill--ok' : 'pill--err' %>"><%= c.active ? 'aktiv' : 'gesperrt' %></span>
-              <% if (c.newsletter) { %><span class="pill pill--info">Newsletter</span><% } %>
-            </td>
             <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/kunden/<%= c.id %>">Öffnen</a></td>
           </tr>
         <% }); %>

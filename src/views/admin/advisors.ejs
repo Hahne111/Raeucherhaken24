@@ -1,0 +1,73 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2><%= rows.length %> Berater</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <thead><tr><th>Name</th><th>Rolle</th><th>Team</th><th>Modell</th><th class="num">Basis %</th><th class="num">Ziel</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <% rows.forEach(function (a) { %>
+              <tr>
+                <td><a class="link" href="/verwaltung/berater/<%= a.id %>"><%= a.name || a.email %></a><br><span style="font-size:12px;color:var(--a-soft)"><%= a.email %></span></td>
+                <td><%= a.role %></td>
+                <td><%= a.team_name || '–' %><%= a.is_leader ? ' (Leitung)' : '' %></td>
+                <td><%= a.commission_model || '–' %></td>
+                <td class="num"><%= a.base_percent === null || a.base_percent === undefined ? '–' : a.base_percent %></td>
+                <td class="num"><%= a.monthly_target_cents ? fmt(a.monthly_target_cents) : '–' %></td>
+                <td>
+                  <span class="pill <%= a.active ? 'pill--ok' : 'pill--err' %>"><%= a.active ? 'Zugang aktiv' : 'gesperrt' %></span>
+                  <% if (a.profile_active === 0) { %><span class="pill">Vertrieb ruht</span><% } %>
+                </td>
+                <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/berater/<%= a.id %>">Öffnen</a></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__head"><h2>Gebiete</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <thead><tr><th>Gebiet</th><th>Zuständig</th><th class="num">Händler</th></tr></thead>
+          <tbody>
+            <% territories.forEach(function (t) { %>
+              <tr><td><%= t.name %></td><td><%= t.advisor_name || '– frei –' %></td><td class="num"><%= t.dealer_count %></td></tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Teams</h2></div>
+      <div class="card__body">
+        <% if (!teams.length) { %><p style="margin:0 0 14px;color:var(--a-soft)">Noch kein Team angelegt.</p><% } else { %>
+        <ul style="margin:0 0 16px;padding-left:18px">
+          <% teams.forEach(function (t) { %>
+            <li><strong><%= t.name %></strong> · Leitung: <%= t.leader_name || '–' %> · <%= t.member_count %> Mitglieder</li>
+          <% }); %>
+        </ul>
+        <% } %>
+        <form method="post" action="/verwaltung/berater/team">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <label class="field"><span>Neues Team</span><input type="text" name="name" required maxlength="80"></label>
+          <label class="field"><span>Teamleitung</span>
+            <select name="leader_id">
+              <option value="">– ohne –</option>
+              <% rows.forEach(function (a) { %><option value="<%= a.id %>"><%= a.name || a.email %></option><% }); %>
+            </select>
+          </label>
+          <label class="field"><span>Notiz</span><input type="text" name="note" maxlength="500"></label>
+          <button class="btn btn--primary btn--block" type="submit">Team anlegen</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

@@ -1,0 +1,71 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--primary btn--sm" href="/verwaltung/haendler/neu">Händler anlegen</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="toolbar">
+  <form method="get" action="/verwaltung/haendler">
+    <label class="visually-hidden" for="q">Suche</label>
+    <input id="q" type="search" name="q" value="<%= q %>" placeholder="Name, Ort, Kontakt">
+    <select name="gebiet" aria-label="Gebiet">
+      <option value="">Alle Gebiete</option>
+      <% territories.forEach(function (t) { %>
+        <option value="<%= t.code %>" <%= territory === t.code ? 'selected' : '' %>><%= t.name %></option>
+      <% }); %>
+    </select>
+    <select name="status" aria-label="Status">
+      <option value="">Alle Status</option>
+      <% Object.keys(states).forEach(function (k) { %>
+        <option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= states[k] %></option>
+      <% }); %>
+    </select>
+    <button class="btn btn--dark btn--sm" type="submit">Suchen</button>
+    <a class="btn btn--ghost btn--sm" href="/verwaltung/haendler">Zurücksetzen</a>
+  </form>
+</div>
+<% if (due.length) { %>
+  <div class="card">
+    <div class="card__head"><h2>Fällige Besuche (<%= due.length %>)</h2></div>
+    <div class="card__body card__body--flush">
+      <table class="tbl">
+        <thead><tr><th>Händler</th><th>Ort</th><th>Zuständig</th><th>Fällig seit</th><th></th></tr></thead>
+        <tbody>
+          <% due.forEach(function (d) { %>
+            <tr>
+              <td><a class="link" href="/verwaltung/haendler/<%= d.id %>"><%= d.name %></a></td>
+              <td><%= d.zip %> <%= d.city %></td>
+              <td><%= d.advisor_name || '–' %></td>
+              <td><%= d.next_visit_at || 'noch kein Besuch' %></td>
+              <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/haendler/<%= d.id %>">Besuch erfassen</a></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% } %>
+<div class="card">
+  <div class="card__head"><h2><%= rows.length %> Händler</h2></div>
+  <div class="card__body card__body--flush">
+    <% if (!rows.length) { %>
+      <p style="padding:20px;margin:0;color:var(--a-soft)">Keine Händler gefunden.</p>
+    <% } else { %>
+    <table class="tbl">
+      <thead><tr><th>Name</th><th>Ort</th><th>Gebiet</th><th>Zuständig</th><th>Rhythmus</th><th>Nächster Besuch</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (d) { %>
+          <tr>
+            <td><a class="link" href="/verwaltung/haendler/<%= d.id %>"><%= d.name %></a><% if (d.contact_name) { %><br><span style="font-size:12px;color:var(--a-soft)"><%= d.contact_name %></span><% } %></td>
+            <td><%= d.zip %> <%= d.city %></td>
+            <td><%= d.territory_name || '–' %></td>
+            <td><%= d.advisor_name || '–' %></td>
+            <td><%= d.visit_interval_days %> Tage</td>
+            <td><%= d.next_visit_at || '–' %></td>
+            <td><span class="pill <%= d.status === 'aktiv' ? 'pill--ok' : '' %>"><%= states[d.status] || d.status %></span></td>
+            <td class="num"><a class="btn btn--ghost btn--sm" href="/verwaltung/haendler/<%= d.id %>">Öffnen</a></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

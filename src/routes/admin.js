@@ -140,6 +140,9 @@ for (const [prefix, permission] of [
   ['/medien', 'medien'],
   ['/bestellungen', 'bestellungen.lesen'],
   ['/kunden', 'kunden.lesen'],
+  ['/haendler', 'haendler'],
+  ['/gebiete', 'gebiete.lesen'],
+  ['/berater', 'crm.berater'],
   ['/gutscheine', 'gutscheine'],
   ['/versandarten', 'versandarten'],
   ['/einstellungen', 'einstellungen'],
@@ -147,6 +150,7 @@ for (const [prefix, permission] of [
 ]) router.use(prefix, access.requirePermission(permission));
 
 router.use('/nachrichten', require('./admin-messages'));
+router.use('/', require('./admin-crm'));
 
 /* ------------------------------ Lager --------------------------------- */
 router.get('/lager', (req, res) => {
@@ -900,43 +904,6 @@ router.post('/bestellungen/:id/stornieren', access.requirePermission('bestellung
   const result = orders.cancel(id, req.admin.email, req.ip);
   req.flash(result.ok ? 'success' : 'error', result.ok ? 'Bestellung storniert, der Bestand wurde zurückgebucht.' : result.message);
   res.redirect('/verwaltung/bestellungen/' + id);
-});
-
-/* -------------------------------- Kunden ------------------------------- */
-router.get('/kunden', (req, res) => {
-  const q = String(req.query.q || '').trim();
-  const params = [];
-  let where = '';
-  if (q) { where = ' WHERE email LIKE ? OR first_name LIKE ? OR last_name LIKE ?'; params.push(`%${q}%`, `%${q}%`, `%${q}%`); }
-  res.render('admin/customers', {
-    title: 'Kunden', q,
-    rows: db.all(
-      `SELECT c.*, (SELECT COUNT(*) FROM orders WHERE customer_id = c.id) AS order_count,
-        (SELECT COALESCE(SUM(total_cents),0) FROM orders WHERE customer_id = c.id AND status != 'storniert') AS revenue
-       FROM customers c${where} ORDER BY c.id DESC LIMIT 100`, params)
-  });
-});
-
-router.get('/kunden/:id', (req, res, next) => {
-  const customerRow = db.get('SELECT * FROM customers WHERE id = ?', [util.toInt(req.params.id, 0)]);
-  if (!customerRow) return next();
-  res.render('admin/customer', {
-    title: customerRow.email,
-    row: customerRow,
-    addresses: db.all('SELECT * FROM addresses WHERE customer_id = ? ORDER BY id', [customerRow.id]),
-    orders: orders.forCustomer(customerRow.id)
-  });
-});
-
-router.post('/kunden/:id', access.requirePermission('kunden.bearbeiten'), (req, res, next) => {
-  const id = util.toInt(req.params.id, 0);
-  const row = db.get('SELECT * FROM customers WHERE id = ?', [id]);
-  if (!row) return next();
-  db.run('UPDATE customers SET note = ?, active = ?, newsletter = ? WHERE id = ?',
-    [String(req.body.note || '').slice(0, 2000), req.body.active === '1' ? 1 : 0, req.body.newsletter === '1' ? 1 : 0, id]);
-  audit.log(req.admin.email, 'kunde.aktualisiert', 'customer', String(id), row.email, req.ip);
-  req.flash('success', 'Kundendaten gespeichert.');
-  res.redirect('/verwaltung/kunden/' + id);
 });
 
 /* ------------------------------ Gutscheine ----------------------------- */

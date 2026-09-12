@@ -139,7 +139,16 @@ function csrf(html) {
   const dashboard = await finance.get('/verwaltung/uebersicht');
   assert.equal(dashboard.status, 200);
   assert.equal(dashboard.body.includes('admin@example.test'), false, 'kein Audit fremder Konten');
-  assert.equal((await finance.get('/verwaltung/bestellungen')).status, 403);
+  // Finanzen liest Auftraege fuer Belege und offene Posten, darf sie aber nicht steuern.
+  const financeOrders = await finance.get('/verwaltung/bestellungen');
+  assert.equal(financeOrders.status, 200);
+  const financeOrder = await finance.get(`/verwaltung/bestellungen/${orderId}`);
+  assert.equal(financeOrder.status, 200);
+  assert.equal(financeOrder.body.includes('Bestellung stornieren'), false);
+  assert.equal((await finance.post(`/verwaltung/bestellungen/${orderId}`, {
+    _csrf: csrf(financeOrder.body), status: 'abgeschlossen'
+  })).status, 403);
+  assert.equal((await finance.get('/verwaltung/kunden')).status, 403);
   const warehouse = clients.lager;
   assert.equal((await warehouse.get('/verwaltung/lager')).status, 200);
   assert.equal((await warehouse.get('/verwaltung/produkte/naturgewuerze')).status, 403);

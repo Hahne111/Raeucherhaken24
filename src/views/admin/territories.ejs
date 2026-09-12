@@ -1,0 +1,62 @@
+<%- include('../partials/admin-head') %>
+<%- include('../partials/admin-shell') %>
+<% if (conflicts.length) { %>
+  <div class="ad-alert ad-alert--warn">
+    <strong><%= conflicts.length %> Zuordnungskonflikt(e):</strong>
+    <ul style="margin:6px 0 0;padding-left:18px">
+      <% conflicts.forEach(function (c) { %>
+        <li><a class="link" href="/verwaltung/haendler/<%= c.id %>"><%= c.name %></a> liegt in <%= c.territory_name %> (<%= c.territory_advisor %>), ist aber <%= c.dealer_advisor %> zugeordnet.</li>
+      <% }); %>
+    </ul>
+  </div>
+<% } %>
+<div class="card">
+  <div class="card__head"><h2>16 Bundesländer</h2></div>
+  <div class="card__body">
+    <div class="territory-map">
+      <% rows.forEach(function (t) { %>
+        <a class="territory-map__item <%= t.advisor_id ? 'is-taken' : '' %>" href="#gebiet-<%= t.code %>">
+          <strong><%= t.name %></strong>
+          <span><%= t.advisor_name || 'frei' %></span>
+          <span><%= t.dealer_count %> Händler</span>
+        </a>
+      <% }); %>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card__head"><h2>Zuordnung</h2></div>
+  <div class="card__body card__body--flush">
+    <table class="tbl">
+      <thead><tr><th>Gebiet</th><th>Zuständig</th><th class="num">Händler</th><th>Notiz</th><th>Stand</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (t) { %>
+          <tr id="gebiet-<%= t.code %>">
+            <td><strong><%= t.name %></strong><br><span style="font-size:12px;color:var(--a-soft)"><%= t.code %></span></td>
+            <td>
+              <% if (canAssign) { %>
+                <form method="post" action="/verwaltung/gebiete/<%= t.code %>" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                  <select name="advisor_id">
+                    <option value="">– frei –</option>
+                    <% advisors.forEach(function (a) { %>
+                      <option value="<%= a.id %>" <%= String(t.advisor_id || '') === String(a.id) ? 'selected' : '' %>><%= a.name || a.email %></option>
+                    <% }); %>
+                  </select>
+                  <input type="text" name="note" value="<%= t.note %>" maxlength="500" placeholder="Notiz" style="min-width:160px">
+                  <button class="btn btn--dark btn--sm" type="submit">Speichern</button>
+                </form>
+              <% } else { %>
+                <%= t.advisor_name || '– frei –' %>
+              <% } %>
+            </td>
+            <td class="num"><%= t.dealer_count %></td>
+            <td><%= canAssign ? '' : t.note %></td>
+            <td><%= formatDay(t.updated_at) %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

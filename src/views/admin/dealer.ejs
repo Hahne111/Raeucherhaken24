@@ -1,0 +1,79 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/haendler">Zur Liste</a> <a class="btn btn--primary btn--sm" href="/verwaltung/haendler/' + row.id + '/bearbeiten">Bearbeiten</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<div class="cols">
+  <div>
+    <div class="card">
+      <div class="card__head"><h2>Besuch erfassen</h2></div>
+      <div class="card__body">
+        <form method="post" action="/verwaltung/haendler/<%= row.id %>/besuch">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <div class="field-row">
+            <label class="field"><span>Datum</span><input type="date" name="visited_at" value="<%= new Date().toISOString().slice(0,10) %>" required></label>
+            <label class="field"><span>Ergebnis</span><input type="text" name="result" maxlength="120" placeholder="z. B. Nachbestellung vereinbart"></label>
+          </div>
+          <label class="field"><span>Notiz</span><textarea name="note" rows="3"></textarea></label>
+          <button class="btn btn--primary" type="submit">Besuch speichern</button>
+          <span style="margin-left:10px;font-size:12.5px;color:var(--a-soft)">Der nächste Besuch wird automatisch auf <%= row.visit_interval_days %> Tage später gesetzt.</span>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Besuchshistorie</h2></div>
+      <div class="card__body card__body--flush">
+        <% if (!visits.length) { %><p style="padding:18px;margin:0;color:var(--a-soft)">Noch kein Besuch erfasst.</p><% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Datum</th><th>Berater</th><th>Ergebnis</th><th>Notiz</th></tr></thead>
+          <tbody>
+            <% visits.forEach(function (v) { %>
+              <tr><td><%= v.visited_at %></td><td><%= v.advisor_name || '–' %></td><td><%= v.result || '–' %></td><td><%= v.note %></td></tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <% } %>
+      </div>
+    </div>
+    <% if (customerOrders.length) { %>
+    <div class="card">
+      <div class="card__head"><h2>Letzte Bestellungen</h2></div>
+      <div class="card__body card__body--flush">
+        <table class="tbl">
+          <thead><tr><th>Nummer</th><th>Datum</th><th>Status</th><th class="num">Summe</th></tr></thead>
+          <tbody>
+            <% customerOrders.forEach(function (o) { %>
+              <tr><td><%= o.number %></td><td><%= formatDay(o.created_at) %></td><td><%= o.status %></td><td class="num"><%= fmt(o.total_cents) %></td></tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <div class="card">
+    <div class="card__head"><h2>Stammdaten</h2></div>
+    <div class="card__body">
+      <p style="margin:0 0 14px;font-size:14px">
+        <strong><%= row.name %></strong><br>
+        <span style="color:var(--a-soft)"><%= row.contact_name || '' %><br><%= row.street %><br><%= row.zip %> <%= row.city %></span>
+        <% if (row.zip && row.city) { %>
+          <br><a class="link" target="_blank" rel="noopener nofollow" href="https://www.openstreetmap.org/search?query=<%= encodeURIComponent(row.street + ', ' + row.zip + ' ' + row.city) %>">Auf der Karte suchen</a>
+        <% } %>
+      </p>
+      <table class="tbl tbl--plain"><tbody>
+        <tr><th style="text-align:left">Gebiet</th><td><%= row.territory_name || '–' %></td></tr>
+        <tr><th style="text-align:left">Zuständig</th><td><%= row.advisor_name || '–' %></td></tr>
+        <tr><th style="text-align:left">Status</th><td><%= states[row.status] || row.status %></td></tr>
+        <tr><th style="text-align:left">Rabatt</th><td><%= row.discount_percent %> %</td></tr>
+        <tr><th style="text-align:left">Rhythmus</th><td><%= row.visit_interval_days %> Tage</td></tr>
+        <tr><th style="text-align:left">Letzter Besuch</th><td><%= row.last_visit_at || '–' %></td></tr>
+        <tr><th style="text-align:left">Nächster Besuch</th><td><%= row.next_visit_at || '–' %></td></tr>
+        <tr><th style="text-align:left">E-Mail</th><td><%= row.email || '–' %></td></tr>
+        <tr><th style="text-align:left">Telefon</th><td><%= row.phone || '–' %></td></tr>
+        <tr><th style="text-align:left">Kundenakte</th><td><% if (row.customer_id) { %><a class="link" href="/verwaltung/kunden/<%= row.customer_id %>"><%= row.customer_email %></a><% } else { %>–<% } %></td></tr>
+      </tbody></table>
+      <% if (row.terms) { %><h3 style="font-size:14px;margin:16px 0 6px">Konditionen</h3><p style="margin:0;white-space:pre-line;font-size:13.5px"><%= row.terms %></p><% } %>
+      <% if (row.note) { %><h3 style="font-size:14px;margin:16px 0 6px">Notiz</h3><p style="margin:0;white-space:pre-line;font-size:13.5px"><%= row.note %></p><% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-foot') %>

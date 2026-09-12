@@ -1,0 +1,72 @@
+<%- include('../partials/admin-head') %>
+<% var headActions = '<a class="btn btn--ghost btn--sm" href="/verwaltung/haendler">Zur Händlerliste</a>'; %>
+<%- include('../partials/admin-shell', { headActions: headActions }) %>
+<form method="post" action="<%= action %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <div class="cols">
+    <div class="card">
+      <div class="card__head"><h2>Händler</h2></div>
+      <div class="card__body">
+        <label class="field"><span>Name *</span>
+          <input type="text" name="name" required maxlength="120" value="<%= row.name %>">
+          <% if (errors.name) { %><small class="field__err"><%= errors.name %></small><% } %>
+        </label>
+        <label class="field"><span>Ansprechpartner</span><input type="text" name="contact_name" maxlength="100" value="<%= row.contact_name %>"></label>
+        <div class="field-row">
+          <label class="field"><span>E-Mail</span>
+            <input type="email" name="email" maxlength="160" value="<%= row.email %>">
+            <% if (errors.email) { %><small class="field__err"><%= errors.email %></small><% } %>
+          </label>
+          <label class="field"><span>Telefon</span><input type="text" name="phone" maxlength="60" value="<%= row.phone %>"></label>
+        </div>
+        <label class="field"><span>Straße</span><input type="text" name="street" maxlength="120" value="<%= row.street %>"></label>
+        <div class="field-row">
+          <label class="field"><span>PLZ</span><input type="text" name="zip" maxlength="12" pattern="[0-9]{4,5}" value="<%= row.zip %>"></label>
+          <label class="field"><span>Ort</span><input type="text" name="city" maxlength="80" value="<%= row.city %>"></label>
+        </div>
+        <label class="field"><span>Konditionen</span><textarea name="terms" rows="3"><%= row.terms %></textarea></label>
+        <label class="field"><span>Notiz</span><textarea name="note" rows="3"><%= row.note %></textarea></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Zuordnung</h2></div>
+      <div class="card__body">
+        <label class="field"><span>Gebiet</span>
+          <select name="territory_code">
+            <option value="">– ohne Gebiet –</option>
+            <% territories.forEach(function (t) { %>
+              <option value="<%= t.code %>" <%= row.territory_code === t.code ? 'selected' : '' %>><%= t.name %><%= t.advisor_name ? ' · ' + t.advisor_name : '' %></option>
+            <% }); %>
+          </select>
+          <% if (errors.territory_code) { %><small class="field__err"><%= errors.territory_code %></small><% } %>
+        </label>
+        <label class="field"><span>Zuständiger Außendienst</span>
+          <select name="advisor_id" <%= ownOnly ? 'disabled' : '' %>>
+            <option value="">– ohne Zuordnung –</option>
+            <% advisors.forEach(function (a) { %>
+              <option value="<%= a.id %>" <%= String(row.advisor_id || '') === String(a.id) ? 'selected' : '' %>><%= a.name || a.email %></option>
+            <% }); %>
+          </select>
+        </label>
+        <div class="field-row">
+          <label class="field"><span>Rabatt (%)</span><input type="text" name="discount_percent" inputmode="decimal" value="<%= row.discount_percent %>"></label>
+          <label class="field"><span>Besuchsrhythmus (Tage)</span><input type="number" name="visit_interval_days" min="1" max="365" value="<%= row.visit_interval_days %>"></label>
+        </div>
+        <label class="field"><span>Status</span>
+          <select name="status">
+            <% Object.keys(states).forEach(function (k) { %>
+              <option value="<%= k %>" <%= row.status === k ? 'selected' : '' %>><%= states[k] %></option>
+            <% }); %>
+          </select>
+        </label>
+        <label class="field"><span>Verknüpfte Kundennummer</span>
+          <input type="number" name="customer_id" min="0" value="<%= row.customer_id || '' %>" placeholder="optional">
+          <% if (errors.customer_id) { %><small class="field__err"><%= errors.customer_id %></small><% } %>
+        </label>
+        <button class="btn btn--primary btn--block" type="submit">Speichern</button>
+        <% if (row.id) { %><p style="margin:12px 0 0"><a class="link" href="/verwaltung/haendler/<%= row.id %>">Abbrechen</a></p><% } %>
+      </div>
+    </div>
+  </div>
+</form>
+<%- include('../partials/admin-foot') %>

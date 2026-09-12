@@ -13,10 +13,17 @@ const ROLES = {
 
 const GRANTS = {
   admin: ['*'],
-  kundenservice: ['bestellungen.lesen', 'kunden.lesen', 'kunden.bearbeiten', 'nachrichten'],
+  kundenservice: [
+    'bestellungen.lesen', 'kunden.lesen', 'kunden.bearbeiten', 'kunden.anlegen',
+    'termine', 'beratung', 'nachrichten'
+  ],
   redaktion: ['produkte', 'kategorien', 'medien', 'nachrichten'],
-  finanzen: ['uebersicht', 'produkt.analyse', 'nachrichten'],
-  vertrieb: ['nachrichten'],
+  finanzen: ['uebersicht', 'produkt.analyse', 'bestellungen.lesen', 'nachrichten'],
+  vertrieb: [
+    'kunden.lesen', 'kunden.bearbeiten', 'kunden.anlegen',
+    'haendler', 'gebiete.lesen', 'gebietsbuch',
+    'termine', 'beratung', 'provision.eigene', 'nachrichten'
+  ],
   produktion: ['nachrichten'],
   lager: ['lager.lesen', 'lager.buchen', 'nachrichten'],
   kasse: ['nachrichten']
@@ -27,10 +34,19 @@ function can(user, permission) {
   return Boolean(grants && (grants.includes('*') || grants.includes(permission)));
 }
 
+/**
+ * Vertrieb sieht nur eigene Kunden, Händler und Gebiete. Admin, Kundenservice
+ * und Finanzen sehen alles, was ihre Rolle erlaubt.
+ */
+function limitedToOwnRecords(user) {
+  return Boolean(user && user.role === 'vertrieb');
+}
+
 function startPath(user) {
   if (can(user, 'uebersicht')) return '/verwaltung/uebersicht';
   if (can(user, 'produkte')) return '/verwaltung/produkte';
   if (can(user, 'bestellungen.lesen')) return '/verwaltung/bestellungen';
+  if (can(user, 'haendler')) return '/verwaltung/haendler';
   if (can(user, 'lager.lesen')) return '/verwaltung/lager';
   if (can(user, 'nachrichten')) return '/verwaltung/nachrichten';
   return '/verwaltung/team';
@@ -45,4 +61,4 @@ function requirePermission(permission) {
   };
 }
 
-module.exports = { ROLES, can, startPath, requirePermission };
+module.exports = { ROLES, can, limitedToOwnRecords, startPath, requirePermission };
