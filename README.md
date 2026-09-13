@@ -1,7 +1,13 @@
 # Räucherhaken24
 
-Onlineshop für Räucherzubehör und Räucherbedarf mit geschütztem Verwaltungsbereich.
-Serverseitig gerenderte Seiten mit eigenen URLs – keine Single-Page-Anwendung, keine Pop-up-Shops.
+Onlineshop für Räucherzubehör und Räucherbedarf mit einem Verwaltungsbereich für
+den gesamten Betrieb: Katalog und Lager, Verkauf und Belege, Einkauf, Fertigung,
+Kasse, Finanzen, Außendienst und Marketing.
+
+Serverseitig gerenderte Seiten mit eigenen URLs – keine Single-Page-Anwendung,
+keine Pop-up-Shops. Node 22 mit Express und EJS, Datenbank über das eingebaute
+Modul `node:sqlite`. Drei Abhängigkeiten (`ejs`, `express`, `multer`); PDF,
+Barcodes und der Mailversand sind selbst geschrieben.
 
 ## Schnellstart
 
@@ -63,14 +69,34 @@ Anker-Symbol in der Fußzeile erreichbar; der Schutz selbst läuft serverseitig
 
 ## Skripte
 
-| Befehl                 | Zweck                                                                |
-| ---------------------- | -------------------------------------------------------------------- |
-| `npm start`            | Server starten                                                        |
-| `npm run dev`          | Server mit automatischem Neustart bei Dateiänderungen                 |
-| `npm run seed`         | Fehlende Grunddaten ergänzen (bestehende Daten bleiben unberührt)     |
-| `npm run reset`        | Katalog- und Bestelldaten löschen und neu anlegen                     |
-| `npm run create-admin` | Verwaltungszugang anlegen                                             |
-| `npm test`             | Kurztest: Seiten, Zugriffsschutz, CSRF, kompletter Bestellvorgang     |
+| Befehl                 | Zweck                                                             |
+| ---------------------- | ----------------------------------------------------------------- |
+| `npm start`            | Server starten                                                     |
+| `npm run dev`          | Server mit automatischem Neustart bei Dateiänderungen              |
+| `npm run seed`         | Fehlende Grunddaten ergänzen (bestehende Daten bleiben unberührt)  |
+| `npm run reset`        | Katalog- und Bestelldaten löschen und neu anlegen                  |
+| `npm run create-admin` | Verwaltungszugang anlegen                                          |
+| `npm test`             | Kurztest: Seiten, Zugriffsschutz, CSRF, kompletter Bestellvorgang  |
+
+Prüfskripte je Fachgebiet – jedes legt eine eigene Datenbank in einem
+temporären Verzeichnis an und lässt die vorhandenen Daten unberührt:
+
+| Befehl                    | Prüft                                                     |
+| ------------------------- | --------------------------------------------------------- |
+| `npm run test:rollen`     | Acht Rollen, erlaubte und gesperrte Aktionen               |
+| `npm run test:crm`        | Kunden, Berater, Festgebiete, Händler                      |
+| `npm run test:kalender`   | Termine, Serien, Erinnerungen, Beratung, Gebietsbücher     |
+| `npm run test:belege`     | Rechnung, Lieferschein, Storno, PDF, Versand               |
+| `npm run test:einkauf`    | Lieferanten, Bestellung, Wareneingang, Inventur            |
+| `npm run test:produktion` | Fertigungsaufträge, Arbeitsschritte, Prototypen            |
+| `npm run test:kasse`      | Schicht, Bon, Retoure, Z-Abschluss, Kassenbuch             |
+| `npm run test:finanzen`   | Alle zehn Finanzbereiche bis zum Monatsabschluss           |
+| `npm run test:vertrieb`   | Provision, Verdienstrechner, Rangliste, Fahrtenbuch        |
+| `npm run test:inhalte`    | Newsletter, Bewertungen, Rezepte                           |
+| `npm run test:gutscheine` | Wertgutscheine, Serien, Journal, Zahlungsarten             |
+| `npm run test:etiketten`  | Vorlagen, Barcodes, Serienlauf, Nachdruck                  |
+| `npm run test:markt`      | Marktplatz: Mitgliedschaft, Anzeigen, Moderation           |
+| `npm run test:alle`       | Alle Skripte nacheinander                                  |
 
 ## Aufbau
 
@@ -79,10 +105,16 @@ server.js              Einstieg: Middleware-Kette, Routen, Fehlerseiten
 src/
   config.js            Konfiguration und .env-Auswertung (ohne Zusatzpaket)
   schema.sql           Datenbankschema
-  db.js                SQLite-Zugriff über node:sqlite
-  lib/                 Fachlogik: Katalog, Warenkorb, Bestellungen, Adressen,
-                       Sitzungen, CSRF, Anmeldung, Einstellungen, Protokoll
-  routes/              shop, cart, checkout, account, admin
+  db.js                SQLite-Zugriff über node:sqlite; ergänzt beim Start
+                       fehlende Spalten, ohne vorhandene Daten anzufassen
+  lib/                 Fachlogik, je Aufgabe eine Datei: Katalog, Warenkorb,
+                       Bestellungen, Lager, Einkauf, Produktion, Kasse, Belege,
+                       PDF, Versand, Finanzen, Provision, Fahrtenbuch, CRM,
+                       Kalender, Beratung, Gutscheine, Zahlungsarten, Etiketten,
+                       Barcode, Newsletter, Bewertungen, Rezepte, Marktplatz,
+                       Systemmail, Sitzungen, CSRF, Rechte, Protokoll
+  routes/              shop, cart, checkout, account, market sowie die
+                       Verwaltung, nach Fachgebiet in eigene Dateien getrennt
   views/               EJS-Vorlagen (öffentlich, Konto, Verwaltung, Partials)
 public/
   css/                 site.css (Shop), admin.css (Verwaltung)
@@ -92,22 +124,67 @@ public/
   fonts/               Prata, Playfair Display und Inter, lokal eingebunden
   uploads/             Bilder aus der Verwaltung (nicht in Git)
 data/shop.db           Datenbank (nicht in Git)
-scripts/               seed, create-admin, smoke-test
+scripts/               seed, create-admin, Produktimport, 14 Prüfskripte
+docs/                  Funktionsmatrix und Fortschrittsbericht
+design/referenz.png    Designvorlage, wird nicht ausgeliefert
 ```
 
 ## Seiten
 
 Öffentlich: `/`, `/produkte`, `/kategorie/:slug`, `/produkt/:slug`, `/suche`,
 `/angebote`, `/warenkorb`, `/kasse/adresse`, `/kasse/versand`, `/kasse/zahlung`,
-`/kasse/pruefen`, `/kasse/danke/:nummer`, `/seite/:slug`.
+`/kasse/pruefen`, `/kasse/danke/:nummer`, `/seite/:slug`, `/ratgeber`,
+`/rezept/:slug`, `/markt`, `/markt/anzeige/:id`, `/markt/neu`,
+`/markt/mitgliedschaft`, `/newsletter/bestaetigen`, `/newsletter/abmelden`.
 
 Konto: `/konto`, `/konto/anmelden`, `/konto/registrieren`, `/konto/daten`,
 `/konto/adressen`, `/konto/bestellungen`, `/konto/bestellungen/:nummer`.
 
-Verwaltung: `/verwaltung` (Anmeldung), `/verwaltung/uebersicht`, `/verwaltung/produkte`,
-`/verwaltung/kategorien`, `/verwaltung/bestellungen`, `/verwaltung/kunden`,
-`/verwaltung/gutscheine`, `/verwaltung/versandarten`, `/verwaltung/einstellungen`,
-`/verwaltung/medien`, `/verwaltung/protokoll`, `/verwaltung/team`.
+Verwaltung: `/verwaltung` (Anmeldung), danach je nach Rolle
+
+* **Katalog** – `/uebersicht`, `/produkte`, `/kategorien`, `/medien`, `/lager`,
+  `/lagerorte`, `/inventur`, `/etiketten`, `/auswertung/produkte`
+* **Finanzen** – `/finanzen` mit `/eingangsbelege`, `/bank`, `/offene-posten`,
+  `/kreditoren`, `/anlagen`, `/planung`, `/steuern`, `/abschluss`
+* **Kasse** – `/kasse`, `/kassen`, `/kassenbuch`
+* **Fertigung** – `/produktion`, `/prototypen`
+* **Einkauf** – `/lieferanten`, `/einkauf`
+* **Verkauf** – `/bestellungen`, `/kunden`, `/belege`, `/versand`, `/gutscheine`,
+  `/versandarten`, `/zahlungsarten`
+* **Vertrieb** – `/beratung`, `/gebietsbuch`, `/haendler`, `/gebiete`, `/berater`,
+  `/provision`, `/verdienst`, `/rangliste`, `/fahrten`, `/fahrzeuge`
+* **Inhalte und Marketing** – `/rezepte`, `/bewertungen`, `/newsletter`,
+  `/marktplatz`
+* **Zusammenarbeit und Konto** – `/termine`, `/nachrichten`, `/einstellungen`,
+  `/team`, `/protokoll`
+
+Alle Pfade tragen das Präfix `/verwaltung`. Jeder Bereich hat eigene Seiten für
+Übersicht, Detail, Anlegen und Bearbeiten; die Rechteprüfung läuft serverseitig,
+ein ausgeblendeter Menüpunkt ersetzt sie nicht.
+
+## Module und Rollen
+
+Acht Rollen mit serverseitig geprüften Rechten: **Admin**, **Kundenservice**,
+**Vertrieb**, **Produktion**, **Lager**, **Finanzen**, **Kasse** und
+**Redaktion**. Vertriebszugänge sehen ausschließlich die ihnen zugewiesenen
+Kunden, Händler und Provisionszeilen.
+
+| Bereich | Was er kann |
+| --- | --- |
+| CRM | Kundenakte für Privat- und Geschäftskunden mit Konditionen, Tags, Berater, Änderungsprotokoll und Dublettenprüfung; Händler mit Besuchsrhythmus; alle 16 Bundesländer als Festgebiete mit Konfliktanzeige |
+| Termine und Beratung | Monat, Woche, Tag und Agenda mit Serien und Erinnerungen; Produktberatung mit Vorschlägen aus echten verfügbaren Artikeln und Übernahme in eine Bestellung; Gebietsbücher mit CSV-Import |
+| Verkauf | Bestellungen mit geprüften Statusübergängen; Rechnung, Lieferschein (auch Teilmenge), Gutschrift und Storno mit fortlaufender Nummer, unveränderbarem Snapshot und eigener PDF-Erzeugung; Versand mit Teilmengen und Trackingstatus |
+| Lager und Einkauf | Bestände je Variante mit Mindestmenge, Lagerorten und Bewegungsjournal; Lieferanten, Bestellungen, Teil-Wareneingang und Inventur, die nur Differenzen bucht |
+| Fertigung | Leitstand als Tabelle und Kanban, Arbeitsschritte mit Person und Zeit; Prototypen mit festem Ablauf und Überführung in die Fertigung |
+| Kasse | Schichten, Bon, Rabatte, Retoure, Kassensturz und Z-Abschluss; Trainingsbetrieb strikt getrennt, ohne Bestands- und Kassenbuchbuchung |
+| Finanzen | Cockpit, Eingangsbelege, Bank-CSV mit Zuordnung, Kassenbuch, offene Posten mit Mahnstufen, Kreditoren, Konten und Anlagen mit linearer Abschreibung, Planung, Steuerübersicht mit DATEV-Export, Monatsabschluss mit Prüfschritten |
+| Vertrieb | Versionierte Provisionsregeln mit festgeschriebenem Rechenweg, Freigabe und Auszahlung; Verdienstrechner; Rangliste mit Sternen; Fahrtenbuch mit lückenloser Kilometerfolge und Reisekostenbelegen |
+| Katalog | Produktzentrale mit eigenen Listen, Produktmaske, Kalkulator mit offenem Rechenweg, Naturgewürze als preislose Entwürfe, Etikettenstudio mit eigenen Barcodes (Code 128, EAN-13) |
+| Marketing | Newsletter mit Doppelbestätigung und Versandjournal, Bewertungen mit Moderation, Rezepte und Ratgeber, Marktplatz „An- und Verkaufen" mit Mitgliedschaft und Freigabe |
+| Gutscheine | Prozent, Festbetrag, Versandfrei und Wertgutschein mit Restwert über mehrere Bestellungen; Serien, Journal und Rückbuchung bei Storno |
+
+Der aktuelle Stand je Funktion steht in `docs/funktionsmatrix.md` – mit URLs,
+Rollen, Geschäftsregeln und dem jeweiligen Prüfnachweis.
 
 ## Bestand und Bestellungen
 
@@ -170,10 +247,34 @@ Für den produktiven Betrieb hinter HTTPS zusätzlich `TRUST_PROXY=1` und
 
 ## Noch nicht angebunden
 
-* **Zahlung**: Es gibt Vorkasse, Rechnung und Nachnahme als Auswahl, aber keine
-  Anbindung an einen Zahlungsanbieter. Dafür fehlen Zugangsdaten.
-* **E-Mail**: Bestellbestätigungen werden nicht versendet. Dafür fehlen SMTP-Daten.
+Diese Punkte sind im Programm vorbereitet und **sichtbar gesperrt**. Sie sind
+nicht „fast fertig": ohne den genannten Zugang, die Hardware oder die fachliche
+Abnahme laufen sie nicht, und das Programm behauptet das Gegenteil an keiner
+Stelle.
+
+| Bereich | Was fehlt | Verhalten heute |
+| --- | --- | --- |
+| **Systemmail** | `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Jede Nachricht liegt sichtbar gesperrt im Ausgangskorb und nennt die fehlenden Angaben. Betrifft Terminerinnerungen, Mahnungen, Lieferantenbestellungen und Newsletter |
+| **Zahlungsanbieter** | Vertrag und Zugangsdaten, vor allem aber eine geprüfte Anbindung | Vorkasse, Rechnung und Nachnahme laufen. PayPal und Kreditkarte lassen sich **nicht** aktivieren; die Verwaltung nennt die nötigen Umgebungsvariablen |
+| **Kasse im Livebetrieb** | Technische Sicherheitseinrichtung (TSE) | Es ist **keine TSE angebunden**. Der Livebetrieb bleibt gesperrt, der Trainingsbetrieb läuft vollständig – ohne Bestands- und Kassenbuchbuchung |
+| **Versandetiketten** | DHL-/DPD-Vertrag und `<CODE>_API_USER`, `_KEY`, `_ACCOUNT` | Sendungen, Teilmengen und Trackingstatus funktionieren; die Labelerzeugung wird abgewiesen und protokolliert |
+| **Steuern** | ELSTER-Anbindung | Es besteht **keine Übertragung an ELSTER**. Die Steuerseite sagt das ausdrücklich. Der DATEV-Export ist ein Vorschlag und mit der Steuerberatung abzustimmen |
+| **Banking** | Kontoabruf per FinTS oder Bank-API | Der CSV-Import mit Dublettenschutz und Zuordnung funktioniert; ein automatischer Abruf fehlt |
+| **Etikettendrucker** | Treiber oder Druckerprofil | Gedruckt wird über den Browser auf ein millimetergenaues A4-Raster |
+| **Marktplatz-Beitrag** | Online-Zahlung | Die Verwaltung schaltet die Mitgliedschaft nach Zahlungseingang von Hand frei |
+| **Kartendienst** | Konto bei einem Routendienst | Fahrtenbuch und Termine funktionieren ohne Karte; Tourenplanung und HSN/TSN-Suche fehlen |
+
+Fachlich extern, nicht durch Programmierung zu erledigen: Abnahme nach GoBD,
+Kassenführung, Fahrtenbuch und die Zuordnung der Konten – das gehört zur
+Steuerberatung.
+
+## Was noch einzutragen ist
+
+* **Firmendaten**: `shop.company`, `shop.tax_id`, `shop.vat_id`, `shop.register`,
+  `shop.bank` und `shop.url` sind absichtlich leer. Ohne sie sind Belege nicht
+  vollständig. Einzutragen unter Einstellungen.
 * **Rechtstexte**: Impressum, Datenschutz, AGB und Widerruf enthalten Platzhalter
   und müssen in der Verwaltung unter Einstellungen → `seiten` ergänzt werden.
 * **Preise und Produktangaben** stammen aus dem Beispieldatensatz und sind noch
-  keine bestätigten Geschäftsdaten.
+  keine bestätigten Geschäftsdaten. Die 135 Naturgewürze bleiben Entwürfe,
+  solange kein gültiger Preis eingetragen ist.
