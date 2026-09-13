@@ -1,7 +1,7 @@
 {
   "name": "Räucherhaken24",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
-  "postCreateCommand": "npm install && npm run seed",
+  "postCreateCommand": "bash .devcontainer/setup.sh",
   "forwardPorts": [3000],
   "portsAttributes": {
     "3000": {

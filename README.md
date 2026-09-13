@@ -28,19 +28,19 @@ npm start
 ```
 
 Codespaces leitet Port 3000 automatisch weiter und öffnet die Vorschau; über
-„Ports" lässt sich die Adresse auch im Browser öffnen. Ohne `.env` läuft der
-Shop im Entwicklungsmodus mit einem Sitzungsschlüssel, der bei jedem Neustart
-wechselt – dann wird man nach einem Neustart abgemeldet. Für dauerhafte
-Sitzungen einmalig:
+„Ports" lässt sich die Adresse auch im Browser öffnen.
 
-```bash
-printf 'SESSION_SECRET=%s\n' "$(node -e "console.log(require('crypto').randomBytes(48).toString('hex'))")" > .env
-```
+`.devcontainer/setup.sh` legt beim Anlegen des Codespace auch eine `.env` an –
+mit einem dort erzeugten `SESSION_SECRET` (eine Anmeldung übersteht damit einen
+Neustart) und `TRUST_PROXY=1` für die Weiterleitung. `SECURE_COOKIES` bleibt
+bewusst auf `0`: im Browser läuft die Weiterleitung über HTTPS, in VS Code
+Desktop aber über `http://localhost:3000`, und dort würde ein `Secure`-Cookie
+die Anmeldung kommentarlos scheitern lassen. Auf einem echten Server mit HTTPS
+gehört dort eine `1` hin. Die `.env` wird nicht committet.
 
-Läuft der Shop hinter der HTTPS-Weiterleitung von Codespaces, zusätzlich
-`TRUST_PROXY=1` in die `.env` schreiben. Wichtig: Node 22.5 oder neuer wird
-benötigt, weil die Datenbank das eingebaute Modul `node:sqlite` nutzt; ältere
-Versionen brechen mit einer entsprechenden Meldung ab.
+Wichtig: Node 22.5 oder neuer wird benötigt, weil die Datenbank das eingebaute
+Modul `node:sqlite` nutzt; ältere Versionen brechen mit einer entsprechenden
+Meldung ab. Der Devcontainer bringt Node 22 mit.
 
 ### Ersten Verwaltungszugang anlegen
 
